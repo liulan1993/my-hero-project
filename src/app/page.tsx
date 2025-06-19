@@ -7,7 +7,7 @@ import React, {
     useEffect, 
     useState, 
     useMemo,
-    useCallback,
+    useCallback
 } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -167,101 +167,33 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 };
 Timeline.displayName = "Timeline";
 
-// --- Project Showcase Component ---
-
+// --- Project Showcase Components ---
 interface HalomotButtonProps {
-  gradient?: string;
-  inscription: string;
-  onClick: () => void;
-  fillWidth?: boolean;
-  fixedWidth?: string;
-  href?: string;
-  backgroundColor?: string;
-  icon?: React.ReactElement;
-  borderWidth?: string;
-  padding?: string;
-  outerBorderRadius?: string;
-  innerBorderRadius?: string;
-  textColor?: string;
+  gradient?: string; inscription: string; onClick: (event: React.MouseEvent) => void;
+  fillWidth?: boolean; fixedWidth?: string; href?: string; backgroundColor?: string;
+  icon?: React.ReactElement; borderWidth?: string; padding?: string;
+  outerBorderRadius?: string; innerBorderRadius?: string; textColor?: string;
   hoverTextColor?: string;
 }
 
 const HalomotButton: React.FC<HalomotButtonProps> = ({
   gradient = "linear-gradient(135deg, #4776cb, #a19fe5, #6cc606)",
-  inscription,
-  onClick,
-  fillWidth = false,
-  fixedWidth,
-  href,
-  backgroundColor = "#000",
-  icon,
-  borderWidth = "1px",
-  padding,
-  outerBorderRadius = "6.34px",
-  innerBorderRadius = "6px",
-  textColor = "#fff",
-  hoverTextColor,
+  inscription, onClick, fillWidth = false, fixedWidth, href,
+  backgroundColor = "#000", icon, borderWidth = "1px", padding,
+  outerBorderRadius = "6.34px", innerBorderRadius = "6px",
+  textColor = "#fff", hoverTextColor,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-
   const containerStyle: React.CSSProperties = fixedWidth ? { width: fixedWidth, display: "inline-block" } : {};
-  const buttonStyle: React.CSSProperties = {
-    padding: borderWidth,
-    background: gradient,
-    borderRadius: outerBorderRadius,
-    width: fillWidth || fixedWidth ? "100%" : "fit-content",
-    //... other non-tailwind styles from original
-    border: "0",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    textDecoration: "none",
-    userSelect: "none",
-    whiteSpace: "nowrap",
-    transition: "all .3s",
-    boxSizing: "border-box",
-  };
-  const spanStyle: React.CSSProperties = {
-    background: isHovered ? "none" : backgroundColor,
-    padding: padding ?? (fillWidth || fixedWidth ? "1rem 0" : "1rem 4rem"),
-    borderRadius: innerBorderRadius,
-    width: "100%",
-    height: "100%",
-    transition: hoverTextColor ? "color 0.3s, background 300ms" : "background 300ms",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "bold",
-    color: isHovered && hoverTextColor ? hoverTextColor : textColor,
-    whiteSpace: "nowrap",
-    fontFamily: "inherit",
-    fontSize: "1rem",
-    gap: icon ? "0.5em" : "0",
-    boxSizing: "border-box",
-    cursor: "pointer",
-  };
-  const iconStyle: React.CSSProperties = {
-    display: "inline-flex", alignItems: "center", height: "1em", width: "1em",
-    fontSize: "1.1em", verticalAlign: "middle", flexShrink: 0,
-  };
-
-  const ButtonContent = (
-    <span style={spanStyle}>
-      {icon && React.cloneElement(icon, { style: iconStyle })}
-      {inscription}
-    </span>
-  );
-
+  const buttonStyle: React.CSSProperties = { padding: borderWidth, background: gradient, borderRadius: outerBorderRadius, width: fillWidth || fixedWidth ? "100%" : "fit-content", border: "0", display: "flex", justifyContent: "center", alignItems: "center", textDecoration: "none", userSelect: "none", whiteSpace: "nowrap", transition: "all .3s", boxSizing: "border-box", };
+  const spanStyle: React.CSSProperties = { background: isHovered ? "none" : backgroundColor, padding: padding ?? (fillWidth || fixedWidth ? "1rem 0" : "1rem 4rem"), borderRadius: innerBorderRadius, width: "100%", height: "100%", transition: "color 0.3s, background 300ms", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", color: isHovered && hoverTextColor ? hoverTextColor : textColor, whiteSpace: "nowrap", fontFamily: "inherit", fontSize: "1rem", gap: icon ? "0.5em" : "0", boxSizing: "border-box", cursor: "pointer", };
+  const iconStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", height: "1em", width: "1em", fontSize: "1.1em", verticalAlign: "middle", flexShrink: 0, };
+  const ButtonContent = <span style={spanStyle}>{icon && React.cloneElement(icon, { style: iconStyle })}{inscription}</span>;
   const ButtonElement = href ? (
-    <a href={href} style={buttonStyle} onClick={onClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} target="_blank" rel="noopener noreferrer">
-      {ButtonContent}
-    </a>
+    <a href={href} style={buttonStyle} onClick={onClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} target="_blank" rel="noopener noreferrer">{ButtonContent}</a>
   ) : (
-    <button type="button" style={buttonStyle} onClick={onClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-      {ButtonContent}
-    </button>
+    <button type="button" style={buttonStyle} onClick={onClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>{ButtonContent}</button>
   );
-
   return fixedWidth ? <div style={containerStyle}>{ButtonElement}</div> : ButtonElement;
 };
 HalomotButton.displayName = "HalomotButton";
@@ -271,8 +203,8 @@ type Testimonial = {
 };
 
 const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
-  <div className="relative h-full w-full rounded-2xl overflow-hidden p-px bg-zinc-800" >
-    <img src={src} alt={alt} className="h-full w-full object-cover object-center rounded-[15px]" />
+  <div className="relative h-full w-full rounded-2xl overflow-hidden p-px bg-zinc-800">
+    <img src={src} alt={alt} className="h-full w-full object-cover object-center rounded-[15px]" loading="lazy" />
   </div>
 );
 ImageContainer.displayName = 'ImageContainer';
@@ -289,11 +221,10 @@ const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
   }, [testimonials.length]);
 
   return (
-    <div className="w-full mx-auto font-sans py-20">
+    <div className="w-full mx-auto font-sans py-20 text-white">
       <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        {/* Image Showcase */}
         <div className="w-full relative aspect-[1.37/1]">
-          <AnimatePresence>
+          <AnimatePresence mode="sync">
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.src}
@@ -315,15 +246,14 @@ const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
             ))}
           </AnimatePresence>
         </div>
-        {/* Text and Controls */}
-        <div className="flex flex-col justify-between py-4 w-full">
+        <div className="flex flex-col justify-between py-4 w-full h-full">
           <motion.div
             key={active}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className='space-y-4'
+            className='flex flex-col justify-center space-y-4'
           >
             <h3 className="font-bold text-2xl text-white">
               {testimonials[active].name}
@@ -332,23 +262,13 @@ const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
               {testimonials[active].designation}
             </p>
             <motion.p className="text-lg text-neutral-200 leading-relaxed">
-              {testimonials[active].quote.split(" ").map((word, index) => (
-                <motion.span
-                  key={index}
-                  initial={{ filter: "blur(8px)", opacity: 0 }}
-                  animate={{ filter: "blur(0px)", opacity: 1 }}
-                  transition={{ duration: 0.2, ease: "easeInOut", delay: 0.03 * index }}
-                  className="inline-block"
-                >
-                  {word}&nbsp;
-                </motion.span>
-              ))}
+              {testimonials[active].quote}
             </motion.p>
           </motion.div>
           <div className="flex gap-4 pt-12 w-full">
             <HalomotButton inscription="Previous" onClick={handlePrev} fixedWidth="172px" backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)' />
             <HalomotButton inscription="Next" onClick={handleNext} fixedWidth="172px" backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)'/>
-            <HalomotButton inscription="Open Web App" onClick={() => window.open(testimonials[active].link, "_blank")} fillWidth href={testimonials[active].link} backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)'/>
+            <HalomotButton inscription="Open Web App" onClick={(e) => { e.preventDefault(); window.open(testimonials[active].link, "_blank")}} fillWidth href={testimonials[active].link} backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)'/>
           </div>
         </div>
       </div>
@@ -356,6 +276,7 @@ const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
   );
 };
 ProjectShowcase.displayName = "ProjectShowcase";
+
 
 // ============================================================================
 // 4. PAGE-LEVEL STATIC DATA
