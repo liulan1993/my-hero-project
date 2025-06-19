@@ -415,9 +415,9 @@ const timelineData = [
 
 export default function HomePage() {
   return (
-    <div className="bg-black relative">
+    <div className="relative text-white">
       {/* Global Background Elements */}
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
+      <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
       <Scene />
 
       {/* Page Content */}
