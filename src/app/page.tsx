@@ -684,15 +684,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                     </motion.div>
                 </motion.div>
             </div>
-
-            {/* Decorative bottom gradient */}
-            <div
-                className="absolute w-full h-px bottom-0 left-0 z-0"
-                style={{
-                    background:
-                        "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0) 100%)",
-                }}
-            />
         </section>
     );
 };
