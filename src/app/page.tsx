@@ -7,9 +7,9 @@ import React, {
     useEffect, 
     useState, 
     useMemo,
-    useCallback,
-    cloneElement
+    useCallback
 } from 'react';
+import Image from 'next/image'; // 导入 Next.js Image 组件
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -211,9 +211,17 @@ type Testimonial = {
   quote: string; name: string; designation: string; src: string; link?: string;
 };
 
+// 使用 Next/Image 替换原生 <img>
 const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
   <div className="relative h-full w-full rounded-2xl overflow-hidden p-px bg-zinc-800">
-    <img src={src} alt={alt} className="h-full w-full object-cover object-center rounded-[15px]" loading="lazy" />
+    <Image 
+      src={src} 
+      alt={alt} 
+      fill
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      className="object-cover object-center rounded-[15px]" 
+      priority // 如果是首屏图片，可以加上 priority
+    />
   </div>
 );
 ImageContainer.displayName = 'ImageContainer';
@@ -298,6 +306,7 @@ const features = [
   { icon: MemoizedZap, title: "闪电响应", description: "对每个命令都能做出即时响应。" },
 ];
 
+// 使用 Next/Image 替换原生 <img>，并提供 width 和 height
 const timelineData = [
     {
       title: "2024",
@@ -305,7 +314,13 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div>
-            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <Image 
+              src="https://assets.aceternity.com/templates/startup-1.webp" 
+              alt="启动模板" 
+              width={500}
+              height={300}
+              className="rounded-lg object-cover w-full h-auto shadow-xl" 
+            />
           </div>
         </div>
       ),
@@ -316,7 +331,13 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div>
-            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <Image 
+              src="https://assets.aceternity.com/pro/hero-sections.png" 
+              alt="英雄区模板" 
+              width={500}
+              height={300}
+              className="rounded-lg object-cover w-full h-auto shadow-xl" 
+            />
           </div>
         </div>
       ),
@@ -327,7 +348,13 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
-            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <Image 
+              src="https://assets.aceternity.com/pro/bento-grids.png" 
+              alt="新组件预览" 
+              width={500}
+              height={300}
+              className="rounded-lg object-cover w-full h-auto shadow-xl"
+            />
           </div>
         </div>
       ),
@@ -407,4 +434,4 @@ export default function HomePage() {
       </main>
     </div>
   );
-};
+}
