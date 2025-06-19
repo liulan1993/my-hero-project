@@ -7,9 +7,9 @@ import React, {
     useEffect, 
     useState, 
     useMemo,
-    useCallback
+    useCallback,
+    cloneElement
 } from 'react';
-import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -189,7 +189,6 @@ const HalomotButton: React.FC<HalomotButtonProps> = ({
   const buttonStyle: React.CSSProperties = { padding: borderWidth, background: gradient, borderRadius: outerBorderRadius, width: fillWidth || fixedWidth ? "100%" : "fit-content", border: "0", display: "flex", justifyContent: "center", alignItems: "center", textDecoration: "none", userSelect: "none", whiteSpace: "nowrap", transition: "all .3s", boxSizing: "border-box", };
   const spanStyle: React.CSSProperties = { background: isHovered ? "none" : backgroundColor, padding: padding ?? (fillWidth || fixedWidth ? "1rem 0" : "1rem 4rem"), borderRadius: innerBorderRadius, width: "100%", height: "100%", transition: "color 0.3s, background 300ms", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", color: isHovered && hoverTextColor ? hoverTextColor : textColor, whiteSpace: "nowrap", fontFamily: "inherit", fontSize: "1rem", gap: icon ? "0.5em" : "0", boxSizing: "border-box", cursor: "pointer", };
   const iconStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", height: "1em", width: "1em", fontSize: "1.1em", verticalAlign: "middle", flexShrink: 0, };
-  
   const ButtonContent = <span style={spanStyle}>{icon && <span style={iconStyle}>{icon}</span>}{inscription}</span>;
   
   const commonProps = {
@@ -214,7 +213,7 @@ type Testimonial = {
 
 const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
   <div className="relative h-full w-full rounded-2xl overflow-hidden p-px bg-zinc-800">
-    <Image src={src} alt={alt} width={1024} height={768} className="h-full w-full object-cover object-center rounded-[15px]" />
+    <img src={src} alt={alt} className="h-full w-full object-cover object-center rounded-[15px]" loading="lazy" />
   </div>
 );
 ImageContainer.displayName = 'ImageContainer';
@@ -306,7 +305,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div>
-            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -317,7 +316,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div>
-            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -328,7 +327,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
-            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
