@@ -17,7 +17,8 @@ import {
   motion,
   useScroll,
   useTransform,
-  AnimatePresence
+  AnimatePresence,
+  type Variants  // 修复: 导入 Variants 类型
 } from "framer-motion";
 
 // --- 从新组件中添加的依赖项 ---
@@ -578,8 +579,8 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
     secondaryImageSrc,
     reverseLayout = false,
 }) => {
-
-    const containerVariants = {
+    // 修复: 为 Variants 对象添加类型注解
+    const containerVariants: Variants = {
         hidden: {},
         visible: {
              transition: {
@@ -588,7 +589,8 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
         },
     };
 
-    const itemVariants = {
+    // 修复: 为 Variants 对象添加类型注解
+    const itemVariants: Variants = {
         hidden: { opacity: 0, y: 50 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
     };
