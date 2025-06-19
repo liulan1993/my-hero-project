@@ -18,7 +18,7 @@ import {
   useScroll,
   useTransform,
   AnimatePresence,
-  type Variants  // 修复: 导入 Variants 类型
+  type Variants
 } from "framer-motion";
 
 // --- 从新组件中添加的依赖项 ---
@@ -579,7 +579,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
     secondaryImageSrc,
     reverseLayout = false,
 }) => {
-    // 修复: 为 Variants 对象添加类型注解
     const containerVariants: Variants = {
         hidden: {},
         visible: {
@@ -589,7 +588,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
         },
     };
 
-    // 修复: 为 Variants 对象添加类型注解
     const itemVariants: Variants = {
         hidden: { opacity: 0, y: 50 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
@@ -604,7 +602,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 
 
     return (
-        <section className="relative py-24 md:py-32 bg-black overflow-hidden">
+        <section className="relative py-24 md:py-32 bg-transparent overflow-hidden">
             <div className="container max-w-[1220px] w-full px-6 md:px-10 relative z-10 mx-auto">
                 <motion.div
                      className={`grid grid-cols-1 gap-16 md:gap-8 w-full items-center ${layoutClasses}`}
