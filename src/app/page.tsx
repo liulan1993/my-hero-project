@@ -2,12 +2,18 @@
 // so it must be declared as a Client Component.
 'use client';
 
-import React, { useRef, forwardRef } from 'react';
+import React, { useRef, forwardRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import {
+  useScroll,
+  useTransform,
+  motion,
+} from "framer-motion";
+
 
 // --- Utility Function for Tailwind CSS class merging ---
 function cn(...inputs: ClassValue[]) {
@@ -15,9 +21,6 @@ function cn(...inputs: ClassValue[]) {
 }
 
 // --- Inline SVG Icons ---
-// Converted from lucide-react for zero dependencies.
-// Added explicit types for props to resolve TypeScript errors.
-
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
 }
@@ -103,51 +106,6 @@ const Zap = ({ size = 24, ...props }: IconProps) => (
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 );
-
-
-// --- Button Component (Kept for potential future use, can be removed if not needed) ---
-const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-);
-
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
-
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
-    return (
-      <button
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
-Button.displayName = "Button";
 
 
 // --- 3D Scene Component for Hero Section ---
@@ -258,6 +216,89 @@ const Scene = () => {
 };
 
 
+// --- Timeline Component ---
+interface TimelineEntry {
+  title: string;
+  content: React.ReactNode;
+}
+
+const Timeline = ({ data }: { data: TimelineEntry[] }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setHeight(rect.height);
+    }
+  }, [ref, data]);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start 10%", "end 50%"],
+  });
+
+  const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
+  const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+
+  return (
+    <div
+      className="w-full bg-black dark:bg-neutral-950 font-sans md:px-10"
+      ref={containerRef}
+    >
+      <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
+        <h2 className="text-lg md:text-4xl mb-4 text-white dark:text-white max-w-4xl">
+          我的开发历程变更日志
+        </h2>
+        <p className="text-neutral-300 dark:text-neutral-300 text-sm md:text-base max-w-sm">
+          在过去的两年里，我一直在努力构建 Aceternity。这是我的心路历程时间线。
+        </p>
+      </div>
+
+      <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
+        {data.map((item, index) => (
+          <div
+            key={index}
+            className="flex justify-start pt-10 md:pt-40 md:gap-10"
+          >
+            <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
+              <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black dark:bg-black flex items-center justify-center">
+                <div className="h-4 w-4 rounded-full bg-neutral-800 dark:bg-neutral-800 border border-neutral-700 dark:border-neutral-700 p-2" />
+              </div>
+              <h3 className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-neutral-500 dark:text-neutral-500 ">
+                {item.title}
+              </h3>
+            </div>
+
+            <div className="relative pl-20 pr-4 md:pl-4 w-full">
+              <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500 dark:text-neutral-500">
+                {item.title}
+              </h3>
+              {item.content}{" "}
+            </div>
+          </div>
+        ))}
+        <div
+          style={{
+            height: height + "px",
+          }}
+          className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-neutral-700 dark:via-neutral-700 to-transparent to-[99%]  [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] "
+        >
+          <motion.div
+            style={{
+              height: heightTransform,
+              opacity: opacityTransform,
+            }}
+            className="absolute inset-x-0 top-0  w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-transparent from-[0%] via-[10%] rounded-full"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // --- Main Page Component ---
 const features = [
   {
@@ -282,42 +323,133 @@ const features = [
   },
 ];
 
-export default function HomePage() {
-  return (
-    <main className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-      {/* Background radial gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
-      
-      {/* 3D Scene (background) */}
-      <Scene />
-
-      {/* Content (foreground) */}
-      <div className="relative z-10 w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
-        <div className="flex flex-col items-center text-center space-y-8">
-          
-          <div className="space-y-6 flex items-center justify-center flex-col pt-16">
-            <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
-              发现极简主义与强大力量的融合
-            </h1>
-            <p className="text-lg text-neutral-300 max-w-2xl">
-              我们在设计时充分考虑了美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
-            </p>
+const timelineData = [
+    {
+      title: "2024",
+      content: (
+        <div>
+          <p className="text-neutral-200 dark:text-neutral-200 text-xs md:text-sm font-normal mb-8">
+            从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <img
+              src="https://assets.aceternity.com/templates/startup-1.webp"
+              alt="启动模板"
+              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
+            />
+            <img
+              src="https://assets.aceternity.com/templates/startup-2.webp"
+              alt="启动模板"
+              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
+            />
+            <img
+              src="https://assets.aceternity.com/templates/startup-3.webp"
+              alt="启动模板"
+              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
+            />
+            <img
+              src="https://assets.aceternity.com/templates/startup-4.webp"
+              alt="启动模板"
+              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
+            />
           </div>
         </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
-          {features.map((feature, idx) => (
-            <div
-              key={idx}
-              className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
-            >
-              <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
-              <h3 className="text-sm md:text-base font-medium text-white">{feature.title}</h3>
-              <p className="text-xs md:text-sm text-neutral-400">{feature.description}</p>
-            </div>
-          ))}
+      ),
+    },
+    {
+      title: "2023年初",
+      content: (
+        <div>
+          <p className="text-neutral-200 dark:text-neutral-200 text-xs md:text-sm font-normal mb-8">
+            我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <img
+              src="https://assets.aceternity.com/pro/hero-sections.png"
+              alt="英雄区模板"
+              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
+            />
+            <img
+              src="https://assets.aceternity.com/features-section.png"
+              alt="功能区模板"
+              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
+            />
+            <img
+              src="https://assets.aceternity.com/pro/bento-grids.png"
+              alt="Bento网格模板"
+              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
+            />
+            <img
+              src="https://assets.aceternity.com/cards.png"
+              alt="卡片模板"
+              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
+            />
+          </div>
         </div>
-      </div>
-    </main>
+      ),
+    },
+    {
+      title: "变更日志",
+      content: (
+        <div>
+          <p className="text-neutral-200 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+            今天在 Aceternity 上部署了5个新组件。
+          </p>
+          <div className="mb-8">
+            <div className="flex gap-2 items-center text-neutral-300 dark:text-neutral-300 text-xs md:text-sm">
+              ✅ 卡片网格组件
+            </div>
+            <div className="flex gap-2 items-center text-neutral-300 dark:text-neutral-300 text-xs md:text-sm">
+              ✅ 启动模板 Aceternity
+            </div>
+            <div className="flex gap-2 items-center text-neutral-300 dark:text-neutral-300 text-xs md:text-sm">
+              ✅ 随机文件上传 哈哈
+            </div>
+          </div>
+        </div>
+      ),
+    },
+];
+
+export default function HomePage() {
+  return (
+    <>
+      <main className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+        {/* Background radial gradient */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
+        
+        {/* 3D Scene (background) */}
+        <Scene />
+
+        {/* Content (foreground) */}
+        <div className="relative z-10 w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center text-center space-y-8">
+            
+            <div className="space-y-6 flex items-center justify-center flex-col pt-16">
+              <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
+                发现极简主义与强大力量的融合
+              </h1>
+              <p className="text-lg text-neutral-300 max-w-2xl">
+                我们在设计时充分考虑了美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+            {features.map((feature, idx) => (
+              <div
+                key={idx}
+                className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
+              >
+                <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
+                <h3 className="text-sm md:text-base font-medium text-white">{feature.title}</h3>
+                <p className="text-xs md:text-sm text-neutral-400">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+      <Timeline data={timelineData} />
+    </>
   );
 };
