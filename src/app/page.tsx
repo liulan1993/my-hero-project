@@ -9,6 +9,7 @@ import React, {
     useMemo,
     useCallback
 } from 'react';
+import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
