@@ -6,7 +6,8 @@ import React, {
     useRef, 
     useEffect, 
     useState, 
-    useMemo
+    useMemo,
+    useCallback,
 } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -14,6 +15,7 @@ import {
   motion,
   useScroll,
   useTransform,
+  AnimatePresence
 } from "framer-motion";
 
 // ============================================================================
@@ -165,9 +167,198 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 };
 Timeline.displayName = "Timeline";
 
+// --- Project Showcase Component ---
+
+interface HalomotButtonProps {
+  gradient?: string;
+  inscription: string;
+  onClick: () => void;
+  fillWidth?: boolean;
+  fixedWidth?: string;
+  href?: string;
+  backgroundColor?: string;
+  icon?: React.ReactElement;
+  borderWidth?: string;
+  padding?: string;
+  outerBorderRadius?: string;
+  innerBorderRadius?: string;
+  textColor?: string;
+  hoverTextColor?: string;
+}
+
+const HalomotButton: React.FC<HalomotButtonProps> = ({
+  gradient = "linear-gradient(135deg, #4776cb, #a19fe5, #6cc606)",
+  inscription,
+  onClick,
+  fillWidth = false,
+  fixedWidth,
+  href,
+  backgroundColor = "#000",
+  icon,
+  borderWidth = "1px",
+  padding,
+  outerBorderRadius = "6.34px",
+  innerBorderRadius = "6px",
+  textColor = "#fff",
+  hoverTextColor,
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const containerStyle: React.CSSProperties = fixedWidth ? { width: fixedWidth, display: "inline-block" } : {};
+  const buttonStyle: React.CSSProperties = {
+    padding: borderWidth,
+    background: gradient,
+    borderRadius: outerBorderRadius,
+    width: fillWidth || fixedWidth ? "100%" : "fit-content",
+    //... other non-tailwind styles from original
+    border: "0",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    textDecoration: "none",
+    userSelect: "none",
+    whiteSpace: "nowrap",
+    transition: "all .3s",
+    boxSizing: "border-box",
+  };
+  const spanStyle: React.CSSProperties = {
+    background: isHovered ? "none" : backgroundColor,
+    padding: padding ?? (fillWidth || fixedWidth ? "1rem 0" : "1rem 4rem"),
+    borderRadius: innerBorderRadius,
+    width: "100%",
+    height: "100%",
+    transition: hoverTextColor ? "color 0.3s, background 300ms" : "background 300ms",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "bold",
+    color: isHovered && hoverTextColor ? hoverTextColor : textColor,
+    whiteSpace: "nowrap",
+    fontFamily: "inherit",
+    fontSize: "1rem",
+    gap: icon ? "0.5em" : "0",
+    boxSizing: "border-box",
+    cursor: "pointer",
+  };
+  const iconStyle: React.CSSProperties = {
+    display: "inline-flex", alignItems: "center", height: "1em", width: "1em",
+    fontSize: "1.1em", verticalAlign: "middle", flexShrink: 0,
+  };
+
+  const ButtonContent = (
+    <span style={spanStyle}>
+      {icon && React.cloneElement(icon, { style: iconStyle })}
+      {inscription}
+    </span>
+  );
+
+  const ButtonElement = href ? (
+    <a href={href} style={buttonStyle} onClick={onClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} target="_blank" rel="noopener noreferrer">
+      {ButtonContent}
+    </a>
+  ) : (
+    <button type="button" style={buttonStyle} onClick={onClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+      {ButtonContent}
+    </button>
+  );
+
+  return fixedWidth ? <div style={containerStyle}>{ButtonElement}</div> : ButtonElement;
+};
+HalomotButton.displayName = "HalomotButton";
+
+type Testimonial = {
+  quote: string; name: string; designation: string; src: string; link?: string;
+};
+
+const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
+  <div className="relative h-full w-full rounded-2xl overflow-hidden p-px bg-zinc-800" >
+    <img src={src} alt={alt} className="h-full w-full object-cover object-center rounded-[15px]" />
+  </div>
+);
+ImageContainer.displayName = 'ImageContainer';
+
+const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
+  const [active, setActive] = useState(0);
+
+  const handleNext = useCallback(() => {
+    setActive((prev) => (prev + 1) % testimonials.length);
+  }, [testimonials.length]);
+
+  const handlePrev = useCallback(() => {
+    setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  }, [testimonials.length]);
+
+  return (
+    <div className="w-full mx-auto font-sans py-20">
+      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        {/* Image Showcase */}
+        <div className="w-full relative aspect-[1.37/1]">
+          <AnimatePresence>
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.src}
+                initial={{ opacity: 0, scale: 0.9, z: -100, rotate: Math.floor(Math.random() * 21) - 10 }}
+                animate={{
+                  opacity: index === active ? 1 : 0.7,
+                  scale: index === active ? 1 : 0.95,
+                  z: index === active ? 0 : -100,
+                  rotate: index === active ? 0 : Math.floor(Math.random() * 21) - 10,
+                  zIndex: index === active ? 999 : testimonials.length - index,
+                  y: index === active ? [0, -40, 0] : 0,
+                }}
+                exit={{ opacity: 0, scale: 0.9, z: 100, rotate: Math.floor(Math.random() * 21) - 10 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="absolute inset-0 origin-bottom"
+              >
+                <ImageContainer src={testimonial.src} alt={testimonial.name} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+        {/* Text and Controls */}
+        <div className="flex flex-col justify-between py-4 w-full">
+          <motion.div
+            key={active}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className='space-y-4'
+          >
+            <h3 className="font-bold text-2xl text-white">
+              {testimonials[active].name}
+            </h3>
+            <p className="text-sm text-neutral-400">
+              {testimonials[active].designation}
+            </p>
+            <motion.p className="text-lg text-neutral-200 leading-relaxed">
+              {testimonials[active].quote.split(" ").map((word, index) => (
+                <motion.span
+                  key={index}
+                  initial={{ filter: "blur(8px)", opacity: 0 }}
+                  animate={{ filter: "blur(0px)", opacity: 1 }}
+                  transition={{ duration: 0.2, ease: "easeInOut", delay: 0.03 * index }}
+                  className="inline-block"
+                >
+                  {word}&nbsp;
+                </motion.span>
+              ))}
+            </motion.p>
+          </motion.div>
+          <div className="flex gap-4 pt-12 w-full">
+            <HalomotButton inscription="Previous" onClick={handlePrev} fixedWidth="172px" backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)' />
+            <HalomotButton inscription="Next" onClick={handleNext} fixedWidth="172px" backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)'/>
+            <HalomotButton inscription="Open Web App" onClick={() => window.open(testimonials[active].link, "_blank")} fillWidth href={testimonials[active].link} backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)'/>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+ProjectShowcase.displayName = "ProjectShowcase";
 
 // ============================================================================
-// 3. PAGE-LEVEL STATIC DATA
+// 4. PAGE-LEVEL STATIC DATA
 // ============================================================================
 
 const features = [
@@ -213,9 +404,33 @@ const timelineData = [
     },
 ];
 
+const projectShowcaseData = [
+  {
+    name: "Plum Cave",
+    quote: '一个云备份解决方案，它采用 "ChaCha20 + Serpent-256 CBC + HMAC-SHA3-512" 认证加密方案进行数据加密，并使用 ML-KEM-1024 进行抗量子密钥交换。',
+    designation: "Next.js 项目",
+    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/plum-cave.webp",
+    link: "https://plum-cave.netlify.app/",
+  },
+  {
+    name: "Namer UI",
+    quote: "一个现代、美观且独特的可重用 TypeScript 组件的全面集合，专为 Next.js 打造。",
+    designation: "Next.js 项目",
+    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui.webp",
+    link: "https://namer-ui.netlify.app/",
+  },
+  {
+    name: "Namer UI For Vue",
+    quote: "一个为 Vue 3 打造的可定制、可重用的 TypeScript 和原生 CSS 组件集合。",
+    designation: "Vue 项目",
+    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui-for-vue.webp",
+    link: "https://namer-ui-for-vue.netlify.app/",
+  },
+];
+
 
 // ============================================================================
-// 4. MAIN PAGE COMPONENT
+// 5. MAIN PAGE COMPONENT
 // ============================================================================
 
 export default function HomePage() {
@@ -254,8 +469,11 @@ export default function HomePage() {
             </div>
         </div>
         
-        {/* 时间轴部分 */}
         <Timeline data={timelineData} />
+
+        <div className="max-w-7xl mx-auto px-8">
+            <ProjectShowcase testimonials={projectShowcaseData} />
+        </div>
       </main>
     </div>
   );
