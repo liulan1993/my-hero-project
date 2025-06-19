@@ -26,209 +26,266 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// --- Utility Function for Tailwind CSS class merging ---
-function cn(...inputs: ClassValue[]) {
+// ============================================================================
+// 1. CORE UTILITIES
+// Adhering to the principle of having a centralized utility for class name merging.
+// ============================================================================
+
+/**
+ * Merges Tailwind CSS classes safely.
+ * @param inputs - A list of class names.
+ * @returns A string of merged class names.
+ */
+function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-// --- Inline SVG Icons ---
+// ============================================================================
+// 2. ATOMIC UI COMPONENTS & ICONS
+// Small, reusable, and pure components. Icons are inlined as SVG components
+// for portability and performance, wrapped in React.memo for optimization.
+// ============================================================================
+
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
 }
 
-const Cpu = ({ size = 24, ...props }: IconProps) => (
+const MemoizedCpu = React.memo(({ size = 24, ...props }: IconProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M9 2v2" /><path d="M9 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 15v-1.5" /><path d="M15 9.5V8" />
   </svg>
-);
+));
+MemoizedCpu.displayName = 'CpuIcon';
 
-const ShieldCheck = ({ size = 24, ...props }: IconProps) => (
+const MemoizedShieldCheck = React.memo(({ size = 24, ...props }: IconProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" />
   </svg>
-);
+));
+MemoizedShieldCheck.displayName = 'ShieldCheckIcon';
 
-const Layers = ({ size = 24, ...props }: IconProps) => (
+const MemoizedLayers = React.memo(({ size = 24, ...props }: IconProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.91a2 2 0 0 0 1.66 0l8.57-3.91a1 1 0 0 0 0-1.84Z" /><path d="M2 12.12V16l8.57 3.91a2 2 0 0 0 1.66 0L21 16v-3.88" /><path d="M2 7.23V11l8.57 3.91a2 2 0 0 0 1.66 0L21 11V7.23" />
   </svg>
-);
+));
+MemoizedLayers.displayName = 'LayersIcon';
 
-const Zap = ({ size = 24, ...props }: IconProps) => (
+const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
-);
+));
+MemoizedZap.displayName = 'ZapIcon';
 
-// --- Dock Navigation Icons ---
-const HomeIcon = (props: React.SVGProps<SVGSVGElement>) => (
+const MemoizedHomeIcon = React.memo((props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-);
-const Package = (props: React.SVGProps<SVGSVGElement>) => (
+));
+MemoizedHomeIcon.displayName = 'HomeIcon';
+
+const MemoizedPackage = React.memo((props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16.5 9.4a4.5 4.5 0 1 1-9 0" /><path d="M12 14.8V22" /><path d="M12 2v7.8" /><path d="M12 22a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M12 2a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></svg>
-);
-const Component = (props: React.SVGProps<SVGSVGElement>) => (
+));
+MemoizedPackage.displayName = 'PackageIcon';
+
+const MemoizedComponent = React.memo((props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 20.94c1.5 0 2.85-.83 3.54-2.06.69-1.23.69-2.77 0-4l-3.54-6.32-3.54 6.32c-.69 1.23-.69 2.77 0 4 .69 1.23 2.04 2.06 3.54 2.06Z" /><path d="m3.8 15.3 4-6.94" /><path d="m20.2 15.3-4-6.94" /><path d="M12 22v-1.06" /><path d="M12 8.84V2" /><path d="M4.93 4.93 7.76 7.76" /><path d="M19.07 4.93 16.24 7.76" /></svg>
-);
-const Activity = (props: React.SVGProps<SVGSVGElement>) => (
+));
+MemoizedComponent.displayName = 'ComponentIcon';
+
+const MemoizedActivity = React.memo((props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
-);
-const ScrollText = (props: React.SVGProps<SVGSVGElement>) => (
+));
+MemoizedActivity.displayName = 'ActivityIcon';
+
+const MemoizedScrollText = React.memo((props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4Z" /><path d="M16 6h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M8 18H6a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2" /><path d="M16 12h-8" /></svg>
-);
-const Mail = (props: React.SVGProps<SVGSVGElement>) => (
+));
+MemoizedScrollText.displayName = 'ScrollTextIcon';
+
+const MemoizedMail = React.memo((props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
-);
-const SunMoon = (props: React.SVGProps<SVGSVGElement>) => (
+));
+MemoizedMail.displayName = 'MailIcon';
+
+const MemoizedSunMoon = React.memo((props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M12 3v1" /><path d="M12 20v1" /><path d="M3 12h1" /><path d="M20 12h1" /><path d="m18.36 5.64-.7-.7" /><path d="m6.34 17.66-.7-.7" /><path d="m18.36 18.36-.7-.7" /><path d="m6.34 6.34-.7-.7" /></svg>
-);
+));
+MemoizedSunMoon.displayName = 'SunMoonIcon';
 
 
-// --- Dock Component Logic ---
+// ============================================================================
+// 3. DOCK COMPONENT SUITE
+// This section contains the logic for the floating dock navigation.
+// It's broken down into a provider and several child components.
+// ============================================================================
+
 const DEFAULT_MAGNIFICATION = 80;
 const DEFAULT_DISTANCE = 150;
-const DEFAULT_PANEL_HEIGHT = 64;
 
 type DockContextType = {
-  mouseX: MotionValue;
-  spring: SpringOptions;
+  mouseX: MotionValue<number>;
   magnification: number;
   distance: number;
 };
+const DockContext = createContext<DockContextType | null>(null);
 
-const DockContext = createContext<DockContextType | undefined>(undefined);
-
-const useDock = () => {
+const useDockContext = () => {
   const context = useContext(DockContext);
-  if (!context) throw new Error("useDock must be used within a DockProvider");
+  if (!context) {
+    throw new Error("useDockContext must be used within a DockProvider");
+  }
   return context;
 };
 
-const DockProvider = ({ children, value }: { children: React.ReactNode; value: DockContextType; }) => (
-    <DockContext.Provider value={value}>{children}</DockContext.Provider>
-);
-
-const Dock = ({
+const DockProvider = ({
   children,
-  className,
-  spring = { mass: 0.1, stiffness: 150, damping: 12 },
   magnification = DEFAULT_MAGNIFICATION,
   distance = DEFAULT_DISTANCE,
-  panelHeight = DEFAULT_PANEL_HEIGHT,
 }: {
   children: React.ReactNode;
-  className?: string;
-  distance?: number;
-  panelHeight?: number;
   magnification?: number;
-  spring?: SpringOptions;
+  distance?: number;
 }) => {
   const mouseX = useMotionValue(Infinity);
+  const value = React.useMemo(() => ({ mouseX, magnification, distance }), [mouseX, magnification, distance]);
+  return <DockContext.Provider value={value}>{children}</DockContext.Provider>;
+};
+DockProvider.displayName = "DockProvider";
+
+const Dock = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
+  ({ children, className }, ref) => {
+    const { mouseX } = useDockContext();
+    return (
+      <motion.div
+        ref={ref}
+        onMouseMove={(e) => mouseX.set(e.pageX)}
+        onMouseLeave={() => mouseX.set(Infinity)}
+        className={cn("mx-auto flex h-16 items-end gap-4 rounded-2xl bg-neutral-900/10 px-4 pb-3 backdrop-blur-md", className)}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+);
+Dock.displayName = "Dock";
+
+const DockItem = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { mouseX, magnification, distance } = useDockContext();
+  const isHovered = useMotionValue(false);
+
+  const width = useSpring(
+    useTransform(
+      useTransform(mouseX, (val) => {
+        const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+        return val - bounds.x - bounds.width / 2;
+      }),
+      [-distance, 0, distance],
+      [40, magnification, 40]
+    ),
+    { mass: 0.1, stiffness: 150, damping: 12 }
+  );
+
   return (
     <motion.div
-      onMouseMove={({ pageX }) => mouseX.set(pageX)}
-      onMouseLeave={() => mouseX.set(Infinity)}
-      className={cn( 'mx-auto flex h-full w-fit items-end gap-4 rounded-2xl bg-gray-50/10 backdrop-blur-md px-4 pb-3 dark:bg-neutral-900/10', className)}
-      style={{ height: panelHeight }}
+      ref={ref}
+      style={{ width }}
+      onHoverStart={() => isHovered.set(true)}
+      onHoverEnd={() => isHovered.set(false)}
+      className={cn("relative flex items-center justify-center", className)}
     >
-      <DockProvider value={{ mouseX, spring, distance, magnification }}>
-        {children}
-      </DockProvider>
+      {Children.map(children, (child) => cloneElement(child as React.ReactElement, { isHovered }))}
     </motion.div>
   );
 };
+DockItem.displayName = "DockItem";
 
-const DockItem = ({ children, className }: { children: React.ReactNode; className?: string; }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { distance, magnification, mouseX, spring } = useDock();
-  const isHovered = useMotionValue(0);
-  const mouseDistance = useTransform(mouseX, (val) => {
-    const domRect = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
-    return val - domRect.x - domRect.width / 2;
-  });
-  const widthTransform = useTransform(mouseDistance, [-distance, 0, distance], [40, magnification, 40]);
-  const width = useSpring(widthTransform, spring);
-  return (
-    <motion.div ref={ref} style={{ width }} onHoverStart={() => isHovered.set(1)} onHoverEnd={() => isHovered.set(0)} className={cn('relative inline-flex items-center justify-center', className)}>
-      {Children.map(children, (child) => cloneElement(child as React.ReactElement, { width, isHovered }))}
+const DockLabel = ({ children }: { children: React.ReactNode }) => (
+  <AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0, y: 0 }}
+      animate={{ opacity: 1, y: -10 }}
+      exit={{ opacity: 0, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs text-white"
+    >
+      {children}
     </motion.div>
-  );
-};
+  </AnimatePresence>
+);
+DockLabel.displayName = "DockLabel";
 
-const DockLabel = ({ children, className, ...rest }: { children: React.ReactNode; className?: string; }) => {
-  const { isHovered } = rest as { isHovered: MotionValue<number> };
-  const [isVisible, setIsVisible] = useState(false);
-  useEffect(() => {
-    const unsubscribe = isHovered.on('change', (latest) => setIsVisible(latest === 1));
-    return () => unsubscribe();
-  }, [isHovered]);
-  return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div initial={{ opacity: 0, y: 0 }} animate={{ opacity: 1, y: -10 }} exit={{ opacity: 0, y: 0 }} transition={{ duration: 0.2 }} className={cn('absolute -top-6 left-1/2 w-fit -translate-x-1/2 whitespace-pre rounded-md border border-gray-200/20 bg-neutral-800 px-2 py-0.5 text-xs text-white', className)}>
-          {children}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
+const DockIcon = ({ children, isHovered, title }: { children: React.ReactNode; isHovered?: MotionValue<boolean>; title: string }) => {
+    const [showLabel, setShowLabel] = useState(false);
 
-const DockIcon = ({ children, className, ...rest }: { children: React.ReactNode; className?: string; }) => {
-  const { width } = rest as { width: MotionValue<number> };
-  const widthTransform = useTransform(width, (val) => val / 2);
-  return <motion.div style={{ width: widthTransform }} className={cn('flex items-center justify-center', className)}>{children}</motion.div>;
-};
-
-// --- Floating Dock Component ---
-const FloatingDock = () => {
-    const dockItems = [
-      { title: '首页', icon: <HomeIcon className='h-full w-full text-neutral-300' />, href: '#' },
-      { title: '产品', icon: <Package className='h-full w-full text-neutral-300' />, href: '#' },
-      { title: '组件', icon: <Component className='h-full w-full text-neutral-300' />, href: '#' },
-      { title: '动态', icon: <Activity className='h-full w-full text-neutral-300' />, href: '#' },
-      { title: '日志', icon: <ScrollText className='h-full w-full text-neutral-300' />, href: '#' },
-      { title: '邮件', icon: <Mail className='h-full w-full text-neutral-300' />, href: '#' },
-      { title: '主题', icon: <SunMoon className='h-full w-full text-neutral-300' />, href: '#' },
-    ];
+    useEffect(() => {
+        if (isHovered) {
+            const unsubscribe = isHovered.on("change", (latest) => {
+                setShowLabel(latest);
+            });
+            return () => unsubscribe();
+        }
+    }, [isHovered]);
 
     return (
-        <div className='fixed top-4 left-1/2 z-50 w-full max-w-fit -translate-x-1/2'>
-            <Dock>
-                {dockItems.map((item) => (
-                    <DockItem key={item.title} className='aspect-square rounded-full bg-neutral-800/60'>
-                        <DockLabel>{item.title}</DockLabel>
-                        <DockIcon>{item.icon}</DockIcon>
-                    </DockItem>
-                ))}
-            </Dock>
+        <div className="flex h-full w-full items-center justify-center">
+            {children}
+            <AnimatePresence>
+                {showLabel && <DockLabel>{title}</DockLabel>}
+            </AnimatePresence>
         </div>
     );
 };
+DockIcon.displayName = "DockIcon";
 
+const FloatingDock = () => {
+  const dockItems = [
+    { title: "首页", icon: <MemoizedHomeIcon className='h-full w-full text-neutral-300' /> },
+    { title: "产品", icon: <MemoizedPackage className='h-full w-full text-neutral-300' /> },
+    { title: "组件", icon: <MemoizedComponent className='h-full w-full text-neutral-300' /> },
+    { title: "动态", icon: <MemoizedActivity className='h-full w-full text-neutral-300' /> },
+    { title: "日志", icon: <MemoizedScrollText className='h-full w-full text-neutral-300' /> },
+    { title: "邮件", icon: <MemoizedMail className='h-full w-full text-neutral-300' /> },
+    { title: "主题", icon: <MemoizedSunMoon className='h-full w-full text-neutral-300' /> },
+  ];
+
+  return (
+    <div className='fixed top-4 left-1/2 z-50 w-full max-w-fit -translate-x-1/2'>
+      <DockProvider>
+        <Dock>
+          {dockItems.map((item) => (
+            <DockItem key={item.title}>
+              <DockIcon title={item.title}>{item.icon}</DockIcon>
+            </DockItem>
+          ))}
+        </Dock>
+      </DockProvider>
+    </div>
+  );
+};
+FloatingDock.displayName = "FloatingDock";
+
+
+// ============================================================================
+// 4. PAGE SECTIONS & LAYOUT COMPONENTS
+// Larger components that compose the page.
+// ============================================================================
 
 // --- 3D Scene Component ---
-interface BoxProps {
-  position: [number, number, number];
-  rotation: [number, number, number];
-}
-
-const Box = ({ position, rotation }: BoxProps) => {
+const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
     const shape = new THREE.Shape();
-    const angleStep = Math.PI * 0.5;
-    const radius = 1;
-    shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1);
-    shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2);
-    shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3);
-    shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4);
+    shape.absarc(2, 2, 1, 0, Math.PI * 2, false);
     const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 };
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.center();
     return (
         <mesh geometry={geometry} position={position} rotation={rotation}>
-            <meshPhysicalMaterial color="#232323" metalness={1} roughness={0.3} reflectivity={0.5} ior={1.5} emissive="#000000" emissiveIntensity={0} transparent={false} opacity={1.0} transmission={0.0} thickness={0.5} clearcoat={0.0} clearcoatRoughness={0.0} sheen={0} sheenRoughness={1.0} sheenColor="#ffffff" specularIntensity={1.0} specularColor="#ffffff" iridescence={1} iridescenceIOR={1.3} iridescenceThicknessRange={[100, 400]} flatShading={false} />
+            <meshPhysicalMaterial color="#232323" metalness={1} roughness={0.3} reflectivity={0.5} ior={1.5} iridescence={1} iridescenceIOR={1.3} iridescenceThicknessRange={[100, 400]} />
         </mesh>
     );
 };
+Box.displayName = "Box";
 
 const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null);
@@ -238,29 +295,29 @@ const AnimatedBoxes = () => {
             groupRef.current.rotation.y += delta * 0.02;
         }
     });
-    const boxes = Array.from({ length: 50 }, (_, index) => ({
+    const boxes = React.useMemo(() => Array.from({ length: 50 }, (_, index) => ({
         position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
         rotation: [(index - 10) * 0.1, Math.PI / 2, 0] as [number, number, number],
         id: index
-    }));
+    })), []);
     return (
         <group ref={groupRef}>
-            {boxes.map((box) => <Box key={box.id} position={box.position} rotation={box.rotation} />)}
+            {boxes.map((box) => <Box key={box.id} {...box} />)}
         </group>
     );
 };
+AnimatedBoxes.displayName = "AnimatedBoxes";
 
-const Scene = () => {
-    return (
-        <div className="fixed top-0 left-0 w-full h-full -z-10">
-            <Canvas camera={{ position: [5, 5, 20], fov: 40 }}>
-                <ambientLight intensity={15} />
-                <directionalLight position={[10, 10, 5]} intensity={15} />
-                <AnimatedBoxes />
-            </Canvas>
-        </div>
-    );
-};
+const Scene = React.memo(() => (
+    <div className="fixed top-0 left-0 w-full h-full -z-10">
+        <Canvas camera={{ position: [5, 5, 20], fov: 40 }}>
+            <ambientLight intensity={15} />
+            <directionalLight position={[10, 10, 5]} intensity={15} />
+            <AnimatedBoxes />
+        </Canvas>
+    </div>
+));
+Scene.displayName = "Scene";
 
 
 // --- Timeline Component ---
@@ -273,16 +330,19 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   const ref = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
+
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
-        if (ref.current) setHeight(ref.current.getBoundingClientRect().height);
+      if (ref.current) setHeight(ref.current.getBoundingClientRect().height);
     });
     if (ref.current) resizeObserver.observe(ref.current);
     return () => resizeObserver.disconnect();
   }, [data]);
+  
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start 10%", "end 50%"] });
   const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
   const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+
   return (
     <div className="w-full bg-transparent font-sans md:px-10" ref={containerRef}>
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
@@ -311,14 +371,19 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
     </div>
   );
 };
+Timeline.displayName = "Timeline";
 
 
-// --- Main Page Component ---
+// ============================================================================
+// 5. PAGE-LEVEL STATIC DATA
+// Defining static data outside the component to prevent re-creation on re-renders.
+// ============================================================================
+
 const features = [
-  { icon: Cpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
-  { icon: ShieldCheck, title: "安全可靠", description: "先进的保护措施，让您高枕无忧。" },
-  { icon: Layers, title: "模块化设计", description: "轻松与现有架构集成。" },
-  { icon: Zap, title: "闪电响应", description: "对每个命令都能做出即时响应。" },
+  { icon: MemoizedCpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
+  { icon: MemoizedShieldCheck, title: "安全可靠", description: "先进的保护措施，让您高枕无忧。" },
+  { icon: MemoizedLayers, title: "模块化设计", description: "轻松与现有架构集成。" },
+  { icon: MemoizedZap, title: "闪电响应", description: "对每个命令都能做出即时响应。" },
 ];
 
 const timelineData = [
@@ -328,10 +393,10 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div className="grid grid-cols-2 gap-4">
-            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
           </div>
         </div>
       ),
@@ -342,10 +407,10 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div className="grid grid-cols-2 gap-4">
-            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/features-section.png" alt="功能区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/cards.png" alt="卡片模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/features-section.png" alt="功能区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/cards.png" alt="卡片模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
           </div>
         </div>
       ),
@@ -364,6 +429,12 @@ const timelineData = [
       ),
     },
 ];
+
+
+// ============================================================================
+// 6. MAIN PAGE COMPONENT
+// The final page, composed of the sections and components defined above.
+// ============================================================================
 
 export default function HomePage() {
   return (
