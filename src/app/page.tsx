@@ -4,7 +4,7 @@
 
 import React, { useRef, forwardRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Shape, ExtrudeGeometry } from 'three';
+import * as THREE from 'three';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -182,7 +182,7 @@ interface BoxProps {
 }
 
 const Box = ({ position, rotation }: BoxProps) => {
-    const shape = new Shape();
+    const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
     const radius = 1;
 
@@ -200,7 +200,7 @@ const Box = ({ position, rotation }: BoxProps) => {
         curveSegments: 20
     };
 
-    const geometry = new ExtrudeGeometry(shape, extrudeSettings);
+    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.center();
 
     return (
