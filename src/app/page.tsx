@@ -3,7 +3,6 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -198,7 +197,7 @@ const AnimatedBoxes = () => {
 
 const Scene = () => {
     return (
-        <div className="absolute inset-0 w-full h-full z-0">
+        <div className="fixed top-0 left-0 w-full h-full -z-10">
             <Canvas camera={{ position: [5, 5, 20], fov: 40 }}>
                 <ambientLight intensity={15} />
                 <directionalLight position={[10, 10, 5]} intensity={15} />
@@ -237,7 +236,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 
   return (
     <div
-      className="w-full bg-black font-sans md:px-10"
+      className="w-full bg-transparent font-sans md:px-10"
       ref={containerRef}
     >
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
@@ -325,32 +324,24 @@ const timelineData = [
             从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。
           </p>
           <div className="grid grid-cols-2 gap-4">
-            <Image
+            <img
               src="https://assets.aceternity.com/templates/startup-1.webp"
               alt="启动模板"
-              width={500}
-              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <Image
+            <img
               src="https://assets.aceternity.com/templates/startup-2.webp"
               alt="启动模板"
-              width={500}
-              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <Image
+            <img
               src="https://assets.aceternity.com/templates/startup-3.webp"
               alt="启动模板"
-              width={500}
-              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <Image
+            <img
               src="https://assets.aceternity.com/templates/startup-4.webp"
               alt="启动模板"
-              width={500}
-              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
           </div>
@@ -365,32 +356,24 @@ const timelineData = [
             我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。
           </p>
           <div className="grid grid-cols-2 gap-4">
-            <Image
+            <img
               src="https://assets.aceternity.com/pro/hero-sections.png"
               alt="英雄区模板"
-              width={500}
-              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <Image
+            <img
               src="https://assets.aceternity.com/features-section.png"
               alt="功能区模板"
-              width={500}
-              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <Image
+            <img
               src="https://assets.aceternity.com/pro/bento-grids.png"
               alt="Bento网格模板"
-              width={500}
-              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <Image
+            <img
               src="https://assets.aceternity.com/cards.png"
               alt="卡片模板"
-              width={500}
-              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
           </div>
@@ -422,18 +405,15 @@ const timelineData = [
 
 export default function HomePage() {
   return (
-    <>
-      <main className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-        {/* Background radial gradient */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
-        
-        {/* 3D Scene (background) */}
-        <Scene />
+    <div className="bg-black">
+      {/* Global Background Elements */}
+      <div className="fixed top-0 left-0 w-full h-full -z-0 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
+      <Scene />
 
-        {/* Content (foreground) */}
-        <div className="relative z-10 w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
+      {/* Page Content */}
+      <main className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
           <div className="flex flex-col items-center text-center space-y-8">
-            
             <div className="space-y-6 flex items-center justify-center flex-col pt-16">
               <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
                 发现极简主义与强大力量的融合
@@ -443,7 +423,6 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
             {features.map((feature, idx) => (
               <div
@@ -458,7 +437,9 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-      <Timeline data={timelineData} />
-    </>
+      <div className="relative z-10">
+        <Timeline data={timelineData} />
+      </div>
+    </div>
   );
 };
