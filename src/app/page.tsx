@@ -2,15 +2,35 @@
 // so it must be declared as a Client Component.
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { 
+    useRef, 
+    useEffect, 
+    useState, 
+    createContext, 
+    useContext, 
+    useMemo, 
+    Children, 
+    cloneElement 
+} from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
+  motion,
   useScroll,
   useTransform,
-  motion,
+  useMotionValue,
+  useSpring,
+  AnimatePresence,
+  type MotionValue,
+  type SpringOptions,
 } from "framer-motion";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
+// --- Utility Function for Tailwind CSS class merging ---
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 // --- Inline SVG Icons ---
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -18,179 +38,210 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 const Cpu = ({ size = 24, ...props }: IconProps) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <rect width="16" height="16" x="4" y="4" rx="2" />
-    <rect width="6" height="6" x="9" y="9" rx="1" />
-    <path d="M15 2v2" />
-    <path d="M15 20v2" />
-    <path d="M9 2v2" />
-    <path d="M9 20v2" />
-    <path d="M2 15h2" />
-    <path d="M2 9h2" />
-    <path d="M20 15h2" />
-    <path d="M20 9h2" />
-    <path d="M9 15v-1.5" />
-    <path d="M15 9.5V8" />
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M9 2v2" /><path d="M9 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 15v-1.5" /><path d="M15 9.5V8" />
   </svg>
 );
 
 const ShieldCheck = ({ size = 24, ...props }: IconProps) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-    <path d="m9 12 2 2 4-4" />
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" />
   </svg>
 );
 
 const Layers = ({ size = 24, ...props }: IconProps) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.91a2 2 0 0 0 1.66 0l8.57-3.91a1 1 0 0 0 0-1.84Z" />
-    <path d="M2 12.12V16l8.57 3.91a2 2 0 0 0 1.66 0L21 16v-3.88" />
-    <path d="M2 7.23V11l8.57 3.91a2 2 0 0 0 1.66 0L21 11V7.23" />
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.91a2 2 0 0 0 1.66 0l8.57-3.91a1 1 0 0 0 0-1.84Z" /><path d="M2 12.12V16l8.57 3.91a2 2 0 0 0 1.66 0L21 16v-3.88" /><path d="M2 7.23V11l8.57 3.91a2 2 0 0 0 1.66 0L21 11V7.23" />
   </svg>
 );
 
 const Zap = ({ size = 24, ...props }: IconProps) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 );
 
+// --- Dock Navigation Icons ---
+const HomeIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+);
+const Package = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16.5 9.4a4.5 4.5 0 1 1-9 0" /><path d="M12 14.8V22" /><path d="M12 2v7.8" /><path d="M12 22a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M12 2a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></svg>
+);
+const Component = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 20.94c1.5 0 2.85-.83 3.54-2.06.69-1.23.69-2.77 0-4l-3.54-6.32-3.54 6.32c-.69 1.23-.69 2.77 0 4 .69 1.23 2.04 2.06 3.54 2.06Z" /><path d="m3.8 15.3 4-6.94" /><path d="m20.2 15.3-4-6.94" /><path d="M12 22v-1.06" /><path d="M12 8.84V2" /><path d="M4.93 4.93 7.76 7.76" /><path d="M19.07 4.93 16.24 7.76" /></svg>
+);
+const Activity = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+);
+const ScrollText = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4Z" /><path d="M16 6h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M8 18H6a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2" /><path d="M16 12h-8" /></svg>
+);
+const Mail = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+);
+const SunMoon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M12 3v1" /><path d="M12 20v1" /><path d="M3 12h1" /><path d="M20 12h1" /><path d="m18.36 5.64-.7-.7" /><path d="m6.34 17.66-.7-.7" /><path d="m18.36 18.36-.7-.7" /><path d="m6.34 6.34-.7-.7" /></svg>
+);
 
-// --- 3D Scene Component for Hero Section ---
-interface BoxProps {
-  position: [number, number, number];
-  rotation: [number, number, number];
-}
 
+// --- Dock Component Logic ---
+const DEFAULT_MAGNIFICATION = 80;
+const DEFAULT_DISTANCE = 150;
+const DEFAULT_PANEL_HEIGHT = 64;
+
+type DockContextType = {
+  mouseX: MotionValue;
+  spring: SpringOptions;
+  magnification: number;
+  distance: number;
+};
+
+const DockContext = createContext<DockContextType | undefined>(undefined);
+
+const useDock = () => {
+  const context = useContext(DockContext);
+  if (!context) throw new Error("useDock must be used within a DockProvider");
+  return context;
+};
+
+const DockProvider = ({ children, value }: { children: React.ReactNode; value: DockContextType; }) => (
+    <DockContext.Provider value={value}>{children}</DockContext.Provider>
+);
+
+const Dock = ({
+  children,
+  className,
+  spring = { mass: 0.1, stiffness: 150, damping: 12 },
+  magnification = DEFAULT_MAGNIFICATION,
+  distance = DEFAULT_DISTANCE,
+  panelHeight = DEFAULT_PANEL_HEIGHT,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  distance?: number;
+  panelHeight?: number;
+  magnification?: number;
+  spring?: SpringOptions;
+}) => {
+  const mouseX = useMotionValue(Infinity);
+  return (
+    <motion.div
+      onMouseMove={({ pageX }) => mouseX.set(pageX)}
+      onMouseLeave={() => mouseX.set(Infinity)}
+      className={cn( 'mx-auto flex h-full w-fit items-end gap-4 rounded-2xl bg-gray-50/10 backdrop-blur-md px-4 pb-3 dark:bg-neutral-900/10', className)}
+      style={{ height: panelHeight }}
+    >
+      <DockProvider value={{ mouseX, spring, distance, magnification }}>
+        {children}
+      </DockProvider>
+    </motion.div>
+  );
+};
+
+const DockItem = ({ children, className }: { children: React.ReactNode; className?: string; }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { distance, magnification, mouseX, spring } = useDock();
+  const isHovered = useMotionValue(0);
+  const mouseDistance = useTransform(mouseX, (val) => {
+    const domRect = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+    return val - domRect.x - domRect.width / 2;
+  });
+  const widthTransform = useTransform(mouseDistance, [-distance, 0, distance], [40, magnification, 40]);
+  const width = useSpring(widthTransform, spring);
+  return (
+    <motion.div ref={ref} style={{ width }} onHoverStart={() => isHovered.set(1)} onHoverEnd={() => isHovered.set(0)} className={cn('relative inline-flex items-center justify-center', className)}>
+      {Children.map(children, (child) => cloneElement(child as React.ReactElement, { width, isHovered }))}
+    </motion.div>
+  );
+};
+
+const DockLabel = ({ children, className, ...rest }: { children: React.ReactNode; className?: string; }) => {
+  const { isHovered } = rest as { isHovered: MotionValue<number> };
+  const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    const unsubscribe = isHovered.on('change', (latest) => setIsVisible(latest === 1));
+    return () => unsubscribe();
+  }, [isHovered]);
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div initial={{ opacity: 0, y: 0 }} animate={{ opacity: 1, y: -10 }} exit={{ opacity: 0, y: 0 }} transition={{ duration: 0.2 }} className={cn('absolute -top-6 left-1/2 w-fit -translate-x-1/2 whitespace-pre rounded-md border border-gray-200/20 bg-neutral-800 px-2 py-0.5 text-xs text-white', className)}>
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const DockIcon = ({ children, className, ...rest }: { children: React.ReactNode; className?: string; }) => {
+  const { width } = rest as { width: MotionValue<number> };
+  const widthTransform = useTransform(width, (val) => val / 2);
+  return <motion.div style={{ width: widthTransform }} className={cn('flex items-center justify-center', className)}>{children}</motion.div>;
+};
+
+// --- Floating Dock Component ---
+const FloatingDock = () => {
+    const dockItems = [
+      { title: '首页', icon: <HomeIcon className='h-full w-full text-neutral-300' />, href: '#' },
+      { title: '产品', icon: <Package className='h-full w-full text-neutral-300' />, href: '#' },
+      { title: '组件', icon: <Component className='h-full w-full text-neutral-300' />, href: '#' },
+      { title: '动态', icon: <Activity className='h-full w-full text-neutral-300' />, href: '#' },
+      { title: '日志', icon: <ScrollText className='h-full w-full text-neutral-300' />, href: '#' },
+      { title: '邮件', icon: <Mail className='h-full w-full text-neutral-300' />, href: '#' },
+      { title: '主题', icon: <SunMoon className='h-full w-full text-neutral-300' />, href: '#' },
+    ];
+
+    return (
+        <div className='fixed top-4 left-1/2 z-50 w-full max-w-fit -translate-x-1/2'>
+            <Dock>
+                {dockItems.map((item) => (
+                    <DockItem key={item.title} className='aspect-square rounded-full bg-neutral-800/60'>
+                        <DockLabel>{item.title}</DockLabel>
+                        <DockIcon>{item.icon}</DockIcon>
+                    </DockItem>
+                ))}
+            </Dock>
+        </div>
+    );
+};
+
+
+// --- 3D Scene Component ---
 const Box = ({ position, rotation }: BoxProps) => {
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
     const radius = 1;
-
     shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1);
     shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2);
     shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3);
     shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4);
-
-    const extrudeSettings = {
-        depth: 0.3,
-        bevelEnabled: true,
-        bevelThickness: 0.05,
-        bevelSize: 0.05,
-        bevelSegments: 20,
-        curveSegments: 20
-    };
-
+    const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 };
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.center();
-
     return (
-        <mesh
-            geometry={geometry}
-            position={position}
-            rotation={rotation}
-        >
-            <meshPhysicalMaterial 
-                color="#232323"
-                metalness={1}
-                roughness={0.3}
-                reflectivity={0.5}
-                ior={1.5}
-                emissive="#000000"
-                emissiveIntensity={0}
-                transparent={false}
-                opacity={1.0}
-                transmission={0.0}
-                thickness={0.5}
-                clearcoat={0.0}
-                clearcoatRoughness={0.0}
-                sheen={0}
-                sheenRoughness={1.0}
-                sheenColor="#ffffff"
-                specularIntensity={1.0}
-                specularColor="#ffffff"
-                iridescence={1}
-                iridescenceIOR={1.3}
-                iridescenceThicknessRange={[100, 400]}
-                flatShading={false}
-            />
+        <mesh geometry={geometry} position={position} rotation={rotation}>
+            <meshPhysicalMaterial color="#232323" metalness={1} roughness={0.3} reflectivity={0.5} ior={1.5} emissive="#000000" emissiveIntensity={0} transparent={false} opacity={1.0} transmission={0.0} thickness={0.5} clearcoat={0.0} clearcoatRoughness={0.0} sheen={0} sheenRoughness={1.0} sheenColor="#ffffff" specularIntensity={1.0} specularColor="#ffffff" iridescence={1} iridescenceIOR={1.3} iridescenceThicknessRange={[100, 400]} flatShading={false} />
         </mesh>
     );
 };
 
 const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null);
-
     useFrame((state, delta) => {
         if (groupRef.current) {
             groupRef.current.rotation.x += delta * 0.05;
             groupRef.current.rotation.y += delta * 0.02;
         }
     });
-
     const boxes = Array.from({ length: 50 }, (_, index) => ({
         position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
-        rotation: [
-            (index - 10) * 0.1,
-            Math.PI / 2,
-            0
-        ] as [number, number, number],
+        rotation: [(index - 10) * 0.1, Math.PI / 2, 0] as [number, number, number],
         id: index
     }));
-
     return (
         <group ref={groupRef}>
-            {boxes.map((box) => (
-                <Box
-                    key={box.id}
-                    position={box.position}
-                    rotation={box.rotation}
-                />
-            ))}
+            {boxes.map((box) => <Box key={box.id} position={box.position} rotation={box.rotation} />)}
         </group>
     );
 };
@@ -209,91 +260,43 @@ const Scene = () => {
 
 
 // --- Timeline Component ---
-interface TimelineEntry {
-  title: string;
-  content: React.ReactNode;
-}
-
 const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   const ref = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
-
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
-        if (ref.current) {
-            const rect = ref.current.getBoundingClientRect();
-            setHeight(rect.height);
-        }
+        if (ref.current) setHeight(ref.current.getBoundingClientRect().height);
     });
-
-    if (ref.current) {
-        resizeObserver.observe(ref.current);
-    }
-    
-    return () => {
-        resizeObserver.disconnect();
-    };
+    if (ref.current) resizeObserver.observe(ref.current);
+    return () => resizeObserver.disconnect();
   }, [data]);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start 10%", "end 50%"],
-  });
-
+  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start 10%", "end 50%"] });
   const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
   const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
-
   return (
-    <div
-      className="w-full bg-transparent font-sans md:px-10"
-      ref={containerRef}
-    >
+    <div className="w-full bg-transparent font-sans md:px-10" ref={containerRef}>
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="text-lg md:text-4xl mb-4 text-white max-w-4xl">
-          我的开发历程变更日志
-        </h2>
-        <p className="text-neutral-300 text-sm md:text-base max-w-sm">
-          在过去的两年里，我一直在努力构建 Aceternity。这是我的心路历程时间线。
-        </p>
+        <h2 className="text-lg md:text-4xl mb-4 text-white max-w-4xl">我的开发历程变更日志</h2>
+        <p className="text-neutral-300 text-sm md:text-base max-w-sm">在过去的两年里，我一直在努力构建 Aceternity。这是我的心路历程时间线。</p>
       </div>
-
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
         {data.map((item, index) => (
-          <div
-            key={index}
-            className="flex justify-start pt-10 md:pt-40 md:gap-10"
-          >
+          <div key={index} className="flex justify-start pt-10 md:pt-40 md:gap-10">
             <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
-              <h3 className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-neutral-500">
-                {item.title}
-              </h3>
+              <h3 className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-neutral-500">{item.title}</h3>
             </div>
-
             <div className="relative pl-20 pr-4 md:pl-4 w-full">
-              <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500">
-                {item.title}
-              </h3>
-              {item.content}{" "}
+              <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500">{item.title}</h3>
+              {item.content}
             </div>
           </div>
         ))}
-        <div
-          style={{
-            height: height + "px",
-          }}
-          className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-neutral-700 to-transparent to-[99%]  [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] "
-        >
-          <motion.div
-            style={{
-              height: heightTransform,
-              opacity: opacityTransform,
-            }}
-            className="absolute inset-x-0 top-0  w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-transparent from-[0%] via-[10%] rounded-full"
-          />
+        <div style={{ height: `${height}px` }} className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-neutral-700 to-transparent to-[99%] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]">
+          <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute inset-x-0 top-0 w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-transparent from-[0%] via-[10%] rounded-full" />
         </div>
       </div>
     </div>
@@ -303,26 +306,10 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 
 // --- Main Page Component ---
 const features = [
-  {
-    icon: Cpu,
-    title: "性能卓越",
-    description: "在任何情况下都能实现超快速的数据处理。",
-  },
-  {
-    icon: ShieldCheck,
-    title: "安全可靠",
-    description: "先进的保护措施，让您高枕无忧。",
-  },
-  {
-    icon: Layers,
-    title: "模块化设计",
-    description: "轻松与现有架构集成。",
-  },
-  {
-    icon: Zap,
-    title: "闪电响应",
-    description: "对每个命令都能做出即时响应。",
-  },
+  { icon: Cpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
+  { icon: ShieldCheck, title: "安全可靠", description: "先进的保护措施，让您高枕无忧。" },
+  { icon: Layers, title: "模块化设计", description: "轻松与现有架构集成。" },
+  { icon: Zap, title: "闪电响应", description: "对每个命令都能做出即时响应。" },
 ];
 
 const timelineData = [
@@ -330,30 +317,12 @@ const timelineData = [
       title: "2024",
       content: (
         <div>
-          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">
-            从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。
-          </p>
+          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div className="grid grid-cols-2 gap-4">
-            <img
-              src="https://assets.aceternity.com/templates/startup-1.webp"
-              alt="启动模板"
-              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
-            />
-            <img
-              src="https://assets.aceternity.com/templates/startup-2.webp"
-              alt="启动模板"
-              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
-            />
-            <img
-              src="https://assets.aceternity.com/templates/startup-3.webp"
-              alt="启动模板"
-              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
-            />
-            <img
-              src="https://assets.aceternity.com/templates/startup-4.webp"
-              alt="启动模板"
-              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
-            />
+            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
           </div>
         </div>
       ),
@@ -362,30 +331,12 @@ const timelineData = [
       title: "2023年初",
       content: (
         <div>
-          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">
-            我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。
-          </p>
+          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div className="grid grid-cols-2 gap-4">
-            <img
-              src="https://assets.aceternity.com/pro/hero-sections.png"
-              alt="英雄区模板"
-              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
-            />
-            <img
-              src="https://assets.aceternity.com/features-section.png"
-              alt="功能区模板"
-              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
-            />
-            <img
-              src="https://assets.aceternity.com/pro/bento-grids.png"
-              alt="Bento网格模板"
-              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
-            />
-            <img
-              src="https://assets.aceternity.com/cards.png"
-              alt="卡片模板"
-              className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
-            />
+            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/features-section.png" alt="功能区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/cards.png" alt="卡片模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
           </div>
         </div>
       ),
@@ -394,19 +345,11 @@ const timelineData = [
       title: "变更日志",
       content: (
         <div>
-          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">
-            今天在 Aceternity 上部署了5个新组件。
-          </p>
+          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div className="mb-8">
-            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">
-              ✅ 卡片网格组件
-            </div>
-            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">
-              ✅ 启动模板 Aceternity
-            </div>
-            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">
-              ✅ 随机文件上传 哈哈
-            </div>
+            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">✅ 卡片网格组件</div>
+            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">✅ 启动模板 Aceternity</div>
+            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">✅ 随机文件上传 哈哈</div>
           </div>
         </div>
       ),
@@ -415,12 +358,13 @@ const timelineData = [
 
 export default function HomePage() {
   return (
-    <div className="relative text-white">
-      {/* Global Background Elements */}
+    <div className="bg-black text-white">
+      {/* 全局背景元素 */}
       <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
       <Scene />
+      <FloatingDock />
 
-      {/* Page Content */}
+      {/* 页面内容 */}
       <main className="relative z-10">
         <div className="min-h-screen w-full flex flex-col items-center justify-center">
             <div className="w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
@@ -449,7 +393,7 @@ export default function HomePage() {
             </div>
         </div>
         
-        {/* Timeline Section */}
+        {/* 时间轴部分 */}
         <Timeline data={timelineData} />
       </main>
     </div>
