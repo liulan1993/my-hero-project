@@ -13,7 +13,6 @@ import React, {
     cloneElement,
     Children
 } from 'react';
-import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -458,7 +457,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div>
-            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -469,7 +468,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div>
-            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -480,7 +479,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
-            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
