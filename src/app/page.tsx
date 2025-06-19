@@ -617,7 +617,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                             "flex flex-col justify-center gap-4 mt-10 md:mt-0",
                             textOrderClass,
                             "items-center text-center",
-                            reverseLayout ? "md:items-start md:text-left" : "md:items-end md:text-right"
+                            reverseLayout ? "md:items-end md:text-right" : "md:items-start md:text-left"
                         )}
                         variants={itemVariants}
                     >
