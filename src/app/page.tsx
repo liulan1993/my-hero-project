@@ -7,7 +7,11 @@ import React, {
     useEffect, 
     useState, 
     useMemo,
-    useCallback
+    useCallback,
+    createContext,
+    useContext,
+    cloneElement,
+    Children
 } from 'react';
 import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -16,11 +20,24 @@ import {
   motion,
   useScroll,
   useTransform,
-  AnimatePresence
+  AnimatePresence,
+  useMotionValue,
+  useSpring,
+  type MotionValue,
 } from "framer-motion";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 // ============================================================================
-// 1. ATOMIC UI COMPONENTS & ICONS
+// 1. CORE UTILITIES
+// ============================================================================
+
+function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
+}
+
+// ============================================================================
+// 2. ATOMIC UI COMPONENTS & ICONS
 // ============================================================================
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -55,9 +72,145 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
 ));
 MemoizedZap.displayName = 'ZapIcon';
 
+const MemoizedHomeIcon = React.memo((props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+));
+MemoizedHomeIcon.displayName = 'HomeIcon';
+
+const MemoizedPackage = React.memo((props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16.5 9.4a4.5 4.5 0 1 1-9 0" /><path d="M12 14.8V22" /><path d="M12 2v7.8" /><path d="M12 22a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M12 2a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></svg>
+));
+MemoizedPackage.displayName = 'PackageIcon';
+
+const MemoizedComponent = React.memo((props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 20.94c1.5 0 2.85-.83 3.54-2.06.69-1.23.69-2.77 0-4l-3.54-6.32-3.54 6.32c-.69 1.23-.69 2.77 0 4 .69 1.23 2.04 2.06 3.54 2.06Z" /><path d="m3.8 15.3 4-6.94" /><path d="m20.2 15.3-4-6.94" /><path d="M12 22v-1.06" /><path d="M12 8.84V2" /><path d="M4.93 4.93 7.76 7.76" /><path d="M19.07 4.93 16.24 7.76" /></svg>
+));
+MemoizedComponent.displayName = 'ComponentIcon';
+
+const MemoizedActivity = React.memo((props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+));
+MemoizedActivity.displayName = 'ActivityIcon';
+
+const MemoizedScrollText = React.memo((props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4Z" /><path d="M16 6h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M8 18H6a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2" /><path d="M16 12h-8" /></svg>
+));
+MemoizedScrollText.displayName = 'ScrollTextIcon';
+
+const MemoizedMail = React.memo((props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+));
+MemoizedMail.displayName = 'MailIcon';
+
+const MemoizedSunMoon = React.memo((props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M12 3v1" /><path d="M12 20v1" /><path d="M3 12h1" /><path d="M20 12h1" /><path d="m18.36 5.64-.7-.7" /><path d="m6.34 17.66-.7-.7" /><path d="m18.36 18.36-.7-.7" /><path d="m6.34 6.34-.7-.7" /></svg>
+));
+MemoizedSunMoon.displayName = 'SunMoonIcon';
+
 
 // ============================================================================
-// 2. PAGE SECTIONS & LAYOUT COMPONENTS
+// 3. DOCK COMPONENT SUITE
+// ============================================================================
+
+const DockContext = createContext<{ mouseX: MotionValue<number> } | null>(null);
+
+const useDockContext = () => {
+  const context = useContext(DockContext);
+  if (!context) throw new Error("useDockContext must be used within a DockProvider");
+  return context;
+};
+
+const DockProvider = ({ children }: { children: React.ReactNode }) => {
+  const mouseX = useMotionValue(Infinity);
+  return <DockContext.Provider value={{ mouseX }}>{children}</DockContext.Provider>;
+};
+DockProvider.displayName = "DockProvider";
+
+const Dock = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
+  ({ children, className }, ref) => {
+    const { mouseX } = useDockContext();
+    return (
+      <motion.div
+        ref={ref}
+        onMouseMove={(e) => mouseX.set(e.pageX)}
+        onMouseLeave={() => mouseX.set(Infinity)}
+        className={cn("mx-auto flex h-16 items-end gap-4 rounded-2xl bg-neutral-900/10 px-4 pb-3 backdrop-blur-md", className)}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+);
+Dock.displayName = "Dock";
+
+const DockItem = ({ children, title }: { children: React.ReactNode; title: string }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { mouseX } = useDockContext();
+  const [isHovered, setIsHovered] = useState(false);
+
+  const distance = useTransform(mouseX, (val) => {
+    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+    return val - bounds.x - bounds.width / 2;
+  });
+
+  const widthSync = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
+  const width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 });
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ width }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      className="relative flex items-center justify-center"
+    >
+        {children}
+        <AnimatePresence>
+            {isHovered && (
+                <motion.div
+                    initial={{ opacity: 0, y: 0 }}
+                    animate={{ opacity: 1, y: -10 }}
+                    exit={{ opacity: 0, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs text-white"
+                >
+                    {title}
+                </motion.div>
+            )}
+        </AnimatePresence>
+    </motion.div>
+  );
+};
+DockItem.displayName = "DockItem";
+
+const dockItems = [
+    { title: "首页", icon: <MemoizedHomeIcon className='h-full w-full text-neutral-300' /> },
+    { title: "产品", icon: <MemoizedPackage className='h-full w-full text-neutral-300' /> },
+    { title: "组件", icon: <MemoizedComponent className='h-full w-full text-neutral-300' /> },
+    { title: "动态", icon: <MemoizedActivity className='h-full w-full text-neutral-300' /> },
+    { title: "日志", icon: <MemoizedScrollText className='h-full w-full text-neutral-300' /> },
+    { title: "邮件", icon: <MemoizedMail className='h-full w-full text-neutral-300' /> },
+    { title: "主题", icon: <MemoizedSunMoon className='h-full w-full text-neutral-300' /> },
+];
+
+const FloatingDock = () => (
+    <div className='fixed top-4 left-1/2 z-50 w-full max-w-fit -translate-x-1/2'>
+        <DockProvider>
+            <Dock>
+                {dockItems.map((item) => (
+                    <DockItem key={item.title} title={item.title}>
+                        {item.icon}
+                    </DockItem>
+                ))}
+            </Dock>
+        </DockProvider>
+    </div>
+);
+FloatingDock.displayName = "FloatingDock";
+
+
+// ============================================================================
+// 4. PAGE SECTIONS & LAYOUT COMPONENTS
 // ============================================================================
 
 const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
@@ -189,11 +342,19 @@ const HalomotButton: React.FC<HalomotButtonProps> = ({
   const buttonStyle: React.CSSProperties = { padding: borderWidth, background: gradient, borderRadius: outerBorderRadius, width: fillWidth || fixedWidth ? "100%" : "fit-content", border: "0", display: "flex", justifyContent: "center", alignItems: "center", textDecoration: "none", userSelect: "none", whiteSpace: "nowrap", transition: "all .3s", boxSizing: "border-box", };
   const spanStyle: React.CSSProperties = { background: isHovered ? "none" : backgroundColor, padding: padding ?? (fillWidth || fixedWidth ? "1rem 0" : "1rem 4rem"), borderRadius: innerBorderRadius, width: "100%", height: "100%", transition: "color 0.3s, background 300ms", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", color: isHovered && hoverTextColor ? hoverTextColor : textColor, whiteSpace: "nowrap", fontFamily: "inherit", fontSize: "1rem", gap: icon ? "0.5em" : "0", boxSizing: "border-box", cursor: "pointer", };
   const iconStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", height: "1em", width: "1em", fontSize: "1.1em", verticalAlign: "middle", flexShrink: 0, };
-  const ButtonContent = <span style={spanStyle}>{icon && React.cloneElement(icon, { style: iconStyle })}{inscription}</span>;
+  const ButtonContent = <span style={spanStyle}>{icon && <span style={iconStyle}>{icon}</span>}{inscription}</span>;
+  
+  const commonProps = {
+    style: buttonStyle,
+    onClick: onClick,
+    onMouseEnter: () => setIsHovered(true),
+    onMouseLeave: () => setIsHovered(false),
+  };
+
   const ButtonElement = href ? (
-    <a href={href} style={buttonStyle} onClick={onClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} target="_blank" rel="noopener noreferrer">{ButtonContent}</a>
+    <a href={href} {...commonProps} target="_blank" rel="noopener noreferrer">{ButtonContent}</a>
   ) : (
-    <button type="button" style={buttonStyle} onClick={onClick} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>{ButtonContent}</button>
+    <button type="button" {...commonProps}>{ButtonContent}</button>
   );
   return fixedWidth ? <div style={containerStyle}>{ButtonElement}</div> : ButtonElement;
 };
@@ -205,7 +366,7 @@ type Testimonial = {
 
 const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
   <div className="relative h-full w-full rounded-2xl overflow-hidden p-px bg-zinc-800">
-    <Image src={src} alt={alt} width={1024} height={768} className="h-full w-full object-cover object-center rounded-[15px]" />
+    <img src={src} alt={alt} className="h-full w-full object-cover object-center rounded-[15px]" loading="lazy" />
   </div>
 );
 ImageContainer.displayName = 'ImageContainer';
@@ -297,7 +458,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div>
-            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -308,7 +469,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div>
-            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -319,7 +480,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
-            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
