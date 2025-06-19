@@ -6,11 +6,11 @@ import React, { useRef, forwardRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Shape, ExtrudeGeometry } from 'three';
 import { cva } from 'class-variance-authority';
-import { clsx } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 // --- Utility Function for Tailwind CSS class merging ---
-function cn(...inputs) {
+function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
