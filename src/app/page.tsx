@@ -9,7 +9,8 @@ import React, {
     useMemo,
     useCallback
 } from 'react';
-import Image from 'next/image'; // 导入 Next.js Image 组件
+import Image from 'next/image';
+import Link from 'next/link';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -19,45 +20,311 @@ import {
   AnimatePresence
 } from "framer-motion";
 
-// ============================================================================
-// 1. ATOMIC UI COMPONENTS & ICONS
-// ============================================================================
+// --- 从新组件中添加的依赖项 ---
+import { Menu, MoveRight, X } from 'lucide-react';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
+import { Slot } from '@radix-ui/react-slot';
+import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-interface IconProps extends React.SVGProps<SVGSVGElement> {
-  size?: number;
+
+// ============================================================================
+// 0. 工具函数 (来自 shadcn/ui)
+// ============================================================================
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
-const MemoizedCpu = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M9 2v2" /><path d="M9 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 15v-1.5" /><path d="M15 9.5V8" />
-  </svg>
-));
-MemoizedCpu.displayName = 'CpuIcon';
 
-const MemoizedShieldCheck = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" />
-  </svg>
-));
-MemoizedShieldCheck.displayName = 'ShieldCheckIcon';
+// ============================================================================
+// 1. 新的导航栏组件 (合并自用户提供的文件)
+// ============================================================================
 
-const MemoizedLayers = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.91a2 2 0 0 0 1.66 0l8.57-3.91a1 1 0 0 0 0-1.84Z" /><path d="M2 12.12V16l8.57 3.91a2 2 0 0 0 1.66 0L21 16v-3.88" /><path d="M2 7.23V11l8.57 3.91a2 2 0 0 0 1.66 0L21 11V7.23" />
-  </svg>
-));
-MemoizedLayers.displayName = 'LayersIcon';
+// --- 辅助组件: Button (来自 button.tsx) ---
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-white text-black hover:bg-white/90",
+        destructive: "bg-red-500 text-slate-50 hover:bg-red-500/90",
+        outline: "border border-slate-200 bg-transparent hover:bg-slate-100 hover:text-slate-900",
+        secondary: "bg-slate-100 text-slate-900 hover:bg-slate-100/80",
+        ghost: "hover:bg-slate-800 hover:text-slate-50",
+        link: "text-slate-900 underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
 
-const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-  </svg>
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+
+
+// --- 辅助组件: NavigationMenu (来自 navigation-menu.tsx) ---
+const NavigationMenu = React.forwardRef<
+  React.ElementRef<typeof NavigationMenuPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
+>(({ className, children, ...props }, ref) => (
+  <NavigationMenuPrimitive.Root
+    ref={ref}
+    className={cn(
+      "relative z-10 flex max-w-max flex-1 items-center justify-center",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <NavigationMenuViewport />
+  </NavigationMenuPrimitive.Root>
 ));
-MemoizedZap.displayName = 'ZapIcon';
+NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName;
+
+const NavigationMenuList = React.forwardRef<
+  React.ElementRef<typeof NavigationMenuPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <NavigationMenuPrimitive.List
+    ref={ref}
+    className={cn(
+      "group flex flex-1 list-none items-center justify-center space-x-1",
+      className
+    )}
+    {...props}
+  />
+));
+NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName;
+
+const NavigationMenuItem = NavigationMenuPrimitive.Item;
+
+const navigationMenuTriggerStyle = cva(
+  "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-slate-800/50 data-[state=open]:bg-slate-800/50"
+);
+
+const NavigationMenuTrigger = React.forwardRef<
+  React.ElementRef<typeof NavigationMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+  <NavigationMenuPrimitive.Trigger
+    ref={ref}
+    className={cn(navigationMenuTriggerStyle(), "group", className)}
+    {...props}
+  >
+    {children}{" "}
+    <ChevronDownIcon
+      className="relative top-[1px] ml-1 h-3 w-3 transition duration-300 group-data-[state=open]:rotate-180"
+      aria-hidden="true"
+    />
+  </NavigationMenuPrimitive.Trigger>
+));
+NavigationMenuTrigger.displayName = NavigationMenuPrimitive.Trigger.displayName;
+
+const NavigationMenuContent = React.forwardRef<
+  React.ElementRef<typeof NavigationMenuPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <NavigationMenuPrimitive.Content
+    ref={ref}
+    className={cn(
+      "left-0 top-0 w-full data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute md:w-auto",
+      className
+    )}
+    {...props}
+  />
+));
+NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName;
+
+const NavigationMenuLink = NavigationMenuPrimitive.Link;
+
+const NavigationMenuViewport = React.forwardRef<
+  React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
+>(({ className, ...props }, ref) => (
+  <div className={cn("absolute left-0 top-full flex justify-center")}>
+    <NavigationMenuPrimitive.Viewport
+      className={cn(
+        "origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md border border-slate-700 bg-black text-white shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
+        className
+      )}
+      ref={ref}
+      {...props}
+    />
+  </div>
+));
+NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName;
+
+
+// --- 主导航栏组件 (来自 header.tsx) ---
+const AppNavigationBar = () => {
+    const navigationItems = [
+        { title: "Home", href: "/", description: "" },
+        {
+            title: "Product", description: "Managing a small business today is already tough.",
+            items: [
+                { title: "Reports", href: "#" },
+                { title: "Statistics", href: "#" },
+                { title: "Dashboards", href: "#" },
+                { title: "Recordings", href: "#" },
+            ],
+        },
+        {
+            title: "Company", description: "Managing a small business today is already tough.",
+            items: [
+                { title: "About us", href: "#" },
+                { title: "Fundraising", href: "#" },
+                { title: "Investors", href: "#" },
+                { title: "Contact us", href: "#" },
+            ],
+        },
+    ];
+
+    const [isOpen, setOpen] = useState(false);
+    
+    return (
+        <header className="w-full z-50 fixed top-0 left-0 bg-black/50 backdrop-blur-sm">
+            <div className="container relative mx-auto min-h-20 flex gap-4 flex-row lg:grid lg:grid-cols-3 items-center px-4 md:px-8">
+                <div className="justify-start items-center gap-4 lg:flex hidden flex-row">
+                    <NavigationMenu>
+                        <NavigationMenuList>
+                            {navigationItems.map((item) => (
+                                <NavigationMenuItem key={item.title}>
+                                    {item.href ? (
+                                        <Link href={item.href} legacyBehavior passHref>
+                                            <NavigationMenuLink asChild>
+                                                <Button variant="ghost">{item.title}</Button>
+                                            </NavigationMenuLink>
+                                        </Link>
+                                    ) : (
+                                        <>
+                                            <NavigationMenuTrigger className="font-medium text-sm">
+                                                {item.title}
+                                            </NavigationMenuTrigger>
+                                            <NavigationMenuContent className="!w-[450px] p-4">
+                                                <div className="flex flex-col lg:grid grid-cols-2 gap-4">
+                                                    <div className="flex flex-col h-full justify-between">
+                                                        <div className="flex flex-col">
+                                                            <p className="text-base font-semibold">{item.title}</p>
+                                                            <p className="text-neutral-400 text-sm">
+                                                                {item.description}
+                                                            </p>
+                                                        </div>
+                                                        <Button size="sm" className="mt-10" variant="outline">
+                                                            Book a call today
+                                                        </Button>
+                                                    </div>
+                                                    <div className="flex flex-col text-sm h-full justify-end">
+                                                        {item.items?.map((subItem) => (
+                                                          <Link href={subItem.href} key={subItem.title} legacyBehavior passHref>
+                                                            <NavigationMenuLink
+                                                              className="flex flex-row justify-between items-center hover:bg-slate-800 py-2 px-4 rounded"
+                                                            >
+                                                                <span>{subItem.title}</span>
+                                                                <MoveRight className="w-4 h-4 text-neutral-400" />
+                                                            </NavigationMenuLink>
+                                                          </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </NavigationMenuContent>
+                                        </>
+                                    )}
+                                </NavigationMenuItem>
+                            ))}
+                        </NavigationMenuList>
+                    </NavigationMenu>
+                </div>
+                <div className="flex lg:justify-center">
+                    <Link href="/" className="font-semibold text-xl">
+                      MyPortfolio
+                    </Link>
+                </div>
+                <div className="flex justify-end w-full gap-2 md:gap-4">
+                    <Button variant="ghost" className="hidden md:inline">
+                        Book a demo
+                    </Button>
+                    <div className="border-r border-slate-700 hidden md:inline"></div>
+                    <Button variant="outline">Sign in</Button>
+                    <Button variant='default'>Get started</Button>
+                </div>
+                <div className="flex w-12 shrink lg:hidden items-end justify-end">
+                    <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
+                        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                    </Button>
+                    {isOpen && (
+                        <div className="absolute top-20 border-t border-slate-800 flex flex-col w-full right-0 bg-black shadow-lg py-4 container gap-8">
+                            {navigationItems.map((item) => (
+                                <div key={item.title}>
+                                    <div className="flex flex-col gap-2">
+                                        {item.href ? (
+                                            <Link
+                                                href={item.href}
+                                                className="flex justify-between items-center"
+                                                onClick={() => setOpen(false)}
+                                            >
+                                                <span className="text-lg">{item.title}</span>
+                                                <MoveRight className="w-4 h-4 stroke-1 text-neutral-400" />
+                                            </Link>
+                                        ) : (
+                                            <p className="text-lg font-semibold">{item.title}</p>
+                                        )}
+                                        {item.items &&
+                                            item.items.map((subItem) => (
+                                                <Link
+                                                    key={subItem.title}
+                                                    href={subItem.href}
+                                                    className="flex justify-between items-center pl-2"
+                                                    onClick={() => setOpen(false)}
+                                                >
+                                                    <span className="text-neutral-300">
+                                                        {subItem.title}
+                                                    </span>
+                                                    <MoveRight className="w-4 h-4 stroke-1" />
+                                                </Link>
+                                            ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </header>
+    );
+}
+AppNavigationBar.displayName = "AppNavigationBar";
 
 
 // ============================================================================
-// 2. PAGE SECTIONS & LAYOUT COMPONENTS
+// 2. 页面区域和布局组件 (现有代码)
 // ============================================================================
 
 const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
@@ -168,7 +435,6 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 };
 Timeline.displayName = "Timeline";
 
-// --- Project Showcase Components ---
 interface HalomotButtonProps {
   gradient?: string; inscription: string; onClick: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   fillWidth?: boolean; fixedWidth?: string; href?: string; backgroundColor?: string;
@@ -211,7 +477,6 @@ type Testimonial = {
   quote: string; name: string; designation: string; src: string; link?: string;
 };
 
-// 使用 Next/Image 替换原生 <img>
 const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
   <div className="relative h-full w-full rounded-2xl overflow-hidden p-px bg-zinc-800">
     <Image 
@@ -220,7 +485,7 @@ const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
       fill
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       className="object-cover object-center rounded-[15px]" 
-      priority // 如果是首屏图片，可以加上 priority
+      priority
     />
   </div>
 );
@@ -296,8 +561,36 @@ ProjectShowcase.displayName = "ProjectShowcase";
 
 
 // ============================================================================
-// 4. PAGE-LEVEL STATIC DATA
+// 4. 页面级别的静态数据 (现有代码)
 // ============================================================================
+const MemoizedCpu = React.memo(({ size = 24, ...props }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M9 2v2" /><path d="M9 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 15v-1.5" /><path d="M15 9.5V8" />
+  </svg>
+));
+MemoizedCpu.displayName = 'CpuIcon';
+
+const MemoizedShieldCheck = React.memo(({ size = 24, ...props }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" />
+  </svg>
+));
+MemoizedShieldCheck.displayName = 'ShieldCheckIcon';
+
+const MemoizedLayers = React.memo(({ size = 24, ...props }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.91a2 2 0 0 0 1.66 0l8.57-3.91a1 1 0 0 0 0-1.84Z" /><path d="M2 12.12V16l8.57 3.91a2 2 0 0 0 1.66 0L21 16v-3.88" /><path d="M2 7.23V11l8.57 3.91a2 2 0 0 0 1.66 0L21 11V7.23" />
+  </svg>
+));
+MemoizedLayers.displayName = 'LayersIcon';
+
+const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
+));
+MemoizedZap.displayName = 'ZapIcon';
+
 
 const features = [
   { icon: MemoizedCpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
@@ -306,7 +599,6 @@ const features = [
   { icon: MemoizedZap, title: "闪电响应", description: "对每个命令都能做出即时响应。" },
 ];
 
-// 使用 Next/Image 替换原生 <img>，并提供 width 和 height
 const timelineData = [
     {
       title: "2024",
@@ -387,18 +679,19 @@ const projectShowcaseData = [
 
 
 // ============================================================================
-// 5. MAIN PAGE COMPONENT
+// 5. 主页面组件 (已修改)
 // ============================================================================
 
 export default function HomePage() {
   return (
     <div className="relative isolate bg-black text-white">
+      <AppNavigationBar />
       {/* 全局背景元素 */}
       <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
       <Scene />
 
       {/* 页面内容 */}
-      <main className="relative z-10">
+      <main className="relative z-10 pt-20">
         <div className="min-h-screen w-full flex flex-col items-center justify-center py-24">
             <div className="w-full max-w-6xl px-8 space-y-16 flex flex-col items-center justify-center">
               <div className="flex flex-col items-center text-center space-y-8">
