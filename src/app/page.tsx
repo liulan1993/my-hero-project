@@ -613,7 +613,11 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                 >
                     {/* Text Content */}
                     <motion.div
-                        className={`flex flex-col justify-center items-start gap-4 mt-10 md:mt-0 max-w-[546px] mx-auto md:mx-0 ${textOrderClass} ${reverseLayout ? 'md:pl-8' : ''}`}
+                        className={cn(
+                            "flex flex-col justify-center items-start gap-4 mt-10 md:mt-0 max-w-[546px] mx-auto md:mx-0",
+                            textOrderClass,
+                            reverseLayout ? "md:justify-self-start" : "md:justify-self-end"
+                        )}
                         variants={itemVariants}
                     >
                          <div className="space-y-2 md:space-y-1">
