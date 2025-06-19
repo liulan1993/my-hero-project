@@ -220,11 +220,21 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+        if (ref.current) {
+            const rect = ref.current.getBoundingClientRect();
+            setHeight(rect.height);
+        }
+    });
+
     if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setHeight(rect.height);
+        resizeObserver.observe(ref.current);
     }
-  }, [ref, data]);
+    
+    return () => {
+        resizeObserver.disconnect();
+    };
+  }, [data]);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -405,41 +415,43 @@ const timelineData = [
 
 export default function HomePage() {
   return (
-    <div className="bg-black">
+    <div className="bg-black relative">
       {/* Global Background Elements */}
-      <div className="fixed top-0 left-0 w-full h-full -z-0 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
       <Scene />
 
       {/* Page Content */}
-      <main className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-        <div className="w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
-          <div className="flex flex-col items-center text-center space-y-8">
-            <div className="space-y-6 flex items-center justify-center flex-col pt-16">
-              <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
-                发现极简主义与强大力量的融合
-              </h1>
-              <p className="text-lg text-neutral-300 max-w-2xl">
-                我们在设计时充分考虑了美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
-            {features.map((feature, idx) => (
-              <div
-                key={idx}
-                className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
-              >
-                <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
-                <h3 className="text-sm md:text-base font-medium text-white">{feature.title}</h3>
-                <p className="text-xs md:text-sm text-neutral-400">{feature.description}</p>
+      <main className="relative z-10">
+        <div className="min-h-screen w-full flex flex-col items-center justify-center">
+            <div className="w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center text-center space-y-8">
+                <div className="space-y-6 flex items-center justify-center flex-col pt-16">
+                  <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
+                    发现极简主义与强大力量的融合
+                  </h1>
+                  <p className="text-lg text-neutral-300 max-w-2xl">
+                    我们在设计时充分考虑了美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+                {features.map((feature, idx) => (
+                  <div
+                    key={idx}
+                    className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
+                  >
+                    <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
+                    <h3 className="text-sm md:text-base font-medium text-white">{feature.title}</h3>
+                    <p className="text-xs md:text-sm text-neutral-400">{feature.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
         </div>
-      </main>
-      <div className="relative z-10">
+        
+        {/* Timeline Section */}
         <Timeline data={timelineData} />
-      </div>
+      </main>
     </div>
   );
 };
