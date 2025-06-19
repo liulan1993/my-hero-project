@@ -184,11 +184,8 @@ const timelineData = [
       content: (
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
-          <div className="grid grid-cols-2 gap-4">
-            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <Image src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <Image src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <Image src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+          <div>
+            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -198,11 +195,8 @@ const timelineData = [
       content: (
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
-          <div className="grid grid-cols-2 gap-4">
-            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <Image src="https://assets.aceternity.com/features-section.png" alt="功能区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <Image src="https://assets.aceternity.com/cards.png" alt="卡片模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+          <div>
+            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -212,10 +206,8 @@ const timelineData = [
       content: (
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
-          <div className="mb-8">
-            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">✅ 卡片网格组件</div>
-            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">✅ 启动模板 Aceternity</div>
-            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">✅ 随机文件上传 哈哈</div>
+          <div>
+            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
