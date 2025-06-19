@@ -8,8 +8,6 @@ import React, {
     useState, 
     createContext, 
     useContext, 
-    Children, 
-    cloneElement,
     useMemo
 } from 'react';
 import Image from 'next/image';
@@ -22,8 +20,7 @@ import {
   useMotionValue,
   useSpring,
   AnimatePresence,
-  type MotionValue,
-  type SpringOptions,
+  type MotionValue
 } from "framer-motion";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -122,15 +119,7 @@ MemoizedSunMoon.displayName = 'SunMoonIcon';
 // It's broken down into a provider and several child components.
 // ============================================================================
 
-const DEFAULT_MAGNIFICATION = 80;
-const DEFAULT_DISTANCE = 150;
-
-type DockContextType = {
-  mouseX: MotionValue<number>;
-  magnification: number;
-  distance: number;
-};
-const DockContext = createContext<DockContextType | null>(null);
+const DockContext = createContext<{ mouseX: MotionValue<number> } | null>(null);
 
 const useDockContext = () => {
   const context = useContext(DockContext);
@@ -140,18 +129,9 @@ const useDockContext = () => {
   return context;
 };
 
-const DockProvider = ({
-  children,
-  magnification = DEFAULT_MAGNIFICATION,
-  distance = DEFAULT_DISTANCE,
-}: {
-  children: React.ReactNode;
-  magnification?: number;
-  distance?: number;
-}) => {
+const DockProvider = ({ children }: { children: React.ReactNode }) => {
   const mouseX = useMotionValue(Infinity);
-  const value = useMemo(() => ({ mouseX, magnification, distance }), [mouseX, magnification, distance]);
-  return <DockContext.Provider value={value}>{children}</DockContext.Provider>;
+  return <DockContext.Provider value={{ mouseX }}>{children}</DockContext.Provider>;
 };
 DockProvider.displayName = "DockProvider";
 
@@ -172,74 +152,45 @@ const Dock = React.forwardRef<HTMLDivElement, { children: React.ReactNode; class
 );
 Dock.displayName = "Dock";
 
-const DockItem = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+const DockItem = ({ children, title }: { children: React.ReactNode; title: string }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { mouseX, magnification, distance } = useDockContext();
-  const isHovered = useMotionValue(false);
+  const { mouseX } = useDockContext();
+  const [isHovered, setIsHovered] = useState(false);
 
-  const width = useSpring(
-    useTransform(
-      useTransform(mouseX, (val) => {
-        const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
-        return val - bounds.x - bounds.width / 2;
-      }),
-      [-distance, 0, distance],
-      [40, magnification, 40]
-    ),
-    { mass: 0.1, stiffness: 150, damping: 12 }
-  );
+  const distance = useTransform(mouseX, (val) => {
+    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+    return val - bounds.x - bounds.width / 2;
+  });
+
+  const widthSync = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
+  const width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 });
 
   return (
     <motion.div
       ref={ref}
       style={{ width }}
-      onHoverStart={() => isHovered.set(true)}
-      onHoverEnd={() => isHovered.set(false)}
-      className={cn("relative flex items-center justify-center", className)}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      className="relative flex items-center justify-center"
     >
-      {Children.map(children, (child) => cloneElement(child as React.ReactElement, { isHovered }))}
+        {children}
+        <AnimatePresence>
+            {isHovered && (
+                <motion.div
+                    initial={{ opacity: 0, y: 0 }}
+                    animate={{ opacity: 1, y: -10 }}
+                    exit={{ opacity: 0, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs text-white"
+                >
+                    {title}
+                </motion.div>
+            )}
+        </AnimatePresence>
     </motion.div>
   );
 };
 DockItem.displayName = "DockItem";
-
-const DockLabel = ({ children }: { children: React.ReactNode }) => (
-  <AnimatePresence>
-    <motion.div
-      initial={{ opacity: 0, y: 0 }}
-      animate={{ opacity: 1, y: -10 }}
-      exit={{ opacity: 0, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs text-white"
-    >
-      {children}
-    </motion.div>
-  </AnimatePresence>
-);
-DockLabel.displayName = "DockLabel";
-
-const DockIcon = ({ children, isHovered, title }: { children: React.ReactNode; isHovered?: MotionValue<boolean>; title: string }) => {
-    const [showLabel, setShowLabel] = useState(false);
-
-    useEffect(() => {
-        if (isHovered) {
-            const unsubscribe = isHovered.on("change", (latest) => {
-                setShowLabel(latest);
-            });
-            return () => unsubscribe();
-        }
-    }, [isHovered]);
-
-    return (
-        <div className="flex h-full w-full items-center justify-center">
-            {children}
-            <AnimatePresence>
-                {showLabel && <DockLabel>{title}</DockLabel>}
-            </AnimatePresence>
-        </div>
-    );
-};
-DockIcon.displayName = "DockIcon";
 
 const dockItems = [
     { title: "首页", icon: <MemoizedHomeIcon className='h-full w-full text-neutral-300' /> },
@@ -256,8 +207,8 @@ const FloatingDock = () => (
         <DockProvider>
             <Dock>
                 {dockItems.map((item) => (
-                    <DockItem key={item.title}>
-                        <DockIcon title={item.title}>{item.icon}</DockIcon>
+                    <DockItem key={item.title} title={item.title}>
+                        {item.icon}
                     </DockItem>
                 ))}
             </Dock>
@@ -273,13 +224,14 @@ FloatingDock.displayName = "FloatingDock";
 // ============================================================================
 
 const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
-    const shape = useMemo(() => {
-        const s = new THREE.Shape();
-        s.absarc(2, 2, 1, 0, Math.PI * 2, false);
-        return s;
+    const geometry = useMemo(() => {
+        const shape = new THREE.Shape();
+        shape.absarc(2, 2, 1, 0, Math.PI * 2, false);
+        const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 };
+        const geom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        geom.center();
+        return geom;
     }, []);
-    const extrudeSettings = useMemo(() => ({ depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 }), []);
-    const geometry = useMemo(() => new THREE.ExtrudeGeometry(shape, extrudeSettings), [shape, extrudeSettings]);
     return (
         <mesh geometry={geometry} position={position} rotation={rotation}>
             <meshPhysicalMaterial color="#232323" metalness={1} roughness={0.3} reflectivity={0.5} ior={1.5} iridescence={1} iridescenceIOR={1.3} iridescenceThicknessRange={[100, 400]} />
