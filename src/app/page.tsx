@@ -264,16 +264,16 @@ const AppNavigationBar = () => {
                 </div>
                 <div className="flex lg:justify-center">
                     <Link href="/" className="font-semibold text-xl">
-                      Apex
+                      MyPortfolio
                     </Link>
                 </div>
                 <div className="flex justify-end w-full gap-2 md:gap-4">
                     <Button variant="ghost" className="hidden md:inline">
-                        Sara
+                        Book a demo
                     </Button>
                     <div className="border-r border-slate-700 hidden md:inline"></div>
-                    <Button variant="outline">登录</Button>
-                    <Button variant='default'>开始使用</Button>
+                    <Button variant="outline">Sign in</Button>
+                    <Button variant='default'>Get started</Button>
                 </div>
                 <div className="flex w-12 shrink lg:hidden items-end justify-end">
                     <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
@@ -703,10 +703,10 @@ export default function HomePage() {
               <div className="flex flex-col items-center text-center space-y-8">
                 <div className="space-y-6 flex items-center justify-center flex-col">
                   <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
-                    重新开发网页
+                    发现极简主义与强大力量的融合
                   </h1>
                   <p className="text-lg text-neutral-300 max-w-2xl">
-                    充分考虑了美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
+                    我们在设计时充分考虑了美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
                   </p>
                 </div>
               </div>
