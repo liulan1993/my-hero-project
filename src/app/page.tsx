@@ -18,7 +18,8 @@ import {
   useScroll,
   useTransform,
   AnimatePresence,
-  type Variants
+  type Variants,
+  type HTMLMotionProps
 } from "framer-motion";
 
 // --- 从新组件中添加的依赖项 ---
@@ -689,6 +690,163 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 };
 InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 
+// ============================================================================
+// 4. 新增: 带图库的行动号召(CTA)区域组件
+// ============================================================================
+const SPRING_TRANSITION_CONFIG = {
+  type: "spring",
+  stiffness: 100,
+  damping: 16,
+  mass: 0.75,
+  restDelta: 0.005,
+};
+const filterVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    filter: "blur(10px)",
+  },
+  visible: {
+    opacity: 1,
+    filter: "blur(0px)",
+  },
+};
+const areaClasses = [
+  "col-start-2 col-end-3 row-start-1 row-end-3", // .div1
+  "col-start-1 col-end-2 row-start-2 row-end-4", // .div2
+  "col-start-1 col-end-2 row-start-4 row-end-6", // .div3
+  "col-start-2 col-end-3 row-start-3 row-end-5", // .div4
+];
+
+const ContainerStagger = React.forwardRef<
+  HTMLDivElement,
+  HTMLMotionProps<"div">
+>(({ transition, ...props }, ref) => {
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      whileInView={"visible"}
+      viewport={{ once: true }}
+      transition={{
+        staggerChildren: transition?.staggerChildren ?? 0.2,
+        delayChildren: transition?.delayChildren ?? 0.2,
+        duration: 0.3,
+        ...transition,
+      }}
+      {...props}
+    />
+  );
+});
+ContainerStagger.displayName = "ContainerStagger";
+
+const ContainerAnimated = React.forwardRef<
+  HTMLDivElement,
+  HTMLMotionProps<"div">
+>(({ transition, ...props }, ref) => {
+  return (
+    <motion.div
+      ref={ref}
+      variants={filterVariants}
+      transition={{
+        ...SPRING_TRANSITION_CONFIG,
+        duration: 0.3,
+        ...transition,
+      }}
+      {...props}
+    />
+  );
+});
+ContainerAnimated.displayName = "ContainerAnimated";
+
+const GalleryGrid = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "grid grid-cols-2 grid-rows-[50px_150px_50px_150px_50px] gap-4",
+        className
+      )}
+      {...props}
+    />
+  );
+});
+GalleryGrid.displayName = "ContainerSticky";
+
+interface GalleryGridCellProps extends HTMLMotionProps<"div"> {
+  index: number;
+}
+
+const GalleryGridCell = React.forwardRef<
+  HTMLDivElement,
+  GalleryGridCellProps
+>(({ className, transition, index, ...props }, ref) => {
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{
+        duration: 0.3,
+        delay: index * 0.2,
+        delayChildren: transition?.delayChildren ?? 0.2,
+      }}
+      className={`relative overflow-hidden rounded-xl shadow-xl ${areaClasses[index]}`}
+      {...props}
+    />
+  );
+});
+GalleryGridCell.displayName = "GalleryGridCell";
+
+const CtaWithGallerySection = () => {
+  const IMAGES = [
+    "https://images.unsplash.com/photo-1455849318743-b2233052fcff?q=80&w=2338&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1733680958774-39a0e8a64a54?q=80&w=2487&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1548783307-f63adc3f200b?q=80&w=2487&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1703622377707-29bc9409aaf2?q=80&w=2400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  ];
+  return (
+    <section className="bg-transparent py-12">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 px-8 py-12 md:grid-cols-2">
+        <ContainerStagger>
+          <ContainerAnimated className="mb-4 block text-xs font-medium text-rose-500 md:text-sm">
+            Innovate & Grow
+          </ContainerAnimated>
+          <ContainerAnimated className="text-4xl font-semibold md:text-[2.4rem] tracking-tight text-white">
+            Scale Your Business Through Innovation
+          </ContainerAnimated>
+          <ContainerAnimated className="my-4 text-base text-neutral-300 md:my-6 md:text-lg">
+            Transform your startup&apos;s potential through innovative solutions
+            and strategic growth. We help businesses adapt, evolve, and thrive
+            in today&apos;s competitive marketplace.
+          </ContainerAnimated>
+          <ContainerAnimated>
+            <Button className="bg-rose-500 hover:bg-rose-500/90 text-white">Start Scaling Today</Button>
+          </ContainerAnimated>
+        </ContainerStagger>
+
+        <GalleryGrid>
+          {IMAGES.map((imageUrl, index) => (
+            <GalleryGridCell index={index} key={index}>
+              <Image
+                className="size-full object-cover object-center"
+                fill
+                src={imageUrl}
+                alt={`Gallery image ${index + 1}`}
+                sizes="(max-width: 768px) 50vw, 33vw"
+              />
+            </GalleryGridCell>
+          ))}
+        </GalleryGrid>
+      </div>
+    </section>
+  )
+}
+CtaWithGallerySection.displayName = "CtaWithGallerySection";
+
 
 // ============================================================================
 // 4. 页面级别的静态数据 (现有代码)
@@ -904,10 +1062,11 @@ export default function HomePage() {
             <ProjectShowcase testimonials={projectShowcaseData} />
         </div>
         
-        {/* --- 新增的组件实例 --- */}
         <InfoSectionWithMockup {...infoSectionData1} />
         <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
 
+        {/* --- 新增的组件实例 --- */}
+        <CtaWithGallerySection />
       </main>
     </div>
   );
