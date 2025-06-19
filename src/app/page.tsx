@@ -8,7 +8,6 @@ import React, {
     useState, 
     useMemo
 } from 'react';
-import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -144,7 +143,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
       </div>
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
         {data.map((item, index) => (
-          <div key={index} className="flex justify-start pt-10 md:pt-40 md:gap-10">
+          <div key={index} className="flex justify-start pt-10 md:pt-24 md:gap-10">
             <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
@@ -185,7 +184,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div>
-            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -196,7 +195,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div>
-            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -207,7 +206,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
-            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" width={500} height={500} className="rounded-lg object-cover w-full h-auto shadow-xl" />
+            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="新组件预览" className="rounded-lg object-cover w-full h-auto shadow-xl" />
           </div>
         </div>
       ),
@@ -228,10 +227,10 @@ export default function HomePage() {
 
       {/* 页面内容 */}
       <main className="relative z-10">
-        <div className="min-h-screen w-full flex flex-col items-center justify-center">
-            <div className="w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
+        <div className="min-h-screen w-full flex flex-col items-center justify-center py-24">
+            <div className="w-full max-w-6xl px-8 space-y-16 flex flex-col items-center justify-center">
               <div className="flex flex-col items-center text-center space-y-8">
-                <div className="space-y-6 flex items-center justify-center flex-col pt-16">
+                <div className="space-y-6 flex items-center justify-center flex-col">
                   <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
                     发现极简主义与强大力量的融合
                   </h1>
