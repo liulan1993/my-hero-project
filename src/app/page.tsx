@@ -561,6 +561,136 @@ ProjectShowcase.displayName = "ProjectShowcase";
 
 
 // ============================================================================
+// 3. 新增: 带模型图的信息卡片区域组件
+// ============================================================================
+interface InfoSectionProps {
+    title: string | React.ReactNode;
+    description: string | React.ReactNode;
+    primaryImageSrc: string;
+    secondaryImageSrc: string;
+    reverseLayout?: boolean;
+}
+
+const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
+    title,
+    description,
+    primaryImageSrc,
+    secondaryImageSrc,
+    reverseLayout = false,
+}) => {
+
+    const containerVariants = {
+        hidden: {},
+        visible: {
+             transition: {
+                staggerChildren: 0.2,
+            }
+        },
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 50 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+    };
+
+    const layoutClasses = reverseLayout
+        ? "md:grid-cols-2 md:grid-flow-col-dense"
+        : "md:grid-cols-2";
+
+    const textOrderClass = reverseLayout ? "md:col-start-2" : "";
+    const imageOrderClass = reverseLayout ? "md:col-start-1" : "";
+
+
+    return (
+        <section className="relative py-24 md:py-32 bg-black overflow-hidden">
+            <div className="container max-w-[1220px] w-full px-6 md:px-10 relative z-10 mx-auto">
+                <motion.div
+                     className={`grid grid-cols-1 gap-16 md:gap-8 w-full items-center ${layoutClasses}`}
+                     variants={containerVariants}
+                     initial="hidden"
+                     whileInView="visible"
+                     viewport={{ once: true, amount: 0.2 }}
+                >
+                    {/* Text Content */}
+                    <motion.div
+                        className={`flex flex-col items-start gap-4 mt-10 md:mt-0 max-w-[546px] mx-auto md:mx-0 ${textOrderClass}`}
+                        variants={itemVariants}
+                    >
+                         <div className="space-y-2 md:space-y-1">
+                            <h2 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
+                                {title}
+                            </h2>
+                        </div>
+
+                        <p className="text-[#868f97] text-sm md:text-[15px] leading-6">
+                            {description}
+                        </p>
+                    </motion.div>
+
+                    {/* App mockup/Image Content */}
+                    <motion.div
+                        className={`relative mt-10 md:mt-0 mx-auto ${imageOrderClass} w-full max-w-[300px] md:max-w-[471px]`}
+                        variants={itemVariants}
+                    >
+                        {/* Decorative Background Element */}
+                        <motion.div
+                             className={`absolute w-[300px] h-[317px] md:w-[472px] md:h-[500px] bg-[#090909] rounded-[32px] z-0`}
+                             style={{
+                                top: reverseLayout ? 'auto' : '10%',
+                                bottom: reverseLayout ? '10%' : 'auto',
+                                left: reverseLayout ? 'auto' : '-20%',
+                                right: reverseLayout ? '-20%' : 'auto',
+                                transform: reverseLayout ? 'translate(0, 0)' : 'translateY(10%)',
+                                filter: 'blur(2px)'
+                            }}
+                            initial={{ y: reverseLayout ? 0 : 0 }}
+                            whileInView={{ y: reverseLayout ? -20 : -30 }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            viewport={{ once: true, amount: 0.5 }}
+                        >
+                            <div
+                                className="relative w-full h-full bg-cover bg-center rounded-[32px]"
+                                style={{
+                                    backgroundImage: `url(${secondaryImageSrc})`,
+                                }}
+                            />
+                        </motion.div>
+
+                        {/* Main Mockup Card */}
+                        <motion.div
+                            className="relative w-full h-[405px] md:h-[637px] bg-[#ffffff0a] rounded-[32px] backdrop-blur-[15px] backdrop-brightness-[100%] border-0 z-10 overflow-hidden"
+                            initial={{ y: reverseLayout ? 0 : 0 }}
+                            whileInView={{ y: reverseLayout ? 20 : 30 }}
+                             transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
+                             viewport={{ once: true, amount: 0.5 }}
+                        >
+                             <Image
+                                src={primaryImageSrc}
+                                alt={typeof title === 'string' ? title : 'Info Section Image'}
+                                fill
+                                style={{ objectFit: 'cover' }}
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                            />
+                        </motion.div>
+                    </motion.div>
+                </motion.div>
+            </div>
+
+            {/* Decorative bottom gradient */}
+            <div
+                className="absolute w-full h-px bottom-0 left-0 z-0"
+                style={{
+                    background:
+                        "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0) 100%)",
+                }}
+            />
+        </section>
+    );
+};
+InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
+
+
+// ============================================================================
 // 4. 页面级别的静态数据 (现有代码)
 // ============================================================================
 
@@ -683,6 +813,49 @@ const projectShowcaseData = [
   },
 ];
 
+// --- 新增: 信息卡片区域的数据 ---
+const infoSectionData1 = {
+    title: (
+        <>
+            智慧洞察,
+            <br />
+            为您呈现
+        </>
+    ),
+    description: (
+        <>
+            每周一早晨，您的虚拟个人分析师会将精心制作的简报
+            <br />
+            直接发送到您的收件箱，重点介绍未来一周
+            <br />
+            值得关注的重要事件和财报。
+        </>
+    ),
+    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png',
+    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png',
+};
+
+const infoSectionData2 = {
+    title: (
+        <>
+            无缝集成,
+            <br />
+            强大扩展
+        </>
+    ),
+    description: (
+        <>
+            我们的平台设计灵活，可以轻松与您现有的
+            <br />
+            工作流程和工具集成。无论您的团队规模如何，
+            <br />
+            都能够无缝扩展，满足您的业务需求。
+        </>
+    ),
+    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png',
+    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png',
+};
+
 
 // ============================================================================
 // 5. 主页面组件 (已修改)
@@ -730,6 +903,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-8">
             <ProjectShowcase testimonials={projectShowcaseData} />
         </div>
+        
+        {/* --- 新增的组件实例 --- */}
+        <InfoSectionWithMockup {...infoSectionData1} />
+        <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
+
       </main>
     </div>
   );
