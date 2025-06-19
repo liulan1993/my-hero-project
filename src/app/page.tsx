@@ -5,7 +5,7 @@
 import React, { useRef, forwardRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Shape, ExtrudeGeometry } from 'three';
-import { cva } from 'class-variance-authority';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -16,8 +16,9 @@ function cn(...inputs: ClassValue[]) {
 
 // --- Inline SVG Icons ---
 // Converted from lucide-react for zero dependencies.
+// Added explicit types for props to resolve TypeScript errors.
 
-const Cpu = (props) => (
+const Cpu = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -45,7 +46,7 @@ const Cpu = (props) => (
   </svg>
 );
 
-const ShieldCheck = (props) => (
+const ShieldCheck = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -63,7 +64,7 @@ const ShieldCheck = (props) => (
   </svg>
 );
 
-const Layers = (props) => (
+const Layers = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -82,7 +83,7 @@ const Layers = (props) => (
   </svg>
 );
 
-const Zap = (props) => (
+const Zap = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -118,7 +119,11 @@ const badgeVariants = cva(
   }
 );
 
-function Badge({ className, variant, ...props }) {
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
   return (
     <div className={cn(badgeVariants({ variant }), className)} {...props} />
   );
@@ -152,20 +157,31 @@ const buttonVariants = cva(
   }
 );
 
-const Button = forwardRef(({ className, variant, size, ...props }, ref) => {
-  return (
-    <button
-      className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
-      {...props}
-    />
-  );
-});
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {}
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, ...props }, ref) => {
+    return (
+      <button
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
 Button.displayName = "Button";
 
 
 // --- 3D Scene Component for Hero Section ---
-const Box = ({ position, rotation }) => {
+interface BoxProps {
+  position: [number, number, number];
+  rotation: [number, number, number];
+}
+
+const Box = ({ position, rotation }: BoxProps) => {
     const shape = new Shape();
     const angleStep = Math.PI * 0.5;
     const radius = 1;
@@ -222,7 +238,7 @@ const Box = ({ position, rotation }) => {
 };
 
 const AnimatedBoxes = () => {
-    const groupRef = useRef();
+    const groupRef = useRef<THREE.Group>(null);
 
     useFrame((state, delta) => {
         if (groupRef.current) {
@@ -232,12 +248,12 @@ const AnimatedBoxes = () => {
     });
 
     const boxes = Array.from({ length: 50 }, (_, index) => ({
-        position: [(index - 25) * 0.75, 0, 0],
+        position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
         rotation: [
             (index - 10) * 0.1,
             Math.PI / 2,
             0
-        ],
+        ] as [number, number, number],
         id: index
     }));
 
