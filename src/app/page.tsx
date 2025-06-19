@@ -8,6 +8,7 @@ import React, {
     useState, 
     useMemo
 } from 'react';
+import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -15,19 +16,9 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 
 // ============================================================================
-// 1. CORE UTILITIES
-// ============================================================================
-
-function cn(...inputs: ClassValue[]): string {
-  return twMerge(clsx(inputs));
-}
-
-// ============================================================================
-// 2. ATOMIC UI COMPONENTS & ICONS
+// 1. ATOMIC UI COMPONENTS & ICONS
 // ============================================================================
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -64,7 +55,7 @@ MemoizedZap.displayName = 'ZapIcon';
 
 
 // ============================================================================
-// 3. PAGE SECTIONS & LAYOUT COMPONENTS
+// 2. PAGE SECTIONS & LAYOUT COMPONENTS
 // ============================================================================
 
 const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
@@ -177,7 +168,7 @@ Timeline.displayName = "Timeline";
 
 
 // ============================================================================
-// 4. PAGE-LEVEL STATIC DATA
+// 3. PAGE-LEVEL STATIC DATA
 // ============================================================================
 
 const features = [
@@ -194,10 +185,10 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div className="grid grid-cols-2 gap-4">
-            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <img src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <img src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <img src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <Image src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <Image src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <Image src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
           </div>
         </div>
       ),
@@ -208,10 +199,10 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div className="grid grid-cols-2 gap-4">
-            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <img src="https://assets.aceternity.com/features-section.png" alt="功能区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
-            <img src="https://assets.aceternity.com/cards.png" alt="卡片模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <Image src="https://assets.aceternity.com/features-section.png" alt="功能区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <Image src="https://assets.aceternity.com/cards.png" alt="卡片模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
           </div>
         </div>
       ),
@@ -233,7 +224,7 @@ const timelineData = [
 
 
 // ============================================================================
-// 5. MAIN PAGE COMPONENT
+// 4. MAIN PAGE COMPONENT
 // ============================================================================
 
 export default function HomePage() {
