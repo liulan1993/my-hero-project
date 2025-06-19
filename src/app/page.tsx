@@ -6,8 +6,6 @@ import React, {
     useRef, 
     useEffect, 
     useState, 
-    createContext, 
-    useContext, 
     useMemo
 } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -16,10 +14,6 @@ import {
   motion,
   useScroll,
   useTransform,
-  useMotionValue,
-  useSpring,
-  AnimatePresence,
-  type MotionValue
 } from "framer-motion";
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -68,145 +62,9 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
 ));
 MemoizedZap.displayName = 'ZapIcon';
 
-const MemoizedHomeIcon = React.memo((props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-));
-MemoizedHomeIcon.displayName = 'HomeIcon';
-
-const MemoizedPackage = React.memo((props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M16.5 9.4a4.5 4.5 0 1 1-9 0" /><path d="M12 14.8V22" /><path d="M12 2v7.8" /><path d="M12 22a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M12 2a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></svg>
-));
-MemoizedPackage.displayName = 'PackageIcon';
-
-const MemoizedComponent = React.memo((props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 20.94c1.5 0 2.85-.83 3.54-2.06.69-1.23.69-2.77 0-4l-3.54-6.32-3.54 6.32c-.69 1.23-.69 2.77 0 4 .69 1.23 2.04 2.06 3.54 2.06Z" /><path d="m3.8 15.3 4-6.94" /><path d="m20.2 15.3-4-6.94" /><path d="M12 22v-1.06" /><path d="M12 8.84V2" /><path d="M4.93 4.93 7.76 7.76" /><path d="M19.07 4.93 16.24 7.76" /></svg>
-));
-MemoizedComponent.displayName = 'ComponentIcon';
-
-const MemoizedActivity = React.memo((props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
-));
-MemoizedActivity.displayName = 'ActivityIcon';
-
-const MemoizedScrollText = React.memo((props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 22a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4Z" /><path d="M16 6h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M8 18H6a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2" /><path d="M16 12h-8" /></svg>
-));
-MemoizedScrollText.displayName = 'ScrollTextIcon';
-
-const MemoizedMail = React.memo((props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
-));
-MemoizedMail.displayName = 'MailIcon';
-
-const MemoizedSunMoon = React.memo((props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M12 3v1" /><path d="M12 20v1" /><path d="M3 12h1" /><path d="M20 12h1" /><path d="m18.36 5.64-.7-.7" /><path d="m6.34 17.66-.7-.7" /><path d="m18.36 18.36-.7-.7" /><path d="m6.34 6.34-.7-.7" /></svg>
-));
-MemoizedSunMoon.displayName = 'SunMoonIcon';
-
 
 // ============================================================================
-// 3. DOCK COMPONENT SUITE
-// ============================================================================
-
-const DockContext = createContext<{ mouseX: MotionValue<number> } | null>(null);
-
-const useDockContext = () => {
-  const context = useContext(DockContext);
-  if (!context) throw new Error("useDockContext must be used within a DockProvider");
-  return context;
-};
-
-const DockProvider = ({ children }: { children: React.ReactNode }) => {
-  const mouseX = useMotionValue(Infinity);
-  return <DockContext.Provider value={{ mouseX }}>{children}</DockContext.Provider>;
-};
-DockProvider.displayName = "DockProvider";
-
-const Dock = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
-  ({ children, className }, ref) => {
-    const { mouseX } = useDockContext();
-    return (
-      <motion.div
-        ref={ref}
-        onMouseMove={(e) => mouseX.set(e.pageX)}
-        onMouseLeave={() => mouseX.set(Infinity)}
-        className={cn("mx-auto flex h-16 items-end gap-4 rounded-2xl bg-neutral-900/10 px-4 pb-3 backdrop-blur-md", className)}
-      >
-        {children}
-      </motion.div>
-    );
-  }
-);
-Dock.displayName = "Dock";
-
-const DockItem = ({ children, title }: { children: React.ReactNode; title: string }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { mouseX } = useDockContext();
-  const [isHovered, setIsHovered] = useState(false);
-
-  const distance = useTransform(mouseX, (val) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
-    return val - bounds.x - bounds.width / 2;
-  });
-
-  const widthSync = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
-  const width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 });
-
-  return (
-    <motion.div
-      ref={ref}
-      style={{ width }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="relative flex items-center justify-center"
-    >
-        {children}
-        <AnimatePresence>
-            {isHovered && (
-                <motion.div
-                    initial={{ opacity: 0, y: 0 }}
-                    animate={{ opacity: 1, y: -10 }}
-                    exit={{ opacity: 0, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-neutral-700 bg-neutral-800 px-2 py-1 text-xs text-white"
-                >
-                    {title}
-                </motion.div>
-            )}
-        </AnimatePresence>
-    </motion.div>
-  );
-};
-DockItem.displayName = "DockItem";
-
-const dockItems = [
-    { title: "首页", icon: <MemoizedHomeIcon className='h-full w-full text-neutral-300' /> },
-    { title: "产品", icon: <MemoizedPackage className='h-full w-full text-neutral-300' /> },
-    { title: "组件", icon: <MemoizedComponent className='h-full w-full text-neutral-300' /> },
-    { title: "动态", icon: <MemoizedActivity className='h-full w-full text-neutral-300' /> },
-    { title: "日志", icon: <MemoizedScrollText className='h-full w-full text-neutral-300' /> },
-    { title: "邮件", icon: <MemoizedMail className='h-full w-full text-neutral-300' /> },
-    { title: "主题", icon: <MemoizedSunMoon className='h-full w-full text-neutral-300' /> },
-];
-
-const FloatingDock = () => (
-    <div className='fixed top-4 left-1/2 z-50 w-full max-w-fit -translate-x-1/2'>
-        <DockProvider>
-            <Dock>
-                {dockItems.map((item) => (
-                    <DockItem key={item.title} title={item.title}>
-                        {item.icon}
-                    </DockItem>
-                ))}
-            </Dock>
-        </DockProvider>
-    </div>
-);
-FloatingDock.displayName = "FloatingDock";
-
-
-// ============================================================================
-// 4. PAGE SECTIONS & LAYOUT COMPONENTS
+// 3. PAGE SECTIONS & LAYOUT COMPONENTS
 // ============================================================================
 
 const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
@@ -319,7 +177,7 @@ Timeline.displayName = "Timeline";
 
 
 // ============================================================================
-// 5. PAGE-LEVEL STATIC DATA
+// 4. PAGE-LEVEL STATIC DATA
 // ============================================================================
 
 const features = [
@@ -375,7 +233,7 @@ const timelineData = [
 
 
 // ============================================================================
-// 6. MAIN PAGE COMPONENT
+// 5. MAIN PAGE COMPONENT
 // ============================================================================
 
 export default function HomePage() {
@@ -384,7 +242,6 @@ export default function HomePage() {
       {/* 全局背景元素 */}
       <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
       <Scene />
-      <FloatingDock />
 
       {/* 页面内容 */}
       <main className="relative z-10">
