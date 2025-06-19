@@ -9,8 +9,10 @@ import React, {
     createContext, 
     useContext, 
     Children, 
-    cloneElement 
+    cloneElement,
+    useMemo
 } from 'react';
+import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -148,7 +150,7 @@ const DockProvider = ({
   distance?: number;
 }) => {
   const mouseX = useMotionValue(Infinity);
-  const value = React.useMemo(() => ({ mouseX, magnification, distance }), [mouseX, magnification, distance]);
+  const value = useMemo(() => ({ mouseX, magnification, distance }), [mouseX, magnification, distance]);
   return <DockContext.Provider value={value}>{children}</DockContext.Provider>;
 };
 DockProvider.displayName = "DockProvider";
@@ -239,8 +241,7 @@ const DockIcon = ({ children, isHovered, title }: { children: React.ReactNode; i
 };
 DockIcon.displayName = "DockIcon";
 
-const FloatingDock = () => {
-  const dockItems = [
+const dockItems = [
     { title: "首页", icon: <MemoizedHomeIcon className='h-full w-full text-neutral-300' /> },
     { title: "产品", icon: <MemoizedPackage className='h-full w-full text-neutral-300' /> },
     { title: "组件", icon: <MemoizedComponent className='h-full w-full text-neutral-300' /> },
@@ -248,22 +249,21 @@ const FloatingDock = () => {
     { title: "日志", icon: <MemoizedScrollText className='h-full w-full text-neutral-300' /> },
     { title: "邮件", icon: <MemoizedMail className='h-full w-full text-neutral-300' /> },
     { title: "主题", icon: <MemoizedSunMoon className='h-full w-full text-neutral-300' /> },
-  ];
+];
 
-  return (
+const FloatingDock = () => (
     <div className='fixed top-4 left-1/2 z-50 w-full max-w-fit -translate-x-1/2'>
-      <DockProvider>
-        <Dock>
-          {dockItems.map((item) => (
-            <DockItem key={item.title}>
-              <DockIcon title={item.title}>{item.icon}</DockIcon>
-            </DockItem>
-          ))}
-        </Dock>
-      </DockProvider>
+        <DockProvider>
+            <Dock>
+                {dockItems.map((item) => (
+                    <DockItem key={item.title}>
+                        <DockIcon title={item.title}>{item.icon}</DockIcon>
+                    </DockItem>
+                ))}
+            </Dock>
+        </DockProvider>
     </div>
-  );
-};
+);
 FloatingDock.displayName = "FloatingDock";
 
 
@@ -272,13 +272,14 @@ FloatingDock.displayName = "FloatingDock";
 // Larger components that compose the page.
 // ============================================================================
 
-// --- 3D Scene Component ---
 const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
-    const shape = new THREE.Shape();
-    shape.absarc(2, 2, 1, 0, Math.PI * 2, false);
-    const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 };
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center();
+    const shape = useMemo(() => {
+        const s = new THREE.Shape();
+        s.absarc(2, 2, 1, 0, Math.PI * 2, false);
+        return s;
+    }, []);
+    const extrudeSettings = useMemo(() => ({ depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 }), []);
+    const geometry = useMemo(() => new THREE.ExtrudeGeometry(shape, extrudeSettings), [shape, extrudeSettings]);
     return (
         <mesh geometry={geometry} position={position} rotation={rotation}>
             <meshPhysicalMaterial color="#232323" metalness={1} roughness={0.3} reflectivity={0.5} ior={1.5} iridescence={1} iridescenceIOR={1.3} iridescenceThicknessRange={[100, 400]} />
@@ -295,7 +296,7 @@ const AnimatedBoxes = () => {
             groupRef.current.rotation.y += delta * 0.02;
         }
     });
-    const boxes = React.useMemo(() => Array.from({ length: 50 }, (_, index) => ({
+    const boxes = useMemo(() => Array.from({ length: 50 }, (_, index) => ({
         position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
         rotation: [(index - 10) * 0.1, Math.PI / 2, 0] as [number, number, number],
         id: index
@@ -319,8 +320,6 @@ const Scene = React.memo(() => (
 ));
 Scene.displayName = "Scene";
 
-
-// --- Timeline Component ---
 interface TimelineEntry {
   title: string;
   content: React.ReactNode;
@@ -337,7 +336,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
     });
     if (ref.current) resizeObserver.observe(ref.current);
     return () => resizeObserver.disconnect();
-  }, [data]);
+  }, []);
   
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start 10%", "end 50%"] });
   const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
@@ -393,10 +392,10 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div className="grid grid-cols-2 gap-4">
-            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <img src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <img src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <img src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <Image src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <Image src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <Image src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
           </div>
         </div>
       ),
@@ -407,10 +406,10 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div className="grid grid-cols-2 gap-4">
-            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <img src="https://assets.aceternity.com/features-section.png" alt="功能区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <img src="https://assets.aceternity.com/cards.png" alt="卡片模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <Image src="https://assets.aceternity.com/features-section.png" alt="功能区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <Image src="https://assets.aceternity.com/cards.png" alt="卡片模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
           </div>
         </div>
       ),
