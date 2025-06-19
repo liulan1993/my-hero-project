@@ -18,11 +18,15 @@ function cn(...inputs: ClassValue[]) {
 // Converted from lucide-react for zero dependencies.
 // Added explicit types for props to resolve TypeScript errors.
 
-const Cpu = (props: React.SVGProps<SVGSVGElement>) => (
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  size?: number;
+}
+
+const Cpu = ({ size = 24, ...props }: IconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -46,11 +50,11 @@ const Cpu = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const ShieldCheck = (props: React.SVGProps<SVGSVGElement>) => (
+const ShieldCheck = ({ size = 24, ...props }: IconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -64,11 +68,11 @@ const ShieldCheck = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const Layers = (props: React.SVGProps<SVGSVGElement>) => (
+const Layers = ({ size = 24, ...props }: IconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -83,11 +87,11 @@ const Layers = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const Zap = (props: React.SVGProps<SVGSVGElement>) => (
+const Zap = ({ size = 24, ...props }: IconProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
