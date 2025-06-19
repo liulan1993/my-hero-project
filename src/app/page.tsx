@@ -323,25 +323,14 @@ export default function HomePage() {
       {/* Content (foreground) */}
       <div className="relative z-10 w-full max-w-6xl px-8 space-y-12 flex flex-col items-center justify-center">
         <div className="flex flex-col items-center text-center space-y-8">
-          <Badge variant="secondary" className="backdrop-blur-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 px-4 py-2 rounded-full">
-            ✨ 下一代工具集
-          </Badge>
           
-          <div className="space-y-6 flex items-center justify-center flex-col ">
+          <div className="space-y-6 flex items-center justify-center flex-col pt-16">
             <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
               发现极简主义与强大力量的融合
             </h1>
             <p className="text-lg text-neutral-300 max-w-2xl">
               我们在设计时充分考虑了美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <Button className="text-sm px-8 py-3 rounded-xl bg-white text-black border border-white/10 shadow-none hover:bg-white/90 transition-none">
-                开始使用
-              </Button>
-              <Button className="text-sm px-8 py-3 rounded-xl bg-transparent text-white border border-white/20 shadow-none hover:bg-white/10 transition-none">
-                了解更多
-              </Button>
-            </div>
           </div>
         </div>
 
