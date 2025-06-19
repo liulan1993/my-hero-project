@@ -2,7 +2,7 @@
 // so it must be declared as a Client Component.
 'use client';
 
-import React, { useRef, useState, forwardRef } from 'react';
+import React, { useRef, forwardRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Shape, ExtrudeGeometry } from 'three';
 import { cva } from 'class-variance-authority';
