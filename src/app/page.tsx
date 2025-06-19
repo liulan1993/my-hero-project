@@ -614,9 +614,10 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                     {/* Text Content */}
                     <motion.div
                         className={cn(
-                            "flex flex-col justify-center items-start gap-4 mt-10 md:mt-0 max-w-[546px] mx-auto md:mx-0",
+                            "flex flex-col justify-center gap-4 mt-10 md:mt-0",
                             textOrderClass,
-                            reverseLayout ? "md:justify-self-start" : "md:justify-self-end"
+                            "items-center text-center",
+                            reverseLayout ? "md:items-start md:text-left" : "md:items-end md:text-right"
                         )}
                         variants={itemVariants}
                     >
@@ -633,7 +634,11 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 
                     {/* App mockup/Image Content */}
                     <motion.div
-                        className={`relative mt-10 md:mt-0 mx-auto ${imageOrderClass} w-full max-w-[300px] md:max-w-[471px]`}
+                        className={cn(
+                            "relative mt-10 md:mt-0 mx-auto w-full max-w-[300px] md:max-w-[471px]",
+                            imageOrderClass,
+                            reverseLayout ? "md:justify-self-end" : "md:justify-self-start"
+                         )}
                         variants={itemVariants}
                     >
                         {/* Decorative Background Element */}
