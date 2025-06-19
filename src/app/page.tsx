@@ -2,23 +2,16 @@
 // so it must be declared as a Client Component.
 'use client';
 
-import React, { useRef, forwardRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import {
   useScroll,
   useTransform,
   motion,
 } from "framer-motion";
 
-
-// --- Utility Function for Tailwind CSS class merging ---
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 // --- Inline SVG Icons ---
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -244,14 +237,14 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 
   return (
     <div
-      className="w-full bg-black dark:bg-neutral-950 font-sans md:px-10"
+      className="w-full bg-black font-sans md:px-10"
       ref={containerRef}
     >
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="text-lg md:text-4xl mb-4 text-white dark:text-white max-w-4xl">
+        <h2 className="text-lg md:text-4xl mb-4 text-white max-w-4xl">
           我的开发历程变更日志
         </h2>
-        <p className="text-neutral-300 dark:text-neutral-300 text-sm md:text-base max-w-sm">
+        <p className="text-neutral-300 text-sm md:text-base max-w-sm">
           在过去的两年里，我一直在努力构建 Aceternity。这是我的心路历程时间线。
         </p>
       </div>
@@ -263,16 +256,16 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
             className="flex justify-start pt-10 md:pt-40 md:gap-10"
           >
             <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
-              <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black dark:bg-black flex items-center justify-center">
-                <div className="h-4 w-4 rounded-full bg-neutral-800 dark:bg-neutral-800 border border-neutral-700 dark:border-neutral-700 p-2" />
+              <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
+                <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
-              <h3 className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-neutral-500 dark:text-neutral-500 ">
+              <h3 className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-neutral-500">
                 {item.title}
               </h3>
             </div>
 
             <div className="relative pl-20 pr-4 md:pl-4 w-full">
-              <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500 dark:text-neutral-500">
+              <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500">
                 {item.title}
               </h3>
               {item.content}{" "}
@@ -283,7 +276,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
           style={{
             height: height + "px",
           }}
-          className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-neutral-700 dark:via-neutral-700 to-transparent to-[99%]  [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] "
+          className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-neutral-700 to-transparent to-[99%]  [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] "
         >
           <motion.div
             style={{
@@ -328,28 +321,36 @@ const timelineData = [
       title: "2024",
       content: (
         <div>
-          <p className="text-neutral-200 dark:text-neutral-200 text-xs md:text-sm font-normal mb-8">
+          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">
             从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。
           </p>
           <div className="grid grid-cols-2 gap-4">
-            <img
+            <Image
               src="https://assets.aceternity.com/templates/startup-1.webp"
               alt="启动模板"
+              width={500}
+              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <img
+            <Image
               src="https://assets.aceternity.com/templates/startup-2.webp"
               alt="启动模板"
+              width={500}
+              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <img
+            <Image
               src="https://assets.aceternity.com/templates/startup-3.webp"
               alt="启动模板"
+              width={500}
+              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <img
+            <Image
               src="https://assets.aceternity.com/templates/startup-4.webp"
               alt="启动模板"
+              width={500}
+              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
           </div>
@@ -360,28 +361,36 @@ const timelineData = [
       title: "2023年初",
       content: (
         <div>
-          <p className="text-neutral-200 dark:text-neutral-200 text-xs md:text-sm font-normal mb-8">
+          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">
             我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。
           </p>
           <div className="grid grid-cols-2 gap-4">
-            <img
+            <Image
               src="https://assets.aceternity.com/pro/hero-sections.png"
               alt="英雄区模板"
+              width={500}
+              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <img
+            <Image
               src="https://assets.aceternity.com/features-section.png"
               alt="功能区模板"
+              width={500}
+              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <img
+            <Image
               src="https://assets.aceternity.com/pro/bento-grids.png"
               alt="Bento网格模板"
+              width={500}
+              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
-            <img
+            <Image
               src="https://assets.aceternity.com/cards.png"
               alt="卡片模板"
+              width={500}
+              height={500}
               className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]"
             />
           </div>
@@ -392,17 +401,17 @@ const timelineData = [
       title: "变更日志",
       content: (
         <div>
-          <p className="text-neutral-200 dark:text-neutral-200 text-xs md:text-sm font-normal mb-4">
+          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">
             今天在 Aceternity 上部署了5个新组件。
           </p>
           <div className="mb-8">
-            <div className="flex gap-2 items-center text-neutral-300 dark:text-neutral-300 text-xs md:text-sm">
+            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">
               ✅ 卡片网格组件
             </div>
-            <div className="flex gap-2 items-center text-neutral-300 dark:text-neutral-300 text-xs md:text-sm">
+            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">
               ✅ 启动模板 Aceternity
             </div>
-            <div className="flex gap-2 items-center text-neutral-300 dark:text-neutral-300 text-xs md:text-sm">
+            <div className="flex gap-2 items-center text-neutral-300 text-xs md:text-sm">
               ✅ 随机文件上传 哈哈
             </div>
           </div>
