@@ -10,6 +10,7 @@ import React, {
     useContext, 
     useMemo
 } from 'react';
+import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -212,7 +213,14 @@ FloatingDock.displayName = "FloatingDock";
 const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
     const geometry = useMemo(() => {
         const shape = new THREE.Shape();
-        shape.absarc(2, 2, 1, 0, Math.PI * 2, false);
+        const angleStep = Math.PI * 0.5;
+        const radius = 1;
+
+        shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
+        shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
+        shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
+        shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
+
         const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 };
         const geom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
         geom.center();
