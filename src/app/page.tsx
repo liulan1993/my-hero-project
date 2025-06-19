@@ -10,7 +10,6 @@ import React, {
     useContext, 
     useMemo
 } from 'react';
-import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -27,22 +26,14 @@ import { twMerge } from 'tailwind-merge';
 
 // ============================================================================
 // 1. CORE UTILITIES
-// Adhering to the principle of having a centralized utility for class name merging.
 // ============================================================================
 
-/**
- * Merges Tailwind CSS classes safely.
- * @param inputs - A list of class names.
- * @returns A string of merged class names.
- */
 function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
 // ============================================================================
 // 2. ATOMIC UI COMPONENTS & ICONS
-// Small, reusable, and pure components. Icons are inlined as SVG components
-// for portability and performance, wrapped in React.memo for optimization.
 // ============================================================================
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -115,17 +106,13 @@ MemoizedSunMoon.displayName = 'SunMoonIcon';
 
 // ============================================================================
 // 3. DOCK COMPONENT SUITE
-// This section contains the logic for the floating dock navigation.
-// It's broken down into a provider and several child components.
 // ============================================================================
 
 const DockContext = createContext<{ mouseX: MotionValue<number> } | null>(null);
 
 const useDockContext = () => {
   const context = useContext(DockContext);
-  if (!context) {
-    throw new Error("useDockContext must be used within a DockProvider");
-  }
+  if (!context) throw new Error("useDockContext must be used within a DockProvider");
   return context;
 };
 
@@ -220,7 +207,6 @@ FloatingDock.displayName = "FloatingDock";
 
 // ============================================================================
 // 4. PAGE SECTIONS & LAYOUT COMPONENTS
-// Larger components that compose the page.
 // ============================================================================
 
 const Box = ({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number]; }) => {
@@ -262,7 +248,7 @@ const AnimatedBoxes = () => {
 AnimatedBoxes.displayName = "AnimatedBoxes";
 
 const Scene = React.memo(() => (
-    <div className="fixed top-0 left-0 w-full h-full -z-10">
+    <div className="fixed top-0 left-0 w-full h-screen -z-10">
         <Canvas camera={{ position: [5, 5, 20], fov: 40 }}>
             <ambientLight intensity={15} />
             <directionalLight position={[10, 10, 5]} intensity={15} />
@@ -327,7 +313,6 @@ Timeline.displayName = "Timeline";
 
 // ============================================================================
 // 5. PAGE-LEVEL STATIC DATA
-// Defining static data outside the component to prevent re-creation on re-renders.
 // ============================================================================
 
 const features = [
@@ -344,10 +329,10 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div className="grid grid-cols-2 gap-4">
-            <Image src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/templates/startup-1.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <img src="https://assets.aceternity.com/templates/startup-2.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <img src="https://assets.aceternity.com/templates/startup-3.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <img src="https://assets.aceternity.com/templates/startup-4.webp" alt="启动模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
           </div>
         </div>
       ),
@@ -358,10 +343,10 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div className="grid grid-cols-2 gap-4">
-            <Image src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/features-section.png" alt="功能区模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
-            <Image src="https://assets.aceternity.com/cards.png" alt="卡片模板" width={500} height={500} className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]" />
+            <img src="https://assets.aceternity.com/pro/hero-sections.png" alt="英雄区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <img src="https://assets.aceternity.com/features-section.png" alt="功能区模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <img src="https://assets.aceternity.com/pro/bento-grids.png" alt="Bento网格模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
+            <img src="https://assets.aceternity.com/cards.png" alt="卡片模板" className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-xl" />
           </div>
         </div>
       ),
@@ -384,12 +369,11 @@ const timelineData = [
 
 // ============================================================================
 // 6. MAIN PAGE COMPONENT
-// The final page, composed of the sections and components defined above.
 // ============================================================================
 
 export default function HomePage() {
   return (
-    <div className="bg-black text-white">
+    <div className="relative isolate bg-black text-white">
       {/* 全局背景元素 */}
       <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
       <Scene />
