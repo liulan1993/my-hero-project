@@ -239,23 +239,23 @@ NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayNam
 
 const AppNavigationBar = () => {
     const navigationItems = [
-        { title: "Home", href: "/", description: "" },
+        { title: "主页", href: "/", description: "" },
         {
-            title: "Product", description: "Managing a small business today is already tough.",
+            title: "客户支持", description: "拥抱数字化转型，提升客户体验。",
             items: [
-                { title: "Reports", href: "#" },
-                { title: "Statistics", href: "#" },
-                { title: "Dashboards", href: "#" },
-                { title: "Recordings", href: "#" },
+                { title: "问卷调查", href: "#" },
+                { title: "资料上传", href: "#" },
+                { title: "客户反馈", href: "#" },
+                { title: "敬请期待", href: "#" },
             ],
         },
         {
-            title: "Company", description: "Managing a small business today is already tough.",
+            title: "AI赋能", description: "AI驱动的智能，提升业务效率。",
             items: [
-                { title: "About us", href: "#" },
-                { title: "Fundraising", href: "#" },
-                { title: "Investors", href: "#" },
-                { title: "Contact us", href: "#" },
+                { title: "实时汇率", href: "#" },
+                { title: "个税计算器", href: "#" },
+                { title: "专属AI", href: "#" },
+                { title: "敬请期待", href: "#" },
             ],
         },
     ];
@@ -291,7 +291,7 @@ const AppNavigationBar = () => {
                                                             </p>
                                                         </div>
                                                         <Button size="sm" className="mt-10" variant="outline">
-                                                            Book a call today
+                                                            商业洞察
                                                         </Button>
                                                     </div>
                                                     <div className="flex flex-col text-sm h-full justify-end">
@@ -315,16 +315,16 @@ const AppNavigationBar = () => {
                 </div>
                 <div className="flex lg:justify-center">
                     <Link href="/" className="font-semibold text-xl">
-                      MyPortfolio
+                      Apex
                     </Link>
                 </div>
                 <div className="flex justify-end w-full gap-2 md:gap-4">
                     <Button variant="ghost" className="hidden md:inline">
-                        Book a demo
+                        欢迎您！
                     </Button>
                     <div className="border-r border-slate-700 hidden md:inline"></div>
-                    <Button variant="outline">Sign in</Button>
-                    <Button variant='default'>Get started</Button>
+                    <Button variant="outline">登录</Button>
+                    <Button variant='default'>敬请浏览</Button>
                 </div>
                 <div className="flex w-12 shrink lg:hidden items-end justify-end">
                     <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
@@ -458,8 +458,8 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   return (
     <div className="w-full bg-transparent font-sans md:px-10" ref={containerRef}>
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="text-lg md:text-4xl mb-4 text-white max-w-4xl">我的开发历程变更日志</h2>
-        <p className="text-neutral-300 text-sm md:text-base max-w-sm">在过去的两年里，我一直在努力构建 Aceternity。这是我的心路历程时间线。</p>
+        <h2 className="text-lg md:text-4xl mb-4 text-white max-w-4xl">留学教育&Study Abroad Education</h2>
+        <p className="text-neutral-300 text-sm md:text-base max-w-sm">植根新加坡，兼具中国基因。中新团队双语服务，沟通无碍，执行高效。</p>
       </div>
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
         {data.map((item, index) => (
@@ -1106,13 +1106,13 @@ const features = [
 
 const timelineData = [
     {
-      title: "2024",
+      title: "教育路径规划",
       content: (
         <div>
-          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
+          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
           <div>
             <Image 
-              src="https://assets.aceternity.com/templates/startup-1.webp" 
+              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1123,13 +1123,13 @@ const timelineData = [
       ),
     },
     {
-      title: "2023年初",
+      title: "学校申请支持",
       content: (
         <div>
-          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
+          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。</p>
           <div>
             <Image 
-              src="https://assets.aceternity.com/pro/hero-sections.png" 
+              src="https://cdn.apex-elite-service.com/wangzhantupian/222.jpg" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1140,13 +1140,13 @@ const timelineData = [
       ),
     },
     {
-      title: "变更日志",
+      title: "长期成长陪伴",
       content: (
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
             <Image 
-              src="https://assets.aceternity.com/pro/bento-grids.png" 
+              src="https://cdn.apex-elite-service.com/wangzhantupian/333.jpg" 
               alt="新组件预览" 
               width={500}
               height={300}
@@ -1163,14 +1163,14 @@ const projectShowcaseData = [
     name: "Plum Cave",
     quote: '一个云备份解决方案，它采用 "ChaCha20 + Serpent-256 CBC + HMAC-SHA3-512" 认证加密方案进行数据加密，并使用 ML-KEM-1024 进行抗量子密钥交换。',
     designation: "Next.js 项目",
-    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/plum-cave.webp",
+    src: "https://cdn.apex-elite-service.com/wangzhantupian/1.jpg",
     link: "https://plum-cave.netlify.app/",
   },
   {
     name: "Namer UI",
     quote: "一个现代、美观且独特的可重用 TypeScript 组件的全面集合，专为 Next.js 打造。",
     designation: "Next.js 项目",
-    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui.webp",
+    src: "https://cdn.apex-elite-service.com/wangzhantupian/2.jpg",
     link: "https://namer-ui.netlify.app/",
   },
   {
@@ -1230,38 +1230,38 @@ const infoSectionData2 = {
 
 const scrollAnimationPages = [
   {
-    leftBgImage: 'https://images.unsplash.com/photo-1748968218568-a5eac621e65c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1M3x8fGVufDB8fHx8fA%3D%3D',
+    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
-      heading: '欢迎登船！',
-      description: '抓稳你的鼠标，一场奇妙的旅行即将开始！',
+      heading: '首席伙伴',
+      description: '我们凭借在中新两地的实体团队，真正实现了服务的无缝衔接。无论您身在国内还是已在新加坡，都能随时与我们的本地成员当面沟通，确保服务“不掉线”。作为您长期的首席合伙人，为您节省巨大的时间与沟通成本。',
     },
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://images.unsplash.com/photo-1749315099905-9cf6cabd9126?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw0Nnx8fGVufDB8fHx8fA%3D%3D',
+    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg',
     leftContent: {
-      heading: '第二页',
-      description: '剧透一下：这里仍然是空的。让你的滚动手指保持灵活！',
+      heading: '安心保障',
+      description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
     },
     rightContent: null,
   },
   {
-    leftBgImage: 'https://images.unsplash.com/photo-1747893541442-a139096ea39c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMzZ8fHxlbnwwfHx8fHw%3D',
+    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
-      heading: '第三页',
-      description: '剧情反转：你已经到达中点。太棒了！',
+      heading: '服务流程',
+      description: '我们的合作始于深度保密的咨询，以全面理解您的需求。随后，专家团队将为您量身定制方案，在执行中协调所有细节，并随时汇报进展。',
     },
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://images.unsplash.com/photo-1748164521179-ae3b61c6dd90?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMjR8fHxlbnwwfHx8fHw%3D',
+    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg',
     leftContent: {
-      heading: '第四页',
-      description: '再滚动一次，我保证——就快到了！',
+      heading: '即刻启程',
+      description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
     },
     rightContent: null,
   },
@@ -1569,10 +1569,10 @@ const CustomFooter = () => {
     const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
     const socialIcons = [
-      { name: 'Facebook', icon: <Facebook className="h-4 w-4" />, qrcode: 'https://placehold.co/300x300/png?text=Facebook+QR', url: 'https://www.facebook.com/' },
-      { name: 'Twitter', icon: <Twitter className="h-4 w-4" />, qrcode: 'https://placehold.co/300x300/png?text=Twitter+QR', url: 'https://twitter.com/' },
-      { name: 'Instagram', icon: <Instagram className="h-4 w-4" />, qrcode: 'https://placehold.co/300x300/png?text=Instagram+QR', url: 'https://www.instagram.com/' },
-      { name: 'LinkedIn', icon: <Linkedin className="h-4 w-4" />, qrcode: 'https://placehold.co/300x300/png?text=LinkedIn+QR', url: 'https://www.linkedin.com/' },
+      { name: '小红书', icon: <Facebook className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2?xsec_token=YBu0J314MzsA9PGMJZLZmcLRL3wiuAfNIZeudNRhtPvCk=&xsec_source=app_share&xhsshare=WeixinSession&appuid=6624755f00000000030303c2&apptime=1750082613&share_id=b4da624f466a4aeabb6e1e79662f092d&tab=note&subTab=note' },
+      { name: '知乎', icon: <Twitter className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
+      { name: 'Instagram', icon: <Instagram className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.instagram.com/' },
+      { name: 'LinkedIn', icon: <Linkedin className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.linkedin.com/' },
     ];
 
     return (
@@ -1588,11 +1588,11 @@ const CustomFooter = () => {
               />
             </div>
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300">
-              <Link href="#" className="hover:text-white">Home</Link>
-              <Link href="#" className="hover:text-white">About</Link>
-              <Link href="#" className="hover:text-white">Services</Link>
-              <Link href="#" className="hover:text-white">Products</Link>
-              <Link href="#" className="hover:text-white">Contact</Link>
+              <Link href="#" className="hover:text-white">Apex</Link>
+              <Link href="#" className="hover:text-white">留学</Link>
+              <Link href="#" className="hover:text-white">医疗</Link>
+              <Link href="#" className="hover:text-white">企业出海</Link>
+              <Link href="#" className="hover:text-white">敬请期待</Link>
             </nav>
             <div className="mb-8 flex space-x-4">
               {socialIcons.map((social) => (
@@ -1626,7 +1626,7 @@ const CustomFooter = () => {
                   <Label htmlFor="email-footer" className="sr-only">Email</Label>
                   <Input id="email-footer" placeholder="Enter your email" type="email" className="rounded-full" />
                 </div>
-                <Button type="submit" variant="default" className="rounded-full">Subscribe</Button>
+                <Button type="submit" variant="default" className="rounded-full">提交</Button>
               </form>
             </div>
             <div className="text-center">
@@ -1659,10 +1659,10 @@ export default function HomePage() {
               <div className="flex flex-col items-center text-center space-y-8">
                 <div className="space-y-6 flex items-center justify-center flex-col">
                   <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
-                    发现极简主义与强大力量的融合
+                    为您而来，不止于此
                   </h1>
                   <p className="text-lg text-neutral-300 max-w-2xl">
-                    我们在设计时充分考虑了美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
+                    我们深知您当下的每一步在未来都至关重要。
                   </p>
                 </div>
               </div>
