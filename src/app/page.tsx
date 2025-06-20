@@ -951,13 +951,6 @@ InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 // ============================================================================
 
 const CtaWithGallerySection = () => {
-    const galleryImages = [
-        "https://cdn.apex-elite-service.com/wangzhantupian/gallery1.jpg",
-        "https://cdn.apex-elite-service.com/wangzhantupian/gallery2.jpg",
-        "https://cdn.apex-elite-service.com/wangzhantupian/gallery3.jpg",
-        "https://cdn.apex-elite-service.com/wangzhantupian/gallery4.jpg",
-    ];
-
     const containerVariants: Variants = {
         hidden: {},
         visible: {
@@ -991,30 +984,6 @@ const CtaWithGallerySection = () => {
                     <motion.div variants={itemVariants}>
                         <FeatureTourDialog />
                     </motion.div>
-                </motion.div>
-
-                <motion.div
-                    className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4"
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.2 }}
-                >
-                    {galleryImages.map((src, index) => (
-                        <motion.div
-                            key={index}
-                            className="relative aspect-square w-full h-auto overflow-hidden rounded-lg"
-                            variants={itemVariants}
-                        >
-                            <Image
-                                src={src}
-                                alt={`Gallery image ${index + 1}`}
-                                fill
-                                sizes="(max-width: 768px) 50vw, 25vw"
-                                className="object-cover transition-transform duration-300 hover:scale-105"
-                            />
-                        </motion.div>
-                    ))}
                 </motion.div>
             </div>
         </section>
