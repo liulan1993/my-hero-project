@@ -35,24 +35,18 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 // ============================================================================
-// 修复: 模拟服务器动作 (Server Action)
+// 模拟服务器动作 (Server Action)
 // 在真实的 Next.js 项目中，此异步函数应移至一个单独的文件 (例如 `app/actions.ts`)
 // 并在该文件顶部声明 'use server'。为了在此环境中修复编译错误，我们将其定义为一个常规的异步函数。
 // ============================================================================
-async function saveContactToRedis(formData: Record<string, any>) {
+async function saveContactToRedis(formData: Record<string, string>) {
   console.log("正在模拟将数据保存到 Redis:", formData);
   try {
-    // 使用姓名作为 Redis 的 Key
     const key = formData.name;
     if (!key) {
       throw new Error("姓名不能为空，无法作为主键保存。");
     }
-    
-    // 模拟网络请求和数据库写入的延迟
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // 注意: 在真实的应用中，您会在这里调用 Vercel KV 的服务器端函数
-    
     console.log(`数据 "${key}" 已成功模拟保存。`);
     return { success: true };
   } catch (error) {
@@ -88,7 +82,6 @@ const Image = ({ src, alt, className, width, height, style, fill, onError }: Cus
     const [imgSrc, setImgSrc] = useState(src);
 
     const handleError = () => {
-      // 占位图服务
       setImgSrc(`https://placehold.co/600x400/161616/ffffff?text=${encodeURIComponent(alt)}`);
       if(onError) onError();
     };
@@ -104,6 +97,7 @@ const Image = ({ src, alt, className, width, height, style, fill, onError }: Cus
             objectFit: 'cover' as const
         });
     }
+    // eslint-disable-next-line @next/next/no-img-element
     return <img src={imgSrc} alt={alt} className={className} width={width as number} height={height as number} style={combinedStyle} onError={handleError} />;
 };
 
@@ -456,54 +450,58 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
     const [availableStates, setAvailableStates] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        if (formData.countryKey) {
-            setAvailableStates(countryData[formData.countryKey].states);
-            setFormData(f => ({ ...f, state: '' }));
-            validateField('phone', formData.phone);
-        } else {
-            setAvailableStates([]);
-        }
-    }, [formData.countryKey]);
-
-    const validateField = (name: string, value: string): boolean => {
+    const validateField = useCallback((name: string, value: string, currentCountryKey: string): boolean => {
         let errorMsg = '';
         if (typeof value === 'string' && !value.trim()) {
             errorMsg = '此字段不能为空';
         } else {
             switch (name) {
-                case 'email': if (!emailRegex.test(value)) errorMsg = '请输入有效的邮箱地址 (Google, Outlook, QQ, 163, Yahoo)'; break;
+                case 'email': 
+                    if (!emailRegex.test(value)) errorMsg = '请输入有效的邮箱地址 (Google, Outlook, QQ, 163, Yahoo)'; 
+                    break;
                 case 'phone':
-                    if (formData.countryKey) {
-                        const regex = countryData[formData.countryKey].phoneRegex;
-                        if (!regex.test(value)) errorMsg = `请输入有效的${countryData[formData.countryKey].name}手机号`;
-                    } else if (value) {
+                    if (currentCountryKey && countryData[currentCountryKey as keyof typeof countryData]) {
+                        const regex = countryData[currentCountryKey as keyof typeof countryData].phoneRegex;
+                        if (!regex.test(value)) errorMsg = `请输入有效的${countryData[currentCountryKey as keyof typeof countryData].name}手机号`;
+                    } else if (value.trim()) {
                         errorMsg = '请先选择国家/地区';
                     }
                     break;
-                default: break;
+                default: 
+                    break;
             }
         }
         setErrors(prev => ({ ...prev, [name]: errorMsg }));
         return !errorMsg;
-    };
+    }, []);
+
+    useEffect(() => {
+        if (formData.countryKey) {
+            setAvailableStates(countryData[formData.countryKey as keyof typeof countryData].states);
+            setFormData(f => ({ ...f, state: '' }));
+            validateField('phone', formData.phone, formData.countryKey);
+        } else {
+            setAvailableStates([]);
+        }
+    }, [formData.countryKey, formData.phone, validateField]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        validateField(name, value);
+        const newFormData = { ...formData, [name]: value };
+        setFormData(newFormData);
+        validateField(name, value, newFormData.countryKey);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        const isValid = Object.keys(formData).every(key => validateField(key, formData[key as keyof typeof formData]));
+        const isValid = Object.keys(formData).every(key => validateField(key, formData[key as keyof typeof formData], formData.countryKey));
 
         if (isValid) {
             const result = await saveContactToRedis(formData);
             if (result.success) {
                 alert('资料提交成功！');
-                onSuccess(); // 调用成功回调
+                onSuccess();
             } else {
                 alert(`提交失败: ${result.error}`);
             }
@@ -521,13 +519,11 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
           </div>
           <form onSubmit={handleSubmit} noValidate>
               <div className="grid grid-cols-1 gap-y-4">
-                  {/* 姓名 */}
                   <div>
                       <Label htmlFor="name">姓名</Label>
                       <Input id="name" name="name" type="text" value={formData.name} onChange={handleChange} className={cn("mt-2", errors.name && 'border-red-500')} />
                       {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                   </div>
-                  {/* 服务领域 */}
                   <div>
                       <Label htmlFor="serviceArea">选择服务领域</Label>
                       <select id="serviceArea" name="serviceArea" value={formData.serviceArea} onChange={handleChange} className={cn("form-input mt-2 w-full bg-black border-slate-700", errors.serviceArea && 'border-red-500')}>
@@ -536,13 +532,11 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
                       </select>
                       {errors.serviceArea && <p className="text-red-500 text-xs mt-1">{errors.serviceArea}</p>}
                   </div>
-                  {/* 邮箱 */}
                   <div>
                       <Label htmlFor="email">输入邮箱</Label>
                       <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className={cn("mt-2", errors.email && 'border-red-500')} />
                       {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                   </div>
-                  {/* 手机号 */}
                   <div>
                       <Label htmlFor="phone">输入手机号</Label>
                       <div className="flex gap-2 mt-2">
@@ -554,7 +548,6 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
                       </div>
                       {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                   </div>
-                  {/* 州/省 */}
                   <div>
                       <Label htmlFor="state">州/省</Label>
                       <select id="state" name="state" value={formData.state} onChange={handleChange} disabled={!formData.countryKey} className={cn("form-input mt-2 w-full bg-black border-slate-700", errors.state && 'border-red-500')}>
@@ -1789,6 +1782,7 @@ const CustomFooter = () => {
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
             <div className="mb-8 w-[300px] h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
                 alt="官方公众号二维码"
@@ -1822,6 +1816,7 @@ const CustomFooter = () => {
                     </Button>
                     {hoveredIcon === social.name && (
                       <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-36 h-36 bg-white border rounded-md shadow-lg p-1 flex items-center justify-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={social.qrcode} alt={`${social.name} QR Code`} className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -1955,4 +1950,3 @@ export default function HomePage() {
     </div>
   );
 }
-
