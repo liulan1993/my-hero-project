@@ -1,15 +1,179 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { WavyBackground, GridGlobe } from '@/components/WavyBackground'; // 导入新的主题组件
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import * as THREE from 'three';
 
 // --- 辅助工具函数 ---
 function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
+
+// --- 新的主题组件 ---
+
+// --- 核心波浪背景组件 ---
+function WavyBackground({
+  children,
+  className,
+  containerClassName,
+  colors,
+  waveWidth,
+  backgroundFill,
+  blur = 10,
+  speed = "fast",
+  waveOpacity = 0.5,
+  ...props
+}: {
+  children?: any;
+  className?: string;
+  containerClassName?: string;
+  colors?: string[];
+  waveWidth?: number;
+  backgroundFill?: string;
+  blur?: number;
+  speed?: "slow" | "fast";
+  waveOpacity?: number;
+  [key: string]: any;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let waveColors = colors || ["#38bdf8", "#818cf8", "#c084fc", "#e879f9", "#22d3ee"];
+    const waveWidthValue = waveWidth || 50;
+    const backgroundFillValue = backgroundFill || "black";
+    const waveOpacityValue = waveOpacity || 0.5;
+    
+    let animationId: number;
+    let frame = 0;
+    const waveCount = 4;
+
+    const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        drawWaves();
+    };
+
+    const drawWaves = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = backgroundFillValue;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = waveOpacityValue;
+        
+        for (let i = 0; i < waveCount; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height);
+            ctx.strokeStyle = waveColors[i % waveColors.length];
+            ctx.lineWidth = 2;
+            for (let x = 0; x < canvas.width; x++) {
+                const waveSpeed = speed === 'fast' ? 100 : 200;
+                const angle = frame / (waveSpeed + i * 20) + x / (100 + i * 10);
+                const y = canvas.height / 2 + Math.sin(angle) * (waveWidthValue + i * 5);
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+    };
+    
+    const animate = () => {
+        frame++;
+        drawWaves();
+        animationId = requestAnimationFrame(animate);
+    };
+
+    resizeCanvas();
+    animate();
+    window.addEventListener("resize", resizeCanvas);
+
+    return () => {
+        window.removeEventListener("resize", resizeCanvas);
+        cancelAnimationFrame(animationId);
+    };
+  }, [colors, waveWidth, backgroundFill, waveOpacity, speed]);
+
+  return (
+    <div
+      className={cn("h-screen flex flex-col items-center justify-center", containerClassName)}
+    >
+      <canvas
+        className="absolute inset-0 z-0"
+        ref={canvasRef}
+        style={{ filter: `blur(${blur}px)` }}
+      ></canvas>
+      <div className={cn("relative z-10", className)} {...props}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// --- 3D地球组件 ---
+function GridGlobe() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const geometry = new THREE.SphereGeometry(2, 64, 64);
+    const material = new THREE.MeshBasicMaterial({ color: 0x22c55e, wireframe: true });
+    const globe = new THREE.Mesh(geometry, material);
+    scene.add(globe);
+
+    camera.position.z = 5;
+    
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetRadianX = 0;
+    let targetRadianY = 0;
+
+    function onMouseMove(event: MouseEvent) {
+      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+      targetRadianX = mouseY * 0.5;
+      targetRadianY = mouseX * 0.5;
+    }
+    
+    window.addEventListener('mousemove', onMouseMove);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      globe.rotation.y += (targetRadianY - globe.rotation.y) * 0.05;
+      globe.rotation.x += (targetRadianX - globe.rotation.x) * 0.05;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener('resize', onWindowResize);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('resize', onWindowResize);
+    }
+
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 w-full h-full" />;
+}
+
 
 // --- 税务计算逻辑 ---
 function calculateChinaTax(income: number): number {
