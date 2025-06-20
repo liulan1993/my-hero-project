@@ -1576,7 +1576,7 @@ const CustomFooter = () => {
     ];
 
     return (
-      <footer className="bg-black text-white py-12 mt-20">
+      <footer className="bg-transparent text-white py-12 mt-20">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
