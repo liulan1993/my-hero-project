@@ -14,13 +14,14 @@ function cn(...inputs: ClassValue[]) {
 }
 
 // --- SVG 图标组件 ---
-// 为了生产环境构建，建议使用 lucide-react 包
-// npm install lucide-react
-// import { Cpu, ShieldCheck, Layers, Zap } from 'lucide-react';
-// 但为了保持独立性，这里我们继续使用内联 SVG
 
-const Cpu = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+// 为图标定义一个包含 'size' 属性的类型
+interface IconProps extends React.SVGProps<SVGSVGElement> {
+  size?: number;
+}
+
+const Cpu = ({ size = 24, ...props }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
     <rect x="9" y="9" width="6" height="6"></rect>
     <line x1="9" y1="1" x2="9" y2="4"></line>
@@ -34,23 +35,23 @@ const Cpu = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const ShieldCheck = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+const ShieldCheck = ({ size = 24, ...props }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
     <path d="m9 12 2 2 4-4"></path>
   </svg>
 );
 
-const Layers = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+const Layers = ({ size = 24, ...props }: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
         <polyline points="2 17 12 22 22 17"></polyline>
         <polyline points="2 12 12 17 22 12"></polyline>
     </svg>
 );
 
-const Zap = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+const Zap = ({ size = 24, ...props }: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
     </svg>
 );
