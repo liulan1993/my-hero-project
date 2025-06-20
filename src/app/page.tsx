@@ -28,7 +28,8 @@ import {
 // 导入服务器动作
 import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
-import { Menu, MoveRight, X, CheckCircle2, ArrowRight, Plus, Minus } from 'lucide-react';
+// 修复：移除了未使用的 'Plus' 和 'Minus'
+import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
@@ -56,7 +57,7 @@ interface CustomImageProps {
     priority?: boolean;
     sizes?: string;
     onError?: () => void;
-    unoptimized?: boolean; // 修复：为接口添加 unoptimized 属性
+    unoptimized?: boolean;
 }
 
 
@@ -946,7 +947,84 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 
 // ============================================================================
-// 4. 新增: 带图库的行动号召(CTA)区域组件
+// 4. ✨ 修复并新增: 带图库的行动号召(CTA)区域组件
+// ============================================================================
+
+const CtaWithGallerySection = () => {
+    const galleryImages = [
+        "https://cdn.apex-elite-service.com/wangzhantupian/gallery1.jpg",
+        "https://cdn.apex-elite-service.com/wangzhantupian/gallery2.jpg",
+        "https://cdn.apex-elite-service.com/wangzhantupian/gallery3.jpg",
+        "https://cdn.apex-elite-service.com/wangzhantupian/gallery4.jpg",
+    ];
+
+    const containerVariants: Variants = {
+        hidden: {},
+        visible: {
+            transition: {
+                staggerChildren: 0.2,
+            },
+        },
+    };
+
+    const itemVariants: Variants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+    };
+
+    return (
+        <section className="py-24 md:py-32 bg-transparent">
+            <div className="container mx-auto px-4 md:px-8">
+                <motion.div
+                    className="text-center"
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.3 }}
+                >
+                    <motion.h2 variants={itemVariants} className="text-3xl md:text-4xl font-bold text-white mb-4">
+                        加入我们，共创未来
+                    </motion.h2>
+                    <motion.p variants={itemVariants} className="text-neutral-300 max-w-2xl mx-auto mb-8">
+                        探索我们的创新解决方案，了解我们如何帮助全球客户取得成功。立即开始，释放您的全部潜力。
+                    </motion.p>
+                    <motion.div variants={itemVariants}>
+                        <FeatureTourDialog />
+                    </motion.div>
+                </motion.div>
+
+                <motion.div
+                    className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4"
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.2 }}
+                >
+                    {galleryImages.map((src, index) => (
+                        <motion.div
+                            key={index}
+                            className="relative aspect-square w-full h-auto overflow-hidden rounded-lg"
+                            variants={itemVariants}
+                        >
+                            <Image
+                                src={src}
+                                alt={`Gallery image ${index + 1}`}
+                                fill
+                                sizes="(max-width: 768px) 50vw, 25vw"
+                                className="object-cover transition-transform duration-300 hover:scale-105"
+                            />
+                        </motion.div>
+                    ))}
+                </motion.div>
+            </div>
+        </section>
+    );
+};
+CtaWithGallerySection.displayName = "CtaWithGallerySection";
+
+
+// ============================================================================
+// 5. 动画容器组件
 // ============================================================================
 const SPRING_TRANSITION_CONFIG = {
   type: "spring" as const, 
@@ -1002,7 +1080,7 @@ const ContainerAnimated = React.forwardRef<
 ContainerAnimated.displayName = "ContainerAnimated";
 
 // ============================================================================
-// 5. 新增: 对话框/拓展卡片组件
+// 6. 对话框/拓展卡片组件
 // ============================================================================
 const Dialog = DialogPrimitive.Root
 const DialogTrigger = DialogPrimitive.Trigger
@@ -1235,7 +1313,7 @@ const FeatureTourDialog = () => {
 FeatureTourDialog.displayName = "FeatureTourDialog";
 
 // ============================================================================
-// 6. 页面级别的静态数据 (现有代码)
+// 7. 页面级别的静态数据 (现有代码)
 // ============================================================================
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
@@ -1397,7 +1475,7 @@ const infoSectionData2 = {
 };
 
 // ============================================================================
-// 7. 新增: 分屏滚动动画区域组件
+// 8. 分屏滚动动画区域组件
 // ============================================================================
 
 const scrollAnimationPages = [
@@ -1592,7 +1670,7 @@ function ScrollAdventure() {
 ScrollAdventure.displayName = "ScrollAdventure";
 
 // ============================================================================
-// 8. ✨ 新增: 文本跑马灯组件 (Text Marquee)
+// 9. 文本跑马灯组件 (Text Marquee)
 // ============================================================================
 
 const wrap = (min: number, max: number, v: number) => {
@@ -1666,7 +1744,7 @@ const TextMarqueeSection = () => (
 TextMarqueeSection.displayName = "TextMarqueeSection";
 
 // ============================================================================
-// 9. ✨ 新增: 页脚组件 (Custom Footer)
+// 10. 页脚组件 (Custom Footer)
 // ============================================================================
 
 // --- 页脚所需的 SVG 图标 ---
@@ -1809,7 +1887,7 @@ CustomFooter.displayName = "CustomFooter";
 
 
 // ============================================================================
-// 10. 主页面组件 (已集成新组件和逻辑)
+// 11. 主页面组件 (已集成新组件和逻辑)
 // ============================================================================
 
 export default function HomePage() {
