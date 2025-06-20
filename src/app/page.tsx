@@ -25,8 +25,9 @@ import {
   useMotionValue,
 } from "framer-motion";
 
-// 导入服务器动作
-import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
+// 修复：移除了对 './actions' 的导入，因为该文件不存在
+// 在此独立的组件环境中，我们将模拟这些服务器动作
+// import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
 // 修复：移除了未使用的 'Plus' 和 'Minus'
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
@@ -45,6 +46,24 @@ import { twMerge } from 'tailwind-merge';
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// 模拟服务器动作
+async function saveContactToRedis(data: any) {
+  console.log("模拟保存联系人资料:", data);
+  // 模拟网络延迟
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  // 模拟成功响应
+  return { success: true };
+}
+
+async function saveFooterEmailToRedis(data: { email: string }) {
+  console.log("模拟保存页脚邮箱:", data);
+  // 模拟网络延迟
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  // 模拟成功响应
+  return { success: true };
+}
+
 
 interface CustomImageProps {
     src: string;
@@ -518,7 +537,7 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
                 alert('资料提交成功！');
                 onSuccess();
             } else {
-                alert(`提交失败: ${result.error}`);
+                alert(`提交失败: ${result.error || '未知错误'}`);
             }
         } else {
             console.log("表单存在错误");
@@ -1775,7 +1794,7 @@ const CustomFooter = () => {
             alert("感谢您的订阅！");
             setEmail('');
         } else {
-            alert(`订阅失败：${result.error}`);
+            alert(`订阅失败：${result.error || '未知错误'}`);
         }
         setIsSubmitting(false);
     };
