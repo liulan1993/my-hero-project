@@ -1,338 +1,278 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import React, { useRef, forwardRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-// --- 辅助工具函数 ---
-function cn(...inputs: ClassValue[]): string {
+// 工具函数: 合并 Tailwind CSS 类名
+function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- 新的主题组件 ---
+// --- SVG 图标组件 ---
+// 为了生产环境构建，建议使用 lucide-react 包
+// npm install lucide-react
+// import { Cpu, ShieldCheck, Layers, Zap } from 'lucide-react';
+// 但为了保持独立性，这里我们继续使用内联 SVG
 
-// --- 核心波浪背景组件 ---
-function WavyBackground({
-  children,
-  className,
-  containerClassName,
-  colors,
-  waveWidth,
-  backgroundFill,
-  blur = 10,
-  speed = "fast",
-  waveOpacity = 0.5,
-  ...props
-}: {
-  children?: React.ReactNode;
-  className?: string;
-  containerClassName?: string;
-  colors?: string[];
-  waveWidth?: number;
-  backgroundFill?: string;
-  blur?: number;
-  speed?: "slow" | "fast";
-  waveOpacity?: number;
-  [key: string]: unknown;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const Cpu = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+    <rect x="9" y="9" width="6" height="6"></rect>
+    <line x1="9" y1="1" x2="9" y2="4"></line>
+    <line x1="15" y1="1" x2="15" y2="4"></line>
+    <line x1="9" y1="20" x2="9" y2="23"></line>
+    <line x1="15" y1="20" x2="15" y2="23"></line>
+    <line x1="20" y1="9" x2="23" y2="9"></line>
+    <line x1="20" y1="14" x2="23" y2="14"></line>
+    <line x1="1" y1="9" x2="4" y2="9"></line>
+    <line x1="1" y1="14" x2="4" y2="14"></line>
+  </svg>
+);
 
-  useEffect(() => {
-    if (!canvasRef.current) return;
+const ShieldCheck = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+    <path d="m9 12 2 2 4-4"></path>
+  </svg>
+);
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+const Layers = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+    </svg>
+);
 
-    const waveColors = colors || ["#38bdf8", "#818cf8", "#c084fc", "#e879f9", "#22d3ee"];
-    const waveWidthValue = waveWidth || 50;
-    const backgroundFillValue = backgroundFill || "black";
-    const waveOpacityValue = waveOpacity || 0.5;
-    
-    let animationId: number;
-    let frame = 0;
-    const waveCount = 4;
+const Zap = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    </svg>
+);
 
-    const resizeCanvas = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        drawWaves();
-    };
+// --- Badge (徽章) 组件 ---
+const badgeVariants = cva(
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        outline: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
 
-    const drawWaves = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = backgroundFillValue;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.globalAlpha = waveOpacityValue;
-        
-        for (let i = 0; i < waveCount; i++) {
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height);
-            ctx.strokeStyle = waveColors[i % waveColors.length];
-            ctx.lineWidth = 2;
-            for (let x = 0; x < canvas.width; x++) {
-                const waveSpeed = speed === 'fast' ? 100 : 200;
-                const angle = frame / (waveSpeed + i * 20) + x / (100 + i * 10);
-                const y = canvas.height / 2 + Math.sin(angle) * (waveWidthValue + i * 5);
-                ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        }
-    };
-    
-    const animate = () => {
-        frame++;
-        drawWaves();
-        animationId = requestAnimationFrame(animate);
-    };
+export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
 
-    resizeCanvas();
-    animate();
-    window.addEventListener("resize", resizeCanvas);
-
-    return () => {
-        window.removeEventListener("resize", resizeCanvas);
-        cancelAnimationFrame(animationId);
-    };
-  }, [colors, waveWidth, backgroundFill, waveOpacity, speed]);
-
+function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div
-      className={cn("h-screen flex flex-col items-center justify-center", containerClassName)}
-    >
-      <canvas
-        className="absolute inset-0 z-0"
-        ref={canvasRef}
-        style={{ filter: `blur(${blur}px)` }}
-      ></canvas>
-      <div className={cn("relative z-10", className)} {...props}>
-        {children}
-      </div>
-    </div>
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
   );
 }
 
-// --- 3D地球组件 ---
-function GridGlobe() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    const geometry = new THREE.SphereGeometry(2, 64, 64);
-    const material = new THREE.MeshBasicMaterial({ color: 0x22c55e, wireframe: true });
-    const globe = new THREE.Mesh(geometry, material);
-    scene.add(globe);
-
-    camera.position.z = 5;
-    
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetRadianX = 0;
-    let targetRadianY = 0;
-
-    function onMouseMove(event: MouseEvent) {
-      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-      targetRadianX = mouseY * 0.5;
-      targetRadianY = mouseX * 0.5;
-    }
-    
-    window.addEventListener('mousemove', onMouseMove);
-
-    function animate() {
-      requestAnimationFrame(animate);
-      globe.rotation.y += (targetRadianY - globe.rotation.y) * 0.05;
-      globe.rotation.x += (targetRadianX - globe.rotation.x) * 0.05;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    window.addEventListener('resize', onWindowResize);
-
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('resize', onWindowResize);
-    }
-
-  }, []);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0 w-full h-full" />;
-}
-
-
-// --- 税务计算逻辑 ---
-function calculateChinaTax(income: number): number {
-  if (income <= 0) return 0;
-  const brackets = [
-    { threshold: 960000, rate: 0.45, deduction: 181920 },
-    { threshold: 660000, rate: 0.35, deduction: 85920 },
-    { threshold: 420000, rate: 0.30, deduction: 52920 },
-    { threshold: 300000, rate: 0.25, deduction: 31920 },
-    { threshold: 144000, rate: 0.20, deduction: 16920 },
-    { threshold: 36000, rate: 0.10, deduction: 2520 },
-    { threshold: 0, rate: 0.03, deduction: 0 },
-  ];
-  for (const bracket of brackets) {
-    if (income > bracket.threshold) {
-      return income * bracket.rate - bracket.deduction;
-    }
+// --- Button (按钮) 组件 ---
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
   }
-  return 0;
+);
+
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
 }
 
-function calculateSingaporeTax(income: number): number {
-    if (income <= 20000) return 0;
-    let tax = 0;
-    const brackets = [
-        { cap: 20000, rate: 0, base: 0 }, { cap: 30000, rate: 0.02, base: 0 },
-        { cap: 40000, rate: 0.035, base: 200 }, { cap: 80000, rate: 0.07, base: 550 },
-        { cap: 120000, rate: 0.115, base: 3350 }, { cap: 160000, rate: 0.15, base: 7950 },
-        { cap: 200000, rate: 0.18, base: 13950 }, { cap: 240000, rate: 0.19, base: 21150 },
-        { cap: 280000, rate: 0.195, base: 28750 }, { cap: 320000, rate: 0.20, base: 36550 },
-        { cap: 500000, rate: 0.22, base: 44550 }, { cap: 1000000, rate: 0.23, base: 84150 },
-        { cap: Infinity, rate: 0.24, base: 199150 },
-    ];
-    for (let i = 1; i < brackets.length; i++) {
-        const prevCap = brackets[i - 1].cap;
-        if (income <= brackets[i].cap) {
-            tax = brackets[i-1].base + (income - prevCap) * brackets[i].rate;
-            return tax;
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, asChild = false, ...props }, ref) => {
+  const Comp = asChild ? Slot : "button";
+  return (
+    <Comp
+      className={cn(buttonVariants({ variant, size, className }))}
+      ref={ref}
+      {...props}
+    />
+  );
+});
+Button.displayName = "Button";
+
+
+// --- Scene (3D场景) 组件 ---
+const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
+    const shape = new THREE.Shape();
+    const angleStep = Math.PI * 0.5;
+    const radius = 1;
+
+    shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
+    shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
+    shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
+    shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
+
+    const extrudeSettings = {
+        depth: 0.3,
+        bevelEnabled: true,
+        bevelThickness: 0.05,
+        bevelSize: 0.05,
+        bevelSegments: 20,
+        curveSegments: 20
+    };
+
+    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    geometry.center();
+
+    return (
+        <mesh
+            geometry={geometry}
+            position={position}
+            rotation={rotation}
+        >
+            <meshPhysicalMaterial 
+                color="#232323"
+                metalness={1}
+                roughness={0.3}
+                reflectivity={0.5}
+                ior={1.5}
+                emissive="#000000"
+                emissiveIntensity={0}
+                transparent={false}
+                opacity={1.0}
+                transmission={0.0}
+                thickness={0.5}
+                clearcoat={0.0}
+                clearcoatRoughness={0.0}
+                sheen={0}
+                sheenRoughness={1.0}
+                sheenColor="#ffffff"
+                specularIntensity={1.0}
+                specularColor="#ffffff"
+                iridescence={1}
+                iridescenceIOR={1.3}
+                iridescenceThicknessRange={[100, 400]}
+                flatShading={false}
+            />
+        </mesh>
+    );
+};
+
+const AnimatedBoxes = () => {
+    const groupRef = useRef<THREE.Group>(null!);
+
+    useFrame((state, delta) => {
+        if (groupRef.current) {
+            groupRef.current.rotation.x += delta * 0.05;
+            groupRef.current.rotation.y += delta * 0.05;
         }
-    }
-    return tax;
-}
+    });
+
+    const boxes = Array.from({ length: 50 }, (_, index) => ({
+        position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
+        rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number],
+        id: index
+    }));
+
+    return (
+        <group ref={groupRef}>
+            {boxes.map((box) => (
+                <Box
+                    key={box.id}
+                    position={box.position}
+                    rotation={box.rotation}
+                />
+            ))}
+        </group>
+    );
+};
+
+const Scene = () => {
+    return (
+        <div className="absolute inset-0 w-full h-full z-0">
+            <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
+                <ambientLight intensity={15} />
+                <directionalLight position={[10, 10, 5]} intensity={15} />
+                <AnimatedBoxes />
+            </Canvas>
+        </div>
+    );
+};
 
 
-// --- 个人税务计算器组件 ---
-function TaxCalculator() {
-  const [country, setCountry] = useState<'china' | 'singapore'>('singapore');
-  const [income, setIncome] = useState<string>('');
-  const [tax, setTax] = useState<number>(0);
-  
-  useEffect(() => {
-    const incomeValue = parseFloat(income);
-    if (isNaN(incomeValue) || incomeValue < 0) {
-        setTax(0);
-        return;
-    }
-    const calculatedTax = country === 'china' ? calculateChinaTax(incomeValue) : calculateSingaporeTax(incomeValue);
-    setTax(calculatedTax);
-  }, [income, country]);
-
-  const currency = country === 'china' ? 'CNY' : 'SGD';
+// --- 主要的页面组件 ---
+export default function Page() {
+  const features = [
+    { icon: Cpu, title: "性能", description: "在任何情况下都能实现超快的数据处理。" },
+    { icon: ShieldCheck, title: "安全", description: "高级保护，让您完全安心。" },
+    { icon: Layers, title: "模块化", description: "轻松与现有架构集成。" },
+    { icon: Zap, title: "响应性", description: "对每个命令都能即时响应。" },
+  ];
 
   return (
-    <div className="w-full max-w-lg mx-auto mt-8 sm:mt-12 p-4 sm:p-6 bg-white/20 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200/20">
-      <h2 className="text-2xl font-bold text-center text-white mb-6">个人所得税计算器</h2>
-      
-      <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-        <button 
-          onClick={() => setCountry('china')}
-          className={cn(
-            'px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300',
-            country === 'china' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-white/80 text-gray-800 hover:bg-white'
-          )}
-        >
-          中国 (China)
-        </button>
-        <button 
-          onClick={() => setCountry('singapore')}
-          className={cn(
-            'px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300',
-            country === 'singapore' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-white/80 text-gray-800 hover:bg-white'
-          )}
-        >
-          新加坡 (Singapore)
-        </button>
-      </div>
+    <div className="relative min-h-screen w-full bg-[#000] text-white flex flex-col items-center justify-center p-8 overflow-hidden" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
+      <Scene />
+      <div className="w-full max-w-6xl space-y-12 relative z-10">
+        <div className="flex flex-col items-center text-center space-y-8">
+          <Badge variant="secondary" className="backdrop-blur-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 px-4 py-2 rounded-full">
+            ✨ 下一代工具
+          </Badge>
+          
+          <div className="space-y-6 flex items-center justify-center flex-col ">
+            <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl">
+              于一处探索极简与强大
+            </h1>
+            <p className="text-lg text-neutral-300 max-w-2xl">
+              设计兼顾美学与性能。体验超快的处理速度、高级别的安全性以及直观的设计。
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <Button className="text-sm px-8 py-3 rounded-xl bg-white text-black border border-white/10 shadow-none hover:bg-white/90 transition-none">
+                开始使用
+              </Button>
+              <Button className="text-sm px-8 py-3 rounded-xl bg-transparent text-white border border-white/20 shadow-none hover:bg-white/10 transition-none">
+                了解更多
+              </Button>
+            </div>
+          </div>
+        </div>
 
-      <div className="relative mb-4">
-        <label className="block text-sm font-medium text-gray-200 mb-2">
-          {country === 'china' ? '年度应纳税所得额' : 'Chargeable Annual Income'}
-        </label>
-        <div className="relative">
-          <input 
-            type="number"
-            value={income}
-            onChange={(e) => setIncome(e.target.value)}
-            placeholder="在此输入年收入"
-            className="w-full px-4 py-3 pr-16 rounded-lg border border-gray-300/30 bg-gray-900/50 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none transition-all placeholder-gray-400"
-          />
-          <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-300 font-semibold">{currency}</span>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+          {features.map((feature, idx) => (
+            <div
+              key={idx}
+              className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
+            >
+              <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
+              <h3 className="text-sm md:text-base font-medium">{feature.title}</h3>
+              <p className="text-xs md:text-sm text-neutral-400">{feature.description}</p>
+            </div>
+          ))}
         </div>
       </div>
-
-      <div className="text-center bg-black/20 rounded-lg p-4">
-        <p className="text-sm text-gray-300 mb-1">应纳税额 (Tax Payable)</p>
-        <p className="text-3xl font-bold text-white">
-          {tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          <span className="text-lg ml-2">{currency}</span>
-        </p>
-      </div>
     </div>
   );
-}
-
-// --- 页面主入口 ---
-export default function Page() {
-    const title = "Tax Calculator";
-    const words = title.split(" ");
-    
-    return (
-        <WavyBackground className="max-w-4xl mx-auto pb-40">
-            <GridGlobe />
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="text-4xl md:text-6xl lg:text-7xl text-white font-bold text-center mb-8"
-            >
-               {words.map((word, wordIndex) => (
-                    <span key={wordIndex} className="inline-block mr-4 last:mr-0">
-                        {word.split("").map((letter, letterIndex) => (
-                            <motion.span
-                                key={`${wordIndex}-${letterIndex}`}
-                                initial={{ y: 50, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{
-                                    delay: 0.5 + wordIndex * 0.1 + letterIndex * 0.05,
-                                    type: "spring",
-                                    stiffness: 100,
-                                    damping: 20,
-                                }}
-                                className="inline-block"
-                            >
-                                {letter}
-                            </motion.span>
-                        ))}
-                    </span>
-                ))}
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 1, ease: "easeOut" }}
-              className="text-base md:text-lg text-gray-200 text-center mt-4 mb-12"
-            >
-              一个用于快速计算中国和新加坡个人所得税的工具。
-            </motion.p>
-            <TaxCalculator />
-        </WavyBackground>
-    );
-}
+};
