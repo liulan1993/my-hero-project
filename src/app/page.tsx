@@ -47,28 +47,48 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// 修复: 创建一个兼容的 Image 组件替代 next/image
-const Image = ({ src, alt, className, width, height, style, fill, sizes, priority, unoptimized }: any) => {
+// 修复: 为兼容的 Image 和 Link 组件创建明确的 props 类型
+
+interface CustomImageProps {
+    src: string;
+    alt: string;
+    className?: string;
+    width?: number | string;
+    height?: number | string;
+    style?: React.CSSProperties;
+    fill?: boolean;
+    priority?: boolean; // 虽然未使用，但保留以避免在调用时出错
+    unoptimized?: boolean; // 虽然未使用，但保留以避免在调用时出错
+    sizes?: string; // 虽然未使用，但保留以避免在调用时出错
+}
+
+
+const Image = ({ src, alt, className, width, height, style, fill }: CustomImageProps) => {
     const combinedStyle = { ...style };
     if (fill) {
         Object.assign(combinedStyle, {
-            position: 'absolute',
+            position: 'absolute' as const,
             top: 0,
             left: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover'
+            objectFit: 'cover' as const
         });
     }
-    return <img src={src} alt={alt} className={className} width={width} height={height} style={combinedStyle} />;
+    return <img src={src} alt={alt} className={className} width={width as number} height={height as number} style={combinedStyle} />;
 };
 
-// 修复: 创建一个兼容的 Link 组件替代 next/link
-const Link = ({ href, children, legacyBehavior, passHref, ...props }: any) => {
+
+interface CustomLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  href: string;
+  children: React.ReactNode;
+  legacyBehavior?: boolean;
+  passHref?: boolean; // 虽然未使用，但保留以避免在调用时出错
+}
+
+const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => {
   if (legacyBehavior) {
-    // 尝试克隆子元素并传递href，但这在某些情况下可能很棘手
-    // 一个更简单的替代方法是直接渲染一个 <a> 标签
-    const child = React.Children.only(children);
+    const child = React.Children.only(children) as React.ReactElement;
     return React.cloneElement(child, { ...props, href });
   }
   return <a href={href} {...props}>{children}</a>;
