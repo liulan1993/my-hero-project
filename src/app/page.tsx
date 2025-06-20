@@ -324,7 +324,7 @@ const AppNavigationBar = () => {
                     </Button>
                     <div className="border-r border-slate-700 hidden md:inline"></div>
                     <Button variant="outline">登录</Button>
-                    <Button variant='default'>敬请浏览</Button>
+                    <Button variant='default'>我的资料</Button>
                 </div>
                 <div className="flex w-12 shrink lg:hidden items-end justify-end">
                     <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
