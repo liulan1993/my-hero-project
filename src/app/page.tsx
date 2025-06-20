@@ -1,5 +1,3 @@
-// For Next.js App Router, this component uses hooks and event listeners,
-// so it must be declared as a Client Component.
 'use client';
 
 import React, { 
@@ -25,6 +23,9 @@ import {
   useMotionValue,
 } from "framer-motion";
 
+// 导入服务器动作
+import { saveContactToRedis } from './actions';
+
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
@@ -33,27 +34,6 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from 'class-variance-authority';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-
-// ============================================================================
-// 模拟服务器动作 (Server Action)
-// 在真实的 Next.js 项目中，此异步函数应移至一个单独的文件 (例如 `app/actions.ts`)
-// 并在该文件顶部声明 'use server'。为了在此环境中修复编译错误，我们将其定义为一个常规的异步函数。
-// ============================================================================
-async function saveContactToRedis(formData: Record<string, string>) {
-  console.log("正在模拟将数据保存到 Redis:", formData);
-  try {
-    const key = formData.name;
-    if (!key) {
-      throw new Error("姓名不能为空，无法作为主键保存。");
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log(`数据 "${key}" 已成功模拟保存。`);
-    return { success: true };
-  } catch (error) {
-    console.error("模拟写入 Redis 时出错:", error);
-    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
-  }
-}
 
 
 // ============================================================================
@@ -441,7 +421,7 @@ const countryData = {
     'ID': { name: '印度尼西亚', code: '+62', phoneRegex: /^8\d{9,11}$/, states: ['Jakarta', 'West Java', 'East Java', 'Central Java', 'Banten', 'North Sumatra', 'South Sulawesi', 'Bali', 'Riau', 'Lampung'] },
 };
 const serviceAreas = ['企业落地', '准证申请', '子女教育', '溯源体检', '健康管理'];
-const countryOptions = Object.keys(countryData).map(key => ({ value: key, label: `${countryData[key as keyof typeof countryData].name} (${countryData[key as keyof typeof countryData].code})` }));
+const countryOptions = Object.keys(countryData).map(key => ({ value: key, label: `${countryData[key].name} (${countryData[key].code})` }));
 const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:gmail|outlook|hotmail|qq|163|yahoo)\.com$/i;
 
 const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
@@ -1022,7 +1002,7 @@ const CtaWithGallerySection = () => {
           <Image
             className="object-cover"
             fill
-            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            src="[https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D](https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)"
             alt="Global network"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
@@ -1054,7 +1034,7 @@ const DialogOverlay = React.forwardRef<
     {...props}
   />
 ))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
@@ -1078,7 +1058,7 @@ const DialogContent = React.forwardRef<
     </DialogPrimitive.Content>
   </DialogPortal>
 ))
-DialogContent.displayName = DialogPrimitive.Content.displayName;
+DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({
   className,
@@ -1107,7 +1087,7 @@ const DialogTitle = React.forwardRef<
     {...props}
   />
 ))
-DialogTitle.displayName = DialogPrimitive.Title.displayName;
+DialogTitle.displayName = DialogPrimitive.Title.displayName
 
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
@@ -1119,7 +1099,7 @@ const DialogDescription = React.forwardRef<
     {...props}
   />
 ))
-DialogDescription.displayName = DialogPrimitive.Description.displayName;
+DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 const FeatureTourDialog = () => {
   const [step, setStep] = useState(0);
@@ -1164,7 +1144,7 @@ const FeatureTourDialog = () => {
           <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
             <div className="flex flex-col gap-3">
               <Image
-                src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png"
+                src="[https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png](https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png)"
                 alt="Logo"
                 width={48}
                 height={48}
@@ -1232,7 +1212,7 @@ const FeatureTourDialog = () => {
 
               <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center">
                 <Image
-                  src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
+                  src="[https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png](https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png)"
                   alt="Step Visual"
                   width={200}
                   height={200}
@@ -1273,28 +1253,28 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 const MemoizedCpu = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M9 2v2" /><path d="M9 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 15v-1.5" /><path d="M15 9.5V8" />
   </svg>
 ));
 MemoizedCpu.displayName = 'CpuIcon';
 
 const MemoizedShieldCheck = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" />
   </svg>
 ));
 MemoizedShieldCheck.displayName = 'ShieldCheckIcon';
 
 const MemoizedLayers = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.91a2 2 0 0 0 1.66 0l8.57-3.91a1 1 0 0 0 0-1.84Z" /><path d="M2 12.12V16l8.57 3.91a2 2 0 0 0 1.66 0L21 16v-3.88" /><path d="M2 7.23V11l8.57 3.91a2 2 0 0 0 1.66 0L21 11V7.23" />
   </svg>
 ));
 MemoizedLayers.displayName = 'LayersIcon';
 
 const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 ));
@@ -1315,7 +1295,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
+              src="[https://cdn.apex-elite-service.com/wangzhantupian/111.jpg](https://cdn.apex-elite-service.com/wangzhantupian/111.jpg)" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1332,7 +1312,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/222.jpg" 
+              src="[https://cdn.apex-elite-service.com/wangzhantupian/222.jpg](https://cdn.apex-elite-service.com/wangzhantupian/222.jpg)" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1349,7 +1329,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/333.jpg" 
+              src="[https://cdn.apex-elite-service.com/wangzhantupian/333.jpg](https://cdn.apex-elite-service.com/wangzhantupian/333.jpg)" 
               alt="新组件预览" 
               width={500}
               height={300}
@@ -1366,23 +1346,22 @@ const projectShowcaseData = [
     name: "Plum Cave",
     quote: '一个云备份解决方案，它采用 "ChaCha20 + Serpent-256 CBC + HMAC-SHA3-512" 认证加密方案进行数据加密，并使用 ML-KEM-1024 进行抗量子密钥交换。',
     designation: "Next.js 项目",
-    src: "https://cdn.apex-elite-service.com/wangzhantupian/1.jpg",
-    link: "https://plum-cave.netlify.app/",
+    src: "[https://cdn.apex-elite-service.com/wangzhantupian/1.jpg](https://cdn.apex-elite-service.com/wangzhantupian/1.jpg)",
+    link: "[https://plum-cave.netlify.app/](https://plum-cave.netlify.app/)",
   },
   {
     name: "Namer UI",
     quote: "一个现代、美观且独特的可重用 TypeScript 组件的全面集合，专为 Next.js 打造。",
     designation: "Next.js 项目",
-    src: "https://cdn.apex-elite-service.com/wangzhantupian/2.jpg",
-    link: "https://namer-ui.netlify.app/",
+    src: "[https://cdn.apex-elite-service.com/wangzhantupian/2.jpg](https://cdn.apex-elite-service.com/wangzhantupian/2.jpg)",
+    link: "[https://namer-ui.netlify.app/](https://namer-ui.netlify.app/)",
   },
   {
     name: "Namer UI For Vue",
     quote: "一个为 Vue 3 打造的可定制、可重用的 TypeScript 和原生 CSS 组件集合。",
     designation: "Vue 项目",
-    // 修复: 替换可能失效的 raw.githubusercontent 链接
-    src: "https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue",
-    link: "https://namer-ui-for-vue.netlify.app/",
+    src: "[https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue](https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue)",
+    link: "[https://namer-ui-for-vue.netlify.app/](https://namer-ui-for-vue.netlify.app/)",
   },
 ];
 
@@ -1403,8 +1382,8 @@ const infoSectionData1 = {
             值得关注的重要事件和财报。
         </>
     ),
-    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png',
-    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png',
+    primaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png](https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png)',
+    secondaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png](https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png)',
 };
 
 const infoSectionData2 = {
@@ -1424,8 +1403,8 @@ const infoSectionData2 = {
             都能够无缝扩展，满足您的业务需求。
         </>
     ),
-    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png',
-    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png',
+    primaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png](https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png)',
+    secondaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png](https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png)',
 };
 
 // ============================================================================
@@ -1434,7 +1413,7 @@ const infoSectionData2 = {
 
 const scrollAnimationPages = [
   {
-    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg',
+    leftBgImage: '[https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg](https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg)',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1444,7 +1423,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg',
+    rightBgImage: '[https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg](https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg)',
     leftContent: {
       heading: '安心保障',
       description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
@@ -1452,7 +1431,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg',
+    leftBgImage: '[https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg](https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg)',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1462,7 +1441,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg',
+    rightBgImage: '[https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg](https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg)',
     leftContent: {
       heading: '即刻启程',
       description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
@@ -1470,7 +1449,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: 'https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D',
+    leftBgImage: '[https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D](https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D)',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1605,7 +1584,7 @@ function ScrollAdventure() {
                   {page.rightContent && (
                      <div className="text-center">
                       <h2 className="text-3xl font-bold uppercase mb-4 tracking-widest">
-                        {page.rightContent.heading}
+                        {page.rightContent.description}
                       </h2>
                       {typeof page.rightContent.description === 'string' ? (
                         <p className="text-lg">
@@ -1709,21 +1688,21 @@ TextMarqueeSection.displayName = "TextMarqueeSection";
 
 // --- 页脚所需的 SVG 图标 ---
 const Facebook = (props: IconProps) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+  <svg {...props} xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
   </svg>
 );
 Facebook.displayName = "Facebook";
 
 const TwitterIconFooter = (props: IconProps) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+  <svg {...props} xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
      <path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 3.3 4.4 3.3 4.4s-1.4 1.4-3.3 1.4c-1 .6-2.3 1-3.6 1-4.5 0-8.4-3.8-8.4-8.5C5.3 6 5.6 4.8 6.2 3.8 5 5.4 0 8.3 0 8.3s2.1-1.7 4.1-2.1c-1.3-1.6-1.3-3.6 0-5.2 1.9-1.9 4.9-1.9 6.8 0 1.3-.2 2.6-.7 3.7-1.4.2 1.3-.4 2.6-1.5 3.4.9-.1 1.8-.4 2.6-.7Z" />
   </svg>
 );
 TwitterIconFooter.displayName = "TwitterIconFooter";
 
 const Instagram = (props: IconProps) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+  <svg {...props} xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
@@ -1732,7 +1711,7 @@ const Instagram = (props: IconProps) => (
 Instagram.displayName = "Instagram";
 
 const Linkedin = (props: IconProps) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+  <svg {...props} xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
     <rect width="4" height="12" x="2" y="9" />
     <circle cx="4" cy="4" r="2" />
@@ -1770,10 +1749,10 @@ const CustomFooter = () => {
     const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
     const socialIcons = [
-      { name: '小红书', icon: <Facebook className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2?xsec_token=YBu0J314MzsA9PGMJZLZmcLRL3wiuAfNIZeudNRhtPvCk=&xsec_source=app_share&xhsshare=WeixinSession&appuid=6624755f00000000030303c2&apptime=1750082613&share_id=b4da624f466a4aeabb6e1e79662f092d&tab=note&subTab=note' },
-      { name: '知乎', icon: <TwitterIconFooter className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
-      { name: 'Instagram', icon: <Instagram className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.instagram.com/' },
-      { name: 'LinkedIn', icon: <Linkedin className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.linkedin.com/' },
+      { name: '小红书', icon: <Facebook className="h-4 w-4" />, qrcode: '[https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png](https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png)', url: '[https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2?xsec_token=YBu0J314MzsA9PGMJZLZmcLRL3wiuAfNIZeudNRhtPvCk=&xsec_source=app_share&xhsshare=WeixinSession&appuid=6624755f00000000030303c2&apptime=1750082613&share_id=b4da624f466a4aeabb6e1e79662f092d&tab=note&subTab=note](https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2?xsec_token=YBu0J314MzsA9PGMJZLZmcLRL3wiuAfNIZeudNRhtPvCk=&xsec_source=app_share&xhsshare=WeixinSession&appuid=6624755f00000000030303c2&apptime=1750082613&share_id=b4da624f466a4aeabb6e1e79662f092d&tab=note&subTab=note)' },
+      { name: '知乎', icon: <TwitterIconFooter className="h-4 w-4" />, qrcode: '[https://cdn.apex-elite-service.com/wangzhantupian/sara.png](https://cdn.apex-elite-service.com/wangzhantupian/sara.png)', url: '[https://www.zhihu.com/org/apex-elite-service](https://www.zhihu.com/org/apex-elite-service)' },
+      { name: 'Instagram', icon: <Instagram className="h-4 w-4" />, qrcode: '[https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png](https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png)', url: '[https://www.instagram.com/](https://www.instagram.com/)' },
+      { name: 'LinkedIn', icon: <Linkedin className="h-4 w-4" />, qrcode: '[https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png](https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png)', url: '[https://www.linkedin.com/](https://www.linkedin.com/)' },
     ];
 
     return (
@@ -1782,11 +1761,12 @@ const CustomFooter = () => {
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
             <div className="mb-8 w-[300px] h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
+              <Image
+                src="[https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png](https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png)"
                 alt="官方公众号二维码"
-                className="w-full h-full object-cover p-2 rounded-lg"
+                width={280}
+                height={280}
+                className="w-[280px] h-[280px] object-cover p-2 rounded-lg"
               />
             </div>
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300">
@@ -1816,8 +1796,7 @@ const CustomFooter = () => {
                     </Button>
                     {hoveredIcon === social.name && (
                       <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-36 h-36 bg-white border rounded-md shadow-lg p-1 flex items-center justify-center">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={social.qrcode} alt={`${social.name} QR Code`} className="w-full h-full object-cover" />
+                        <Image src={social.qrcode} alt={`${social.name} QR Code`} width={136} height={136} className="w-full h-full object-cover" />
                       </div>
                     )}
                  </a>
