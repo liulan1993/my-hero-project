@@ -1514,7 +1514,7 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
   return (
     <div className="overflow-hidden whitespace-nowrap flex flex-nowrap" ref={ref}>
       <motion.div className="flex whitespace-nowrap flex-nowrap gap-x-10" style={{ x }}>
-        {[...Array(10)].map((_, i) => (
+        {[...Array(18)].map((_, i) => (
           <span key={i} className={cn('block', className)}>{children}</span>
         ))}
       </motion.div>
