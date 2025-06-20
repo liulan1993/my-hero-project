@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { WavyBackground, GridGlobe } from "../components/WavyBackground"; // 导入新的主题组件
+import { WavyBackground, GridGlobe } from '@/components/WavyBackground'; // 导入新的主题组件
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
