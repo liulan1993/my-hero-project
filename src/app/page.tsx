@@ -1465,7 +1465,7 @@ ScrollAdventure.displayName = "ScrollAdventure";
 
 
 // ============================================================================
-// 8. ✨ 新增: 文本跑马灯组件 (Text Marquee)
+// 8. ✨ 新增: 文本跑马灯组件 (Text Marquee) - 已修复无限循环逻辑
 // ============================================================================
 
 // --- 辅助函数：循环取值 ---
@@ -1482,7 +1482,7 @@ interface TextMarqueeProps {
   scrollDependent?: boolean;
 }
 
-// --- Marquee 核心组件 ---
+// --- Marquee 核心组件 (已修复) ---
 const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
   children,
   baseVelocity = -5,
@@ -1499,7 +1499,16 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
   const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
     clamp: false,
   });
-  const x = useTransform(baseX, (v) => `${wrap(-20, -45, v)}%`);
+
+  // --- 关键修复逻辑 ---
+  // 1. 定义重复次数。数字越大，在超宽屏上的表现越稳定。
+  const repetitions = 5; 
+  // 2. 计算一个重复单元所占的百分比宽度。
+  const singleBlockPercentage = 100 / repetitions;
+  // 3. 动态计算正确的循环范围，从 -16.66% 到 0% (以6次重复为例)
+  //    替换掉原来错误的 wrap(-20, -45, v)
+  const x = useTransform(baseX, (v) => `${wrap(-singleBlockPercentage, 0, v)}%`);
+  
   const directionFactor = useRef<number>(1);
 
   useAnimationFrame((t, delta) => {
@@ -1514,7 +1523,8 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
   return (
     <div className="overflow-hidden whitespace-nowrap flex flex-nowrap" ref={ref}>
       <motion.div className="flex whitespace-nowrap flex-nowrap gap-x-10" style={{ x }}>
-        {[...Array(18)].map((_, i) => (
+        {/* 4. 使用上面定义的重复次数来渲染内容 */}
+        {[...Array(repetitions)].map((_, i) => (
           <span key={i} className={cn('block', className)}>{children}</span>
         ))}
       </motion.div>
@@ -1522,6 +1532,22 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
   );
 });
 TextMarquee.displayName = 'TextMarquee';
+
+
+// --- Marquee 组件的容器 Section ---
+const TextMarqueeSection = () => (
+    <section className="py-24 md:py-32 w-full">
+         <div className="space-y-4">
+            <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
+               Framer Motion · 
+            </TextMarquee>
+            <TextMarquee baseVelocity={2} className='font-bold text-2xl text-purple-400'>
+               Tailwind CSS · 
+            </TextMarquee>
+        </div>
+    </section>
+);
+TextMarqueeSection.displayName = "TextMarqueeSection";
 
 
 // --- Marquee 组件的容器 Section ---
