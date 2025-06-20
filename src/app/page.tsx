@@ -87,11 +87,13 @@ interface CustomLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> 
 }
 
 const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => {
-  if (legacyBehavior) {
-    const child = React.Children.only(children) as React.ReactElement;
-    return React.cloneElement(child, { ...props, href });
-  }
-  return <a href={href} {...props}>{children}</a>;
+    if (legacyBehavior) {
+        const child = React.Children.only(children) as React.ReactElement;
+        // 修复: 将props对象先赋值给一个变量，以绕过TypeScript的过度属性检查
+        const newProps = { ...props, href };
+        return React.cloneElement(child, newProps);
+    }
+    return <a href={href} {...props}>{children}</a>;
 };
 
 
