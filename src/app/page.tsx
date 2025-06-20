@@ -1515,7 +1515,7 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
     <div className="overflow-hidden whitespace-nowrap flex flex-nowrap" ref={ref}>
       <motion.div className="flex whitespace-nowrap flex-nowrap gap-x-10" style={{ x }}>
         {[...Array(4)].map((_, i) => (
-          <span key={i} className={cn('block text-6xl md:text-8xl', className)}>{children}</span>
+          <span key={i} className={cn('block', className)}>{children}</span>
         ))}
       </motion.div>
     </div>
@@ -1527,11 +1527,11 @@ TextMarquee.displayName = 'TextMarquee';
 // --- Marquee 组件的容器 Section ---
 const TextMarqueeSection = () => (
     <section className="py-24 md:py-32 w-full">
-         <div className="container mx-auto px-8 space-y-8">
-            <TextMarquee baseVelocity={-2} className='font-bold text-blue-400'>
+         <div className="container mx-auto px-8 space-y-2">
+            <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
                Framer Motion · 
             </TextMarquee>
-            <TextMarquee baseVelocity={2} className='font-bold text-purple-400'>
+            <TextMarquee baseVelocity={2} className='font-bold text-2xl text-purple-400'>
                Tailwind CSS · 
             </TextMarquee>
         </div>
