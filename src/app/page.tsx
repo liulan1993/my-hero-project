@@ -296,8 +296,7 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
             title: "AI赋能", description: "AI驱动的智能，提升业务效率。",
             items: [
                 { title: "实时汇率", href: "#" },
-                // ✨ 更新: 修改了个税计算器的链接
-                { title: "个税计算器", href: "/geshuijisuanqi" },
+                { title: "个税计算器", href: "#" },
                 { title: "专属AI", href: "#" },
                 { title: "敬请期待", href: "#" },
             ],
@@ -1959,4 +1958,5 @@ export default function HomePage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
+}
