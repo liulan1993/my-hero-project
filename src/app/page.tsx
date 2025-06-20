@@ -1,3 +1,5 @@
+// For Next.js App Router, this component uses hooks and event listeners,
+// so it must be declared as a Client Component.
 'use client';
 
 import React, { 
@@ -21,10 +23,11 @@ import {
 } from "framer-motion";
 
 // --- 从新组件中添加的依赖项 ---
-import { Menu, MoveRight, X } from 'lucide-react';
+import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from 'class-variance-authority';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -50,7 +53,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-white text-black hover:bg-white/90",
         destructive: "bg-red-500 text-slate-50 hover:bg-red-500/90",
-        outline: "border border-slate-200 bg-transparent hover:bg-slate-100 hover:text-slate-900",
+        outline: "border border-slate-700 bg-transparent hover:bg-slate-800",
         secondary: "bg-slate-100 text-slate-900 hover:bg-slate-100/80",
         ghost: "hover:bg-slate-800 hover:text-slate-50",
         link: "text-slate-900 underline-offset-4 hover:underline",
@@ -689,7 +692,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 
 // ============================================================================
-// 4. 新增: 带图库的行动号召(CTA)区域组件 (已修改为单图)
+// 4. 新增: 带图库的行动号召(CTA)区域组件
 // ============================================================================
 const SPRING_TRANSITION_CONFIG = {
   type: "spring" as const, // Bug Fix: Add 'as const' for type safety
@@ -744,7 +747,6 @@ const ContainerAnimated = React.forwardRef<
 });
 ContainerAnimated.displayName = "ContainerAnimated";
 
-
 const CtaWithGallerySection = () => {
   return (
     <section className="bg-transparent py-24">
@@ -762,7 +764,7 @@ const CtaWithGallerySection = () => {
             in today&apos;s competitive marketplace.
           </ContainerAnimated>
           <ContainerAnimated>
-            <Button className="bg-rose-500 hover:bg-rose-500/90 text-white">Start Scaling Today</Button>
+            <FeatureTourDialog />
           </ContainerAnimated>
         </ContainerStagger>
 
@@ -787,6 +789,247 @@ const CtaWithGallerySection = () => {
   )
 }
 CtaWithGallerySection.displayName = "CtaWithGallerySection";
+
+
+// ============================================================================
+// 5. 新增: 对话框/拓展卡片组件
+// ============================================================================
+const Dialog = DialogPrimitive.Root
+
+const DialogTrigger = DialogPrimitive.Trigger
+
+const DialogPortal = DialogPrimitive.Portal
+
+const DialogClose = DialogPrimitive.Close
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className,
+    )}
+    {...props}
+  />
+))
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+))
+DialogContent.displayName = DialogPrimitive.Content.displayName
+
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className,
+    )}
+    {...props}
+  />
+)
+DialogHeader.displayName = "DialogHeader"
+
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className,
+    )}
+    {...props}
+  />
+))
+DialogTitle.displayName = DialogPrimitive.Title.displayName
+
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-neutral-400", className)}
+    {...props}
+  />
+))
+DialogDescription.displayName = DialogPrimitive.Description.displayName
+
+
+const FeatureTourDialog = () => {
+  const [step, setStep] = useState(0);
+
+  const steps = [
+    {
+      title: "Let's Get Started",
+      description: "Kick off your experience with a brief introduction to our toolkit.",
+    },
+    {
+      title: "Designed For Flexibility",
+      description: "Drag, drop, and build with fully customizable components.",
+    },
+    {
+      title: "Scalable Codebase",
+      description: "Every block is built to be reusable and scalable with your projects.",
+    },
+    {
+      title: "Join Our Community",
+      description: "Get help, share ideas, and grow with developers worldwide.",
+    },
+  ];
+
+  const next = () => {
+    if (step < steps.length - 1) setStep(step + 1);
+  };
+
+  return (
+    <Dialog onOpenChange={(open) => !open && setStep(0)}>
+      <DialogTrigger asChild>
+        <Button className="bg-rose-500 hover:bg-rose-500/90 text-white">Start Scaling Today</Button>
+      </DialogTrigger>
+
+      <DialogContent
+        className={cn(
+          "max-w-3xl p-0 overflow-hidden rounded-xl border-neutral-800 shadow-2xl",
+          "bg-black text-white",
+          "data-[state=open]:animate-none data-[state=closed]:animate-none"
+        )}
+      >
+        <div className="flex flex-col md:flex-row w-full h-full">
+          {/* Sidebar */}
+          <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
+            <div className="flex flex-col gap-3">
+              <Image
+                src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png"
+                alt="Logo"
+                width={48}
+                height={48}
+                className="w-12 h-12 rounded-full border-4 border-neutral-800"
+                unoptimized
+              />
+              <h2 className="text-lg font-medium">Origin UI Onboarding</h2>
+              <p className="text-sm text-neutral-400">
+                Explore our features step-by-step to get the best out of your experience.
+              </p>
+              <div className="flex flex-col gap-3 mt-6">
+                {steps.map((s, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "flex items-center gap-2 text-sm transition-opacity",
+                      index === step
+                        ? "font-semibold text-white"
+                        : "opacity-60 hover:opacity-100"
+                    )}
+                  >
+                    {index < step ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
+                    )}
+                    <span className="font-normal">{s.title}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="w-full md:w-2/3 p-8 flex flex-col justify-between">
+            <div className="space-y-4">
+              <DialogHeader>
+                <AnimatePresence mode="wait">
+                  <motion.h2
+                    key={steps[step].title}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25 }}
+                    className="text-2xl font-medium"
+                  >
+                    {steps[step].title}
+                  </motion.h2>
+                </AnimatePresence>
+
+                <div className="min-h-[60px]">
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={steps[step].description}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.25 }}
+                      className="text-neutral-400 text-base"
+                    >
+                      {steps[step].description}
+                    </motion.p>
+                  </AnimatePresence>
+                </div>
+              </DialogHeader>
+
+              {/* Image */}
+              <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center">
+                <Image
+                  src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
+                  alt="Step Visual"
+                  width={200}
+                  height={200}
+                  className="h-auto object-contain rounded-lg"
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 flex justify-between items-center">
+              <DialogClose asChild>
+                <Button variant="outline">Skip</Button>
+              </DialogClose>
+
+              {step < steps.length - 1 ? (
+                <Button variant="outline" onClick={next}>
+                  Continue
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <DialogClose asChild>
+                  <Button variant="outline">Finish</Button>
+                </DialogClose>
+              )}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+FeatureTourDialog.displayName = "FeatureTourDialog";
 
 
 // ============================================================================
@@ -1006,7 +1249,6 @@ export default function HomePage() {
         <InfoSectionWithMockup {...infoSectionData1} />
         <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
 
-        {/* --- 新增的组件实例 --- */}
         <CtaWithGallerySection />
       </main>
     </div>
