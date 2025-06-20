@@ -1531,26 +1531,12 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
     </div>
   );
 });
-TextMarquee.displayName = 'TextMarqueeSection';
+// --- FIX: Corrected displayName from 'TextMarqueeSection' to 'TextMarquee' ---
+TextMarquee.displayName = 'TextMarquee';
 
 
 // --- Marquee 组件的容器 Section ---
-const TextMarqueeSection = () => (
-    <section className="py-24 md:py-32 w-full">
-         <div className="space-y-4">
-            <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
-               Framer Motion · 
-            </TextMarquee>
-            <TextMarquee baseVelocity={2} className='font-bold text-2xl text-purple-400'>
-               Tailwind CSS · 
-            </TextMarquee>
-        </div>
-    </section>
-);
-TextMarqueeSection.displayName = "TextMarqueeSection";
-
-
-// --- Marquee 组件的容器 Section ---
+// --- FIX: Removed duplicated component declaration ---
 const TextMarqueeSection = () => (
     <section className="py-24 md:py-32 w-full">
         {/* MODIFIED: Changed space-y-8 to space-y-1 to reduce vertical gap */}
