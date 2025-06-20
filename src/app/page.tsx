@@ -8,11 +8,8 @@ import React, {
     useState, 
     useMemo,
     useCallback,
-    forwardRef // 新增 forwardRef
+    forwardRef 
 } from 'react';
-// 修复: 移除 'next/image' 和 'next/link' 的导入，因为它们在标准React环境中不可用
-// import Image from 'next/image';
-// import Link from 'next/link';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -22,14 +19,12 @@ import {
   AnimatePresence,
   type Variants,
   type HTMLMotionProps,
-  // --- 新增 Framer Motion 依赖 ---
   useSpring,
   useVelocity,
   useAnimationFrame,
   useMotionValue,
 } from "framer-motion";
 
-// --- 从新组件中添加的依赖项 ---
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
@@ -47,8 +42,6 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// 修复: 为兼容的 Image 和 Link 组件创建明确的 props 类型
-
 interface CustomImageProps {
     src: string;
     alt: string;
@@ -57,9 +50,9 @@ interface CustomImageProps {
     height?: number | string;
     style?: React.CSSProperties;
     fill?: boolean;
-    priority?: boolean; // 虽然未使用，但保留以避免在调用时出错
-    unoptimized?: boolean; // 虽然未使用，但保留以避免在调用时出错
-    sizes?: string; // 虽然未使用，但保留以避免在调用时出错
+    priority?: boolean;
+    unoptimized?: boolean;
+    sizes?: string;
 }
 
 
@@ -83,13 +76,12 @@ interface CustomLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> 
   href: string;
   children: React.ReactNode;
   legacyBehavior?: boolean;
-  passHref?: boolean; // 虽然未使用，但保留以避免在调用时出错
+  passHref?: boolean;
 }
 
 const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => {
     if (legacyBehavior) {
         const child = React.Children.only(children) as React.ReactElement;
-        // 修复: 将props对象先赋值给一个变量，以绕过TypeScript的过度属性检查
         const newProps = { ...props, href };
         return React.cloneElement(child, newProps);
     }
@@ -101,7 +93,6 @@ const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => 
 // 1. 新的导航栏组件 (合并自用户提供的文件)
 // ============================================================================
 
-// --- 辅助组件: Button (来自 button.tsx) ---
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
@@ -148,8 +139,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-
-// --- 辅助组件: NavigationMenu (来自 navigation-menu.tsx) ---
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
@@ -248,8 +237,6 @@ const NavigationMenuViewport = React.forwardRef<
 ));
 NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName;
 
-
-// --- 主导航栏组件 (来自 header.tsx) ---
 const AppNavigationBar = () => {
     const navigationItems = [
         { title: "Home", href: "/", description: "" },
@@ -386,7 +373,6 @@ const AppNavigationBar = () => {
 }
 AppNavigationBar.displayName = "AppNavigationBar";
 
-
 // ============================================================================
 // 2. 页面区域和布局组件 (现有代码)
 // ============================================================================
@@ -490,9 +476,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
             </div>
           </div>
         ))}
-        <div style={{ height: `${height}px` }} className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-neutral-700 to-transparent to-[99%] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]">
-          <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute inset-x-0 top-0 w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-transparent from-[0%] via-[10%] rounded-full" />
-        </div>
+        <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-transparent from-[0%] via-[10%] rounded-full" />
       </div>
     </div>
   );
@@ -623,7 +607,6 @@ const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
 };
 ProjectShowcase.displayName = "ProjectShowcase";
 
-
 // ============================================================================
 // 3. 新增: 带模型图的信息卡片区域组件
 // ============================================================================
@@ -674,7 +657,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                      whileInView="visible"
                      viewport={{ once: true, amount: 0.2 }}
                 >
-                    {/* Text Content */}
                     <motion.div
                         className={cn(
                             "flex flex-col justify-center gap-4 mt-10 md:mt-0",
@@ -695,7 +677,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                         </p>
                     </motion.div>
 
-                    {/* App mockup/Image Content */}
                     <motion.div
                         className={cn(
                             "relative mt-10 md:mt-0 mx-auto w-full max-w-[300px] md:max-w-[471px]",
@@ -704,7 +685,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                          )}
                         variants={itemVariants}
                     >
-                        {/* Decorative Background Element */}
                         <motion.div
                              className={`absolute w-[300px] h-[317px] md:w-[472px] md:h-[500px] bg-[#090909] rounded-[32px] z-0`}
                              style={{
@@ -728,7 +708,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                             />
                         </motion.div>
 
-                        {/* Main Mockup Card */}
                         <motion.div
                             className="relative w-full h-[405px] md:h-[637px] bg-[#ffffff0a] rounded-[32px] backdrop-blur-[15px] backdrop-brightness-[100%] border-0 z-10 overflow-hidden"
                             initial={{ y: reverseLayout ? 0 : 0 }}
@@ -756,7 +735,7 @@ InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 // 4. 新增: 带图库的行动号召(CTA)区域组件
 // ============================================================================
 const SPRING_TRANSITION_CONFIG = {
-  type: "spring" as const, // Bug Fix: Add 'as const' for type safety
+  type: "spring" as const, 
   stiffness: 100,
   damping: 16,
   mass: 0.75,
@@ -851,16 +830,12 @@ const CtaWithGallerySection = () => {
 }
 CtaWithGallerySection.displayName = "CtaWithGallerySection";
 
-
 // ============================================================================
 // 5. 新增: 对话框/拓展卡片组件
 // ============================================================================
 const Dialog = DialogPrimitive.Root
-
 const DialogTrigger = DialogPrimitive.Trigger
-
 const DialogPortal = DialogPrimitive.Portal
-
 const DialogClose = DialogPrimitive.Close
 
 const DialogOverlay = React.forwardRef<
@@ -943,7 +918,6 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
-
 const FeatureTourDialog = () => {
   const [step, setStep] = useState(0);
 
@@ -984,7 +958,6 @@ const FeatureTourDialog = () => {
         )}
       >
         <div className="flex flex-col md:flex-row w-full h-full">
-          {/* Sidebar */}
           <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
             <div className="flex flex-col gap-3">
               <Image
@@ -1022,7 +995,6 @@ const FeatureTourDialog = () => {
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="w-full md:w-2/3 p-8 flex flex-col justify-between">
             <div className="space-y-4">
               <DialogHeader>
@@ -1055,7 +1027,6 @@ const FeatureTourDialog = () => {
                 </div>
               </DialogHeader>
 
-              {/* Image */}
               <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center">
                 <Image
                   src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
@@ -1067,7 +1038,6 @@ const FeatureTourDialog = () => {
               </div>
             </div>
 
-            {/* Footer */}
             <div className="mt-6 flex justify-between items-center">
               <DialogClose asChild>
                 <Button variant="outline">Skip</Button>
@@ -1092,12 +1062,9 @@ const FeatureTourDialog = () => {
 }
 FeatureTourDialog.displayName = "FeatureTourDialog";
 
-
 // ============================================================================
 // 6. 页面级别的静态数据 (现有代码)
 // ============================================================================
-
-// --- 修复: 添加缺失的 IconProps 接口 ---
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
 }
@@ -1129,7 +1096,6 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
   </svg>
 ));
 MemoizedZap.displayName = 'ZapIcon';
-
 
 const features = [
   { icon: MemoizedCpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
@@ -1216,7 +1182,6 @@ const projectShowcaseData = [
   },
 ];
 
-// --- 新增: 信息卡片区域的数据 ---
 const infoSectionData1 = {
     title: (
         <>
@@ -1258,7 +1223,6 @@ const infoSectionData2 = {
     primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png',
     secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png',
 };
-
 
 // ============================================================================
 // 7. 新增: 分屏滚动动画区域组件
@@ -1402,7 +1366,6 @@ function ScrollAdventure() {
 
         return (
           <div key={idx} className="absolute inset-0">
-            {/* 左半部分 Left Half */}
             <div
               className="absolute top-0 left-0 w-1/2 h-full transition-transform duration-[1000ms] ease-in-out"
               style={{ transform: leftTrans }}
@@ -1426,7 +1389,6 @@ function ScrollAdventure() {
               </div>
             </div>
 
-            {/* 右半部分 Right Half */}
             <div
               className="absolute top-0 left-1/2 w-1/2 h-full transition-transform duration-[1000ms] ease-in-out"
               style={{ transform: rightTrans }}
@@ -1463,18 +1425,15 @@ function ScrollAdventure() {
 }
 ScrollAdventure.displayName = "ScrollAdventure";
 
-
 // ============================================================================
-// 8. ✨ 新增: 文本跑马灯组件 (Text Marquee) - 已修复无限循环逻辑
+// 8. ✨ 新增: 文本跑马灯组件 (Text Marquee)
 // ============================================================================
 
-// --- 辅助函数：循环取值 ---
 const wrap = (min: number, max: number, v: number) => {
   const rangeSize = max - min;
   return ((((v - min) % rangeSize) + rangeSize) % rangeSize) + min;
 };
 
-// --- Marquee 组件属性接口 ---
 interface TextMarqueeProps {
   children: string;
   baseVelocity?: number;
@@ -1482,7 +1441,6 @@ interface TextMarqueeProps {
   scrollDependent?: boolean;
 }
 
-// --- Marquee 核心组件 (已修复) ---
 const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
   children,
   baseVelocity = -5,
@@ -1500,13 +1458,8 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
     clamp: false,
   });
 
-  // --- 关键修复逻辑 ---
-  // 1. 定义重复次数。数字越大，在超宽屏上的表现越稳定。
   const repetitions = 30; 
-  // 2. 计算一个重复单元所占的百分比宽度。
   const singleBlockPercentage = 100 / repetitions;
-  // 3. 动态计算正确的循环范围，从 -16.66% 到 0% (以6次重复为例)
-  //    替换掉原来错误的 wrap(-20, -45, v)
   const x = useTransform(baseX, (v) => `${wrap(-singleBlockPercentage, 0, v)}%`);
   
   const directionFactor = useRef<number>(1);
@@ -1523,7 +1476,6 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
   return (
     <div className="overflow-hidden whitespace-nowrap flex flex-nowrap" ref={ref}>
       <motion.div className="flex whitespace-nowrap flex-nowrap gap-x-10" style={{ x }}>
-        {/* 4. 使用上面定义的重复次数来渲染内容 */}
         {[...Array(repetitions)].map((_, i) => (
           <span key={i} className={cn('block', className)}>{children}</span>
         ))}
@@ -1531,12 +1483,8 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
     </div>
   );
 });
-// --- FIX: Corrected displayName from 'TextMarqueeSection' to 'TextMarquee' ---
 TextMarquee.displayName = 'TextMarquee';
 
-
-// --- Marquee 组件的容器 Section ---
-// --- FIX: Removed duplicated component declaration ---
 const TextMarqueeSection = () => (
     <section className="py-24 md:py-32 w-full">
          <div className="space-y-1">
@@ -1551,20 +1499,159 @@ const TextMarqueeSection = () => (
 );
 TextMarqueeSection.displayName = "TextMarqueeSection";
 
+// ============================================================================
+// 9. ✨ 新增: 页脚组件 (Custom Footer)
+// ============================================================================
+
+// --- 页脚所需的 SVG 图标 ---
+type IconProps = React.HTMLAttributes<SVGElement>;
+
+const Facebook = (props: IconProps) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+Facebook.displayName = "Facebook";
+
+const Twitter = (props: IconProps) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+    <path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 3.3 4.4 3.3 4.4s-1.4 1.4-3.3 1.4c-1.8 0-3.3-1.4-3.3-1.4s-1.4 1.4-3.3 1.4-3.3-1.4-3.3-1.4S2 11.8 2 4.6c0-1.6 1.4-3.3 3.3-3.3s3.3 1.8 3.3 1.8-1.4-1.4-3.3-1.4c-1.8 0-3.3 1.4-3.3 1.4s1.4 1.4 3.3 1.4 3.3-1.4 3.3-1.4 1.4 1.4 3.3 1.4 3.3-1.4 3.3-1.4c1.8 0 3.3-1.4 3.3-1.4s-1.4 1.4-3.3 1.4c-1.9 0-3.3-1.4-3.3-1.4s1.4-1.4 3.3-1.4c1.9 0 3.3 1.4 3.3 1.4s.7-2.1 2-3.4c1.3-1.3 3.4-1.4 3.4-1.4z" />
+  </svg>
+);
+Twitter.displayName = "Twitter";
+
+const Instagram = (props: IconProps) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+Instagram.displayName = "Instagram";
+
+const Linkedin = (props: IconProps) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect width="4" height="12" x="2" y="9" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
+Linkedin.displayName = "Linkedin";
+
+// 页脚中使用的 Input 和 Label 组件
+const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          'flex h-10 w-full rounded-md border border-slate-700 bg-black px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-50',
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Input.displayName = 'Input';
+
+const Label = React.forwardRef<
+  React.ElementRef<'label'>,
+  React.ComponentPropsWithoutRef<'label'>
+>(({ className, ...props }, ref) => (
+  <label ref={ref} className={cn('text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70', className)} {...props} />
+));
+Label.displayName = 'Label';
+
+const CustomFooter = () => {
+    const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
+
+    const socialIcons = [
+      { name: 'Facebook', icon: <Facebook className="h-4 w-4" />, qrcode: 'https://placehold.co/300x300/png?text=Facebook+QR', url: 'https://www.facebook.com/' },
+      { name: 'Twitter', icon: <Twitter className="h-4 w-4" />, qrcode: 'https://placehold.co/300x300/png?text=Twitter+QR', url: 'https://twitter.com/' },
+      { name: 'Instagram', icon: <Instagram className="h-4 w-4" />, qrcode: 'https://placehold.co/300x300/png?text=Instagram+QR', url: 'https://www.instagram.com/' },
+      { name: 'LinkedIn', icon: <Linkedin className="h-4 w-4" />, qrcode: 'https://placehold.co/300x300/png?text=LinkedIn+QR', url: 'https://www.linkedin.com/' },
+    ];
+
+    return (
+      <footer className="bg-black text-white py-12 border-t border-slate-800 mt-20">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col items-center">
+            <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
+            <div className="mb-8 w-[300px] h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center">
+              <img
+                src="https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
+                alt="官方公众号二维码"
+                className="w-full h-full object-cover p-2 rounded-lg"
+              />
+            </div>
+            <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300">
+              <Link href="#" className="hover:text-white">Home</Link>
+              <Link href="#" className="hover:text-white">About</Link>
+              <Link href="#" className="hover:text-white">Services</Link>
+              <Link href="#" className="hover:text-white">Products</Link>
+              <Link href="#" className="hover:text-white">Contact</Link>
+            </nav>
+            <div className="mb-8 flex space-x-4">
+              {socialIcons.map((social) => (
+                 <a
+                    key={social.name}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "relative",
+                      hoveredIcon === social.name ? "z-50" : "z-0"
+                    )}
+                    onMouseEnter={() => setHoveredIcon(social.name)}
+                    onMouseLeave={() => setHoveredIcon(null)}
+                  >
+                    <Button variant="outline" size="icon" className="rounded-full">
+                      {social.icon}
+                      <span className="sr-only">{social.name}</span>
+                    </Button>
+                    {hoveredIcon === social.name && (
+                      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-36 h-36 bg-white border rounded-md shadow-lg p-1 flex items-center justify-center">
+                        <img src={social.qrcode} alt={`${social.name} QR Code`} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                 </a>
+              ))}
+            </div>
+            <div className="mb-8 w-full max-w-md">
+              <form className="flex space-x-2">
+                <div className="flex-grow">
+                  <Label htmlFor="email-footer" className="sr-only">Email</Label>
+                  <Input id="email-footer" placeholder="Enter your email" type="email" className="rounded-full" />
+                </div>
+                <Button type="submit" variant="default" className="rounded-full">Subscribe</Button>
+              </form>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-neutral-400">
+                © 2024 Your Company. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    );
+}
+CustomFooter.displayName = "CustomFooter";
+
 
 // ============================================================================
-// 9. 主页面组件 (已集成新组件)
+// 10. 主页面组件 (已集成新组件)
 // ============================================================================
 
 export default function HomePage() {
   return (
     <div className="relative isolate bg-black text-white">
       <AppNavigationBar />
-      {/* 全局背景元素 */}
       <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
       <Scene />
 
-      {/* 页面内容 */}
       <main className="relative z-10 pt-20">
         <div className="min-h-screen w-full flex flex-col items-center justify-center py-24">
             <div className="w-full max-w-6xl px-8 space-y-16 flex flex-col items-center justify-center">
@@ -1604,16 +1691,16 @@ export default function HomePage() {
 
         <CtaWithGallerySection />
 
-        {/* 新增的滚动动画组件 - 容器用于居中和边距 */}
         <div className="py-24 px-8 flex justify-center items-center">
             <ScrollAdventure />
         </div>
 
-        {/* ✨ 新增的跑马灯区域 ✨ */}
         <div className="max-w-7xl mx-auto px-8">
             <TextMarqueeSection />
         </div>
 
+        {/* --- ✨ 页脚组件已添加在此处 ✨ --- */}
+        <CustomFooter />
       </main>
     </div>
   );
