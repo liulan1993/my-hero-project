@@ -1504,7 +1504,8 @@ TextMarqueeSection.displayName = "TextMarqueeSection";
 // ============================================================================
 
 // --- 页脚所需的 SVG 图标 ---
-type IconProps = React.HTMLAttributes<SVGElement>;
+// 修复: 移除重复的 IconProps 定义
+// type IconProps = React.HTMLAttributes<SVGElement>; 
 
 const Facebook = (props: IconProps) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
@@ -1705,7 +1706,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-// ============================================================================
-// 11. 页面级别的样式 (现有代码)
-// ============================================================================ 
