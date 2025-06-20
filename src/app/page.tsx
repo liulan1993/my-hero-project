@@ -1531,7 +1531,7 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
     </div>
   );
 });
-TextMarquee.displayName = 'TextMarquee';
+TextMarquee.displayName = 'TextMarqueeSection';
 
 
 // --- Marquee 组件的容器 Section ---
