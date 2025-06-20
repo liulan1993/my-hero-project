@@ -1,3 +1,5 @@
+// For Next.js App Router, this component uses hooks and event listeners,
+// so it must be declared as a Client Component.
 'use client';
 
 import React, { 
@@ -24,7 +26,7 @@ import {
 } from "framer-motion";
 
 // 导入服务器动作
-import { saveContactToRedis } from './actions';
+import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
@@ -58,7 +60,7 @@ interface CustomImageProps {
 }
 
 
-const Image = ({ src, alt, className, width, height, style, fill, onError }: CustomImageProps) => {
+const Image = ({ src, alt, className, width, height, style, fill, onError, unoptimized = false, priority = false }: CustomImageProps) => {
     const [imgSrc, setImgSrc] = useState(src);
 
     const handleError = () => {
@@ -78,8 +80,9 @@ const Image = ({ src, alt, className, width, height, style, fill, onError }: Cus
         });
     }
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={imgSrc} alt={alt} className={className} width={width as number} height={height as number} style={combinedStyle} onError={handleError} />;
+    return <img src={imgSrc} alt={alt} className={className} width={width as number} height={height as number} style={combinedStyle} onError={handleError} loading={priority ? 'eager' : 'lazy'} />;
 };
+Image.displayName = "Image";
 
 
 interface CustomLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -97,6 +100,7 @@ const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => 
     }
     return <a href={href} {...props}>{children}</a>;
 };
+Link.displayName = "Link";
 
 
 // ============================================================================
@@ -183,6 +187,7 @@ const NavigationMenuList = React.forwardRef<
 NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName;
 
 const NavigationMenuItem = NavigationMenuPrimitive.Item;
+NavigationMenuItem.displayName = "NavigationMenuItem";
 
 const navigationMenuTriggerStyle = cva(
   "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-slate-800/50 data-[state=open]:bg-slate-800/50"
@@ -226,7 +231,8 @@ const NavigationMenuLink = React.forwardRef<
     React.ComponentPropsWithoutRef<'a'> & { asChild?: boolean }
 >(({ className, asChild, ...props }, ref) => {
     const Comp = asChild ? Slot : 'a';
-    return <Comp ref={ref} className={className} {...props} />;
+    // eslint-disable-next-line jsx-a11y/anchor-has-content
+    return <Comp ref={ref} className={cn("focus:shadow-md", className)} {...props} />;
 });
 NavigationMenuLink.displayName = 'NavigationMenuLink';
 
@@ -421,7 +427,6 @@ const countryData = {
     'ID': { name: '印度尼西亚', code: '+62', phoneRegex: /^8\d{9,11}$/, states: ['Jakarta', 'West Java', 'East Java', 'Central Java', 'Banten', 'North Sumatra', 'South Sulawesi', 'Bali', 'Riau', 'Lampung'] },
 };
 const serviceAreas = ['企业落地', '准证申请', '子女教育', '溯源体检', '健康管理'];
-// 修复: 通过对 Object.keys 的结果进行类型断言来解决 TypeScript 类型错误。
 const countryOptions = (Object.keys(countryData) as Array<keyof typeof countryData>).map(key => ({ value: key, label: `${countryData[key].name} (${countryData[key].code})` }));
 const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:gmail|outlook|hotmail|qq|163|yahoo)\.com$/i;
 
@@ -1003,7 +1008,7 @@ const CtaWithGallerySection = () => {
           <Image
             className="object-cover"
             fill
-            src="[https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D](https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)"
+            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Global network"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
@@ -1145,7 +1150,7 @@ const FeatureTourDialog = () => {
           <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
             <div className="flex flex-col gap-3">
               <Image
-                src="[https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png](https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png)"
+                src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png"
                 alt="Logo"
                 width={48}
                 height={48}
@@ -1211,13 +1216,14 @@ const FeatureTourDialog = () => {
                 </div>
               </DialogHeader>
 
-              <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center">
+              {/* 修复: 使图片填充其容器 */}
+              <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
                 <Image
-                  src="[https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png](https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png)"
+                  src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
                   alt="Step Visual"
                   width={200}
                   height={200}
-                  className="h-auto object-contain rounded-lg"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
@@ -1254,28 +1260,28 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 const MemoizedCpu = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M9 2v2" /><path d="M9 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 15v-1.5" /><path d="M15 9.5V8" />
   </svg>
 ));
 MemoizedCpu.displayName = 'CpuIcon';
 
 const MemoizedShieldCheck = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" />
   </svg>
 ));
 MemoizedShieldCheck.displayName = 'ShieldCheckIcon';
 
 const MemoizedLayers = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.91a2 2 0 0 0 1.66 0l8.57-3.91a1 1 0 0 0 0-1.84Z" /><path d="M2 12.12V16l8.57 3.91a2 2 0 0 0 1.66 0L21 16v-3.88" /><path d="M2 7.23V11l8.57 3.91a2 2 0 0 0 1.66 0L21 11V7.23" />
   </svg>
 ));
 MemoizedLayers.displayName = 'LayersIcon';
 
 const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 ));
@@ -1296,7 +1302,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
           <div>
             <Image 
-              src="[https://cdn.apex-elite-service.com/wangzhantupian/111.jpg](https://cdn.apex-elite-service.com/wangzhantupian/111.jpg)" 
+              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1313,7 +1319,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。</p>
           <div>
             <Image 
-              src="[https://cdn.apex-elite-service.com/wangzhantupian/222.jpg](https://cdn.apex-elite-service.com/wangzhantupian/222.jpg)" 
+              src="https://cdn.apex-elite-service.com/wangzhantupian/222.jpg" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1330,7 +1336,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
             <Image 
-              src="[https://cdn.apex-elite-service.com/wangzhantupian/333.jpg](https://cdn.apex-elite-service.com/wangzhantupian/333.jpg)" 
+              src="https://cdn.apex-elite-service.com/wangzhantupian/333.jpg" 
               alt="新组件预览" 
               width={500}
               height={300}
@@ -1347,22 +1353,22 @@ const projectShowcaseData = [
     name: "Plum Cave",
     quote: '一个云备份解决方案，它采用 "ChaCha20 + Serpent-256 CBC + HMAC-SHA3-512" 认证加密方案进行数据加密，并使用 ML-KEM-1024 进行抗量子密钥交换。',
     designation: "Next.js 项目",
-    src: "[https://cdn.apex-elite-service.com/wangzhantupian/1.jpg](https://cdn.apex-elite-service.com/wangzhantupian/1.jpg)",
-    link: "[https://plum-cave.netlify.app/](https://plum-cave.netlify.app/)",
+    src: "https://cdn.apex-elite-service.com/wangzhantupian/1.jpg",
+    link: "https://plum-cave.netlify.app/",
   },
   {
     name: "Namer UI",
     quote: "一个现代、美观且独特的可重用 TypeScript 组件的全面集合，专为 Next.js 打造。",
     designation: "Next.js 项目",
-    src: "[https://cdn.apex-elite-service.com/wangzhantupian/2.jpg](https://cdn.apex-elite-service.com/wangzhantupian/2.jpg)",
-    link: "[https://namer-ui.netlify.app/](https://namer-ui.netlify.app/)",
+    src: "https://cdn.apex-elite-service.com/wangzhantupian/2.jpg",
+    link: "https://namer-ui.netlify.app/",
   },
   {
     name: "Namer UI For Vue",
     quote: "一个为 Vue 3 打造的可定制、可重用的 TypeScript 和原生 CSS 组件集合。",
     designation: "Vue 项目",
-    src: "[https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue](https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue)",
-    link: "[https://namer-ui-for-vue.netlify.app/](https://namer-ui-for-vue.netlify.app/)",
+    src: "https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue",
+    link: "https://namer-ui-for-vue.netlify.app/",
   },
 ];
 
@@ -1383,8 +1389,8 @@ const infoSectionData1 = {
             值得关注的重要事件和财报。
         </>
     ),
-    primaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png](https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png)',
-    secondaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png](https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png)',
+    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png',
+    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png',
 };
 
 const infoSectionData2 = {
@@ -1404,8 +1410,8 @@ const infoSectionData2 = {
             都能够无缝扩展，满足您的业务需求。
         </>
     ),
-    primaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png](https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png)',
-    secondaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png](https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png)',
+    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png',
+    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png',
 };
 
 // ============================================================================
@@ -1414,7 +1420,7 @@ const infoSectionData2 = {
 
 const scrollAnimationPages = [
   {
-    leftBgImage: '[https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg](https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg)',
+    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1424,7 +1430,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: '[https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg](https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg)',
+    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg',
     leftContent: {
       heading: '安心保障',
       description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
@@ -1432,7 +1438,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: '[https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg](https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg)',
+    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1442,7 +1448,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: '[https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg](https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg)',
+    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg',
     leftContent: {
       heading: '即刻启程',
       description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
@@ -1450,7 +1456,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: '[https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D](https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D)',
+    leftBgImage: 'https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1469,6 +1475,7 @@ function ScrollAdventure() {
   const numOfPages = scrollAnimationPages.length;
   const animTime = 1000;
   const scrolling = useRef(false);
+  const touchStartY = useRef(0);
   const componentRef = useRef<HTMLDivElement>(null);
 
   const navigateUp = useCallback(() => {
@@ -1483,15 +1490,10 @@ function ScrollAdventure() {
     }
   }, [currentPage, numOfPages]);
 
-  useEffect(() => {
-    const scrollComponent = componentRef.current;
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
+  const handleScroll = useCallback((deltaY: number) => {
       if (scrolling.current) return;
       scrolling.current = true;
-
-      if (e.deltaY > 0) {
+      if (deltaY > 0) {
         navigateDown();
       } else {
         navigateUp();
@@ -1499,72 +1501,83 @@ function ScrollAdventure() {
       setTimeout(() => {
         scrolling.current = false;
       }, animTime);
+  }, [navigateDown, navigateUp]);
+
+  useEffect(() => {
+    const scrollComponent = componentRef.current;
+    if (!scrollComponent) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      handleScroll(e.deltaY);
+    };
+    
+    const handleTouchStart = (e: TouchEvent) => {
+        touchStartY.current = e.touches[0].clientY;
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => {
+        e.preventDefault();
+        const touchEndY = e.changedTouches[0].clientY;
+        const deltaY = touchEndY - touchStartY.current;
+        // 阈值判断，防止过于灵敏
+        if(Math.abs(deltaY) > 50) {
+            handleScroll(-deltaY); // 注意方向与滚轮相反
+            touchStartY.current = touchEndY; // 重置起始点
+        }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (scrollComponent) {
         const rect = scrollComponent.getBoundingClientRect();
         const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
 
-        if (isVisible) {
-          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            e.preventDefault(); 
-            if (scrolling.current) return;
-            scrolling.current = true;
-            
-            if (e.key === 'ArrowUp') {
-                navigateUp();
-            } else {
-                navigateDown();
-            }
-
-            setTimeout(() => {
-              scrolling.current = false;
-            }, animTime);
-          }
+        if (isVisible && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+            e.preventDefault();
+            handleScroll(e.key === 'ArrowDown' ? 1 : -1);
         }
-      }
     };
-
-    if (scrollComponent) {
-      scrollComponent.addEventListener('wheel', handleWheel, { passive: false });
-    }
+    
+    scrollComponent.addEventListener('wheel', handleWheel, { passive: false });
+    scrollComponent.addEventListener('touchstart', handleTouchStart, { passive: true });
+    scrollComponent.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      if (scrollComponent) {
-        scrollComponent.removeEventListener('wheel', handleWheel);
-      }
+      scrollComponent.removeEventListener('wheel', handleWheel);
+      scrollComponent.removeEventListener('touchstart', handleTouchStart);
+      scrollComponent.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigateUp, navigateDown]);
+  }, [handleScroll]);
 
   return (
-    <div ref={componentRef} className="relative overflow-hidden w-full max-w-6xl h-[75vh] bg-black font-sans rounded-2xl border border-neutral-700 shadow-2xl">
+    // 修复: 优化移动端布局，默认 flex-col, 大屏为 flex-row
+    <div ref={componentRef} className="relative overflow-hidden w-full max-w-6xl h-[80vh] lg:h-[75vh] bg-black font-sans rounded-2xl border border-neutral-700 shadow-2xl flex flex-col lg:flex-row">
       {scrollAnimationPages.map((page, i) => {
         const idx = i + 1;
         const isActive = currentPage === idx;
         
         const leftTrans = isActive ? 'translateY(0)' : 'translateY(100%)';
         const rightTrans = isActive ? 'translateY(0)' : 'translateY(-100%)';
-
+        
+        // 修复：针对移动端优化，将左右分屏改为上下堆叠
         return (
-          <div key={idx} className="absolute inset-0">
+          <div key={idx} className="absolute inset-0 flex flex-col lg:flex-row">
             <div
-              className="absolute top-0 left-0 w-1/2 h-full transition-transform duration-[1000ms] ease-in-out"
-              style={{ transform: leftTrans }}
+              className="w-full h-1/2 lg:w-1/2 lg:h-full transition-transform duration-[1000ms] ease-in-out"
+              style={{ transform: isActive ? 'translateX(0)' : 'translateX(-100%)' }}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
                 style={{ backgroundImage: page.leftBgImage ? `url(${page.leftBgImage})` : 'none', backgroundColor: '#111' }}
               >
-                <div className="flex flex-col items-center justify-center h-full text-white p-8">
+                <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.leftContent && (
                     <div className="text-center">
-                      <h2 className="text-3xl font-bold uppercase mb-4 tracking-widest">
+                      <h2 className="text-2xl md:text-3xl font-bold uppercase mb-4 tracking-widest">
                         {page.leftContent.heading}
                       </h2>
-                      <p className="text-lg">
+                      <p className="text-base md:text-lg">
                         {page.leftContent.description}
                       </p>
                     </div>
@@ -1574,28 +1587,22 @@ function ScrollAdventure() {
             </div>
 
             <div
-              className="absolute top-0 left-1/2 w-1/2 h-full transition-transform duration-[1000ms] ease-in-out"
-              style={{ transform: rightTrans }}
+              className="w-full h-1/2 lg:w-1/2 lg:h-full transition-transform duration-[1000ms] ease-in-out"
+              style={{ transform: isActive ? 'translateX(0)' : 'translateX(100%)' }}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
                 style={{ backgroundImage: page.rightBgImage ? `url(${page.rightBgImage})` : 'none', backgroundColor: '#111' }}
               >
-                <div className="flex flex-col items-center justify-center h-full text-white p-8">
+                <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.rightContent && (
                      <div className="text-center">
-                      <h2 className="text-3xl font-bold uppercase mb-4 tracking-widest">
+                      <h2 className="text-2xl md:text-3xl font-bold uppercase mb-4 tracking-widest">
                         {page.rightContent.heading}
                       </h2>
-                      {typeof page.rightContent.description === 'string' ? (
-                        <p className="text-lg">
-                          {page.rightContent.description}
-                        </p>
-                      ) : (
-                        <div className="text-lg">
+                       <div className="text-base md:text-lg">
                           {page.rightContent.description}
                         </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -1687,87 +1694,81 @@ TextMarqueeSection.displayName = "TextMarqueeSection";
 // 9. ✨ 新增: 页脚组件 (Custom Footer)
 // ============================================================================
 
-// --- 页脚所需的 SVG 图标 ---
-const Facebook = (props: IconProps) => (
-  <svg {...props} xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+interface SocialIconProps extends IconProps {
+    path: string | React.ReactElement;
+}
+// 内联 SVG 图标
+const XiaohongshuIcon = (props: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M21.273 18.818H18.18v-3.09h-2.181v3.09h-3.09v2.182h3.09v3.091h2.182v-3.09h3.09v-2.182zM4.364 3.818h4.363V2.727H4.364v1.091zm4.363 9.818H4.364v1.091h4.363v-1.09zM15.455 6h-2.182v1.09h2.182V6zm-5.455 0H5.455v1.09h4.545V6zm-1.09 9.818H4.364v1.09h4.545v-1.09zm5.454-3.272H4.364v1.09h9.818v-1.09zM4.364 9.273h9.818v1.09H4.364v-1.09z"/>
   </svg>
 );
-Facebook.displayName = "Facebook";
+XiaohongshuIcon.displayName = "XiaohongshuIcon";
 
-const TwitterIconFooter = (props: IconProps) => (
-  <svg {...props} xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
-     <path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 3.3 4.4 3.3 4.4s-1.4 1.4-3.3 1.4c-1 .6-2.3 1-3.6 1-4.5 0-8.4-3.8-8.4-8.5C5.3 6 5.6 4.8 6.2 3.8 5 5.4 0 8.3 0 8.3s2.1-1.7 4.1-2.1c-1.3-1.6-1.3-3.6 0-5.2 1.9-1.9 4.9-1.9 6.8 0 1.3-.2 2.6-.7 3.7-1.4.2 1.3-.4 2.6-1.5 3.4.9-.1 1.8-.4 2.6-.7Z" />
+const ZhihuIcon = (props: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M21.57,19.38L21.57,19.38l-4.48,0c-0.34,0-0.62-0.28-0.62-0.62v-4.44h-2.5v4.44c0,0.34-0.28,0.62-0.62,0.62H8.85c-0.34,0-0.62-0.28-0.62-0.62v-4.44H5.73v4.44c0,0.34-0.28,0.62-0.62,0.62H2.43c-0.34,0-0.62-0.28-0.62-0.62V5.24c0-0.34,0.28-0.62,0.62-0.62h11.23l0,0l0,0l4.5,0c0.34,0,0.62,0.28,0.62,0.62v13.52C22.19,19.1,21.91,19.38,21.57,19.38z M9.47,12.11H5.73V7.1h3.74V12.11z M15.47,12.11h-3.74V7.1h3.74V12.11z"/>
   </svg>
 );
-TwitterIconFooter.displayName = "TwitterIconFooter";
+ZhihuIcon.displayName = "ZhihuIcon";
 
-const Instagram = (props: IconProps) => (
-  <svg {...props} xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+const DouyinIcon = (props: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M16.6 5.82s.51.5 1.63.5c1.43 0 2.5-.9 2.5-2.55s-1.06-2.46-2.5-2.46C16.6.31 15.14 2.1 15.14 4.16v7.35c0 2.9-2.23 4.88-5.22 4.88-2.51 0-4.62-1.74-4.62-4.52s2.11-4.52 4.62-4.52c.2 0 .4.02.59.05v2.1c-.2-.03-.39-.05-.59-.05-1.34 0-2.5.95-2.5 2.42s1.16 2.42 2.5 2.42c1.73 0 3.03-1.2 3.03-3.2V5.82z"/>
   </svg>
 );
-Instagram.displayName = "Instagram";
+DouyinIcon.displayName = "DouyinIcon";
 
-const Linkedin = (props: IconProps) => (
-  <svg {...props} xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-    <rect width="4" height="12" x="2" y="9" />
-    <circle cx="4" cy="4" r="2" />
+const BilibiliIcon = (props: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2.5 14.5v-9l6 4.5-6 4.5z"/>
   </svg>
 );
-Linkedin.displayName = "Linkedin";
+BilibiliIcon.displayName = "BilibiliIcon";
 
-// 页脚中使用的 Input 和 Label 组件
-const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, type, ...props }, ref) => {
-    return (
-      <input
-        type={type}
-        className={cn(
-          'flex h-10 w-full rounded-md border border-slate-700 bg-black px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-50',
-          className
-        )}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
-Input.displayName = 'Input';
-
-const Label = React.forwardRef<
-  React.ElementRef<'label'>,
-  React.ComponentPropsWithoutRef<'label'>
->(({ className, ...props }, ref) => (
-  <label ref={ref} className={cn('text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70', className)} {...props} />
-));
-Label.displayName = 'Label';
 
 const CustomFooter = () => {
     const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
+    const [email, setEmail] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // 优化: 更换为国内常用社交媒体平台
     const socialIcons = [
-      { name: '小红书', icon: <Facebook className="h-4 w-4" />, qrcode: '[https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png](https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png)', url: '[https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2?xsec_token=YBu0J314MzsA9PGMJZLZmcLRL3wiuAfNIZeudNRhtPvCk=&xsec_source=app_share&xhsshare=WeixinSession&appuid=6624755f00000000030303c2&apptime=1750082613&share_id=b4da624f466a4aeabb6e1e79662f092d&tab=note&subTab=note](https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2?xsec_token=YBu0J314MzsA9PGMJZLZmcLRL3wiuAfNIZeudNRhtPvCk=&xsec_source=app_share&xhsshare=WeixinSession&appuid=6624755f00000000030303c2&apptime=1750082613&share_id=b4da624f466a4aeabb6e1e79662f092d&tab=note&subTab=note)' },
-      { name: '知乎', icon: <TwitterIconFooter className="h-4 w-4" />, qrcode: '[https://cdn.apex-elite-service.com/wangzhantupian/sara.png](https://cdn.apex-elite-service.com/wangzhantupian/sara.png)', url: '[https://www.zhihu.com/org/apex-elite-service](https://www.zhihu.com/org/apex-elite-service)' },
-      { name: 'Instagram', icon: <Instagram className="h-4 w-4" />, qrcode: '[https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png](https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png)', url: '[https://www.instagram.com/](https://www.instagram.com/)' },
-      { name: 'LinkedIn', icon: <Linkedin className="h-4 w-4" />, qrcode: '[https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png](https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png)', url: '[https://www.linkedin.com/](https://www.linkedin.com/)' },
+      { name: '小红书', icon: <XiaohongshuIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2' },
+      { name: '知乎', icon: <ZhihuIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
+      { name: '抖音', icon: <DouyinIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.douyin.com' },
+      { name: '哔哩哔哩', icon: <BilibiliIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.bilibili.com' },
     ];
+
+    const handleEmailSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+            alert("请输入一个有效的邮箱地址。");
+            return;
+        }
+        setIsSubmitting(true);
+        const result = await saveFooterEmailToRedis({ email });
+        if(result.success) {
+            alert("感谢您的订阅！");
+            setEmail('');
+        } else {
+            alert(`订阅失败：${result.error}`);
+        }
+        setIsSubmitting(false);
+    };
 
     return (
       <footer className="bg-transparent text-white py-12 mt-20">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
-            <div className="mb-8 w-[300px] h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center">
+            <div className="mb-8 w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center p-2">
               <Image
-                src="[https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png](https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png)"
+                src="https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
                 alt="官方公众号二维码"
                 width={280}
                 height={280}
-                className="w-[280px] h-[280px] object-cover p-2 rounded-lg"
+                className="w-full h-full object-contain rounded-lg"
               />
             </div>
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300">
@@ -1804,12 +1805,22 @@ const CustomFooter = () => {
               ))}
             </div>
             <div className="mb-8 w-full max-w-md">
-              <form className="flex space-x-2">
+              <form className="flex space-x-2" onSubmit={handleEmailSubmit}>
                 <div className="flex-grow">
                   <Label htmlFor="email-footer" className="sr-only">Email</Label>
-                  <Input id="email-footer" placeholder="输入您的邮箱" type="email" className="rounded-full" />
+                  <Input 
+                    id="email-footer" 
+                    placeholder="输入您的邮箱" 
+                    type="email" 
+                    className="rounded-full" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
-                <Button type="submit" variant="default" className="rounded-full">提交</Button>
+                <Button type="submit" variant="default" className="rounded-full" disabled={isSubmitting}>
+                  {isSubmitting ? '提交中...' : '提交'}
+                </Button>
               </form>
             </div>
             <div className="text-center">
