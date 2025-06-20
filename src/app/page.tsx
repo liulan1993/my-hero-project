@@ -383,8 +383,8 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                         欢迎您！
                     </Button>
                     <div className="border-r border-slate-700 hidden md:inline"></div>
-                    <Button variant="outline" onClick={onLoginClick}>登录</Button>
-                    <Button variant='default'>我的资料</Button>
+                    <Button variant="outline" onClick={onLoginClick}>提交</Button>
+                    <Button variant='default'>敬请期待</Button>
                 </div>
                 <div className="flex w-12 shrink lg:hidden items-end justify-end">
                     <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
@@ -1719,10 +1719,10 @@ const TextMarqueeSection = () => (
     <section className="py-24 md:py-32 w-full">
          <div className="space-y-1">
             <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
-               Framer Motion · 
+               Apex · 
             </TextMarquee>
             <TextMarquee baseVelocity={2} className='font-bold text-2xl text-purple-400'>
-               Tailwind CSS · 
+               Apex · 
             </TextMarquee>
         </div>
     </section>
