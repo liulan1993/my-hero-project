@@ -1033,7 +1033,7 @@ FeatureTourDialog.displayName = "FeatureTourDialog";
 
 
 // ============================================================================
-// 4. 页面级别的静态数据 (现有代码)
+// 6. 页面级别的静态数据 (现有代码)
 // ============================================================================
 
 // --- 修复: 添加缺失的 IconProps 接口 ---
@@ -1200,7 +1200,203 @@ const infoSectionData2 = {
 
 
 // ============================================================================
-// 5. 主页面组件 (已修改)
+// 7. 新增: 分屏滚动动画区域组件 (来自用户的 Canvas)
+// ============================================================================
+
+const scrollAnimationPages = [
+  {
+    leftBgImage: 'https://images.unsplash.com/photo-1748968218568-a5eac621e65c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1M3x8fGVufDB8fHx8fA%3D%3D',
+    rightBgImage: null,
+    leftContent: null,
+    rightContent: {
+      heading: '欢迎登船！',
+      description: '抓稳你的鼠标，一场奇妙的旅行即将开始！',
+    },
+  },
+  {
+    leftBgImage: null,
+    rightBgImage: 'https://images.unsplash.com/photo-1749315099905-9cf6cabd9126?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw0Nnx8fGVufDB8fHx8fA%3D%3D',
+    leftContent: {
+      heading: '第二页',
+      description: '剧透一下：这里仍然是空的。让你的滚动手指保持灵活！',
+    },
+    rightContent: null,
+  },
+  {
+    leftBgImage: 'https://images.unsplash.com/photo-1747893541442-a139096ea39c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMzZ8fHxlbnwwfHx8fHw%3D',
+    rightBgImage: null,
+    leftContent: null,
+    rightContent: {
+      heading: '第三页',
+      description: '剧情反转：你已经到达中点。太棒了！',
+    },
+  },
+  {
+    leftBgImage: null,
+    rightBgImage: 'https://images.unsplash.com/photo-1748164521179-ae3b61c6dd90?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMjR8fHxlbnwwfHx8fHw%3D',
+    leftContent: {
+      heading: '第四页',
+      description: '再滚动一次，我保证——就快到了！',
+    },
+    rightContent: null,
+  },
+  {
+    leftBgImage: 'https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D',
+    rightBgImage: null,
+    leftContent: null,
+    rightContent: {
+      heading: '史诗般的结局！',
+      description: (
+        <>
+         :)
+        </>
+      ),
+    },
+  },
+];
+
+function ScrollAdventure() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const numOfPages = scrollAnimationPages.length;
+  const animTime = 1000;
+  const scrolling = useRef(false);
+  const componentRef = useRef<HTMLDivElement>(null);
+
+  const navigateUp = useCallback(() => {
+    if (currentPage > 1) {
+      setCurrentPage(p => p - 1);
+    }
+  }, [currentPage]);
+
+  const navigateDown = useCallback(() => {
+    if (currentPage < numOfPages) {
+      setCurrentPage(p => p + 1);
+    }
+  }, [currentPage, numOfPages]);
+
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+        // 仅在鼠标悬停在组件上时触发
+        if (componentRef.current && componentRef.current.contains(e.target as Node)) {
+            if (scrolling.current) return;
+            scrolling.current = true;
+            if (e.deltaY > 0) {
+              navigateDown();
+            } else {
+              navigateUp();
+            }
+            setTimeout(() => {
+              scrolling.current = false;
+            }, animTime);
+        }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+        // 仅在组件可见时触发
+        if(componentRef.current) {
+            const rect = componentRef.current.getBoundingClientRect();
+            const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+            if(isVisible) {
+                if (scrolling.current) return;
+                scrolling.current = true;
+                if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  navigateUp();
+                } else if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  navigateDown();
+                }
+                setTimeout(() => {
+                  scrolling.current = false;
+                }, animTime);
+            }
+        }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [navigateUp, navigateDown]);
+
+  return (
+    <div ref={componentRef} className="relative overflow-hidden h-screen bg-black font-sans">
+      {scrollAnimationPages.map((page, i) => {
+        const idx = i + 1;
+        const isActive = currentPage === idx;
+        
+        const leftTrans = isActive ? 'translateY(0)' : 'translateY(100%)';
+        const rightTrans = isActive ? 'translateY(0)' : 'translateY(-100%)';
+
+        return (
+          <div key={idx} className="absolute inset-0">
+            {/* 左半部分 Left Half */}
+            <div
+              className="absolute top-0 left-0 w-1/2 h-full transition-transform duration-[1000ms] ease-in-out"
+              style={{ transform: leftTrans }}
+            >
+              <div
+                className="w-full h-full bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: page.leftBgImage ? `url(${page.leftBgImage})` : 'none', backgroundColor: '#111' }}
+              >
+                <div className="flex flex-col items-center justify-center h-full text-white p-8">
+                  {page.leftContent && (
+                    <div className="text-center">
+                      <h2 className="text-3xl font-bold uppercase mb-4 tracking-widest">
+                        {page.leftContent.heading}
+                      </h2>
+                      <p className="text-lg">
+                        {page.leftContent.description}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 右半部分 Right Half */}
+            <div
+              className="absolute top-0 left-1/2 w-1/2 h-full transition-transform duration-[1000ms] ease-in-out"
+              style={{ transform: rightTrans }}
+            >
+              <div
+                className="w-full h-full bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: page.rightBgImage ? `url(${page.rightBgImage})` : 'none', backgroundColor: '#111' }}
+              >
+                <div className="flex flex-col items-center justify-center h-full text-white p-8">
+                  {page.rightContent && (
+                     <div className="text-center">
+                      <h2 className="text-3xl font-bold uppercase mb-4 tracking-widest">
+                        {page.rightContent.heading}
+                      </h2>
+                      {typeof page.rightContent.description === 'string' ? (
+                        <p className="text-lg">
+                          {page.rightContent.description}
+                        </p>
+                      ) : (
+                        <div className="text-lg">
+                          {page.rightContent.description}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+ScrollAdventure.displayName = "ScrollAdventure";
+
+
+// ============================================================================
+// 8. 主页面组件 (已修改)
 // ============================================================================
 
 export default function HomePage() {
@@ -1250,6 +1446,9 @@ export default function HomePage() {
         <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
 
         <CtaWithGallerySection />
+
+        {/* 新增的滚动动画组件 */}
+        <ScrollAdventure />
       </main>
     </div>
   );
