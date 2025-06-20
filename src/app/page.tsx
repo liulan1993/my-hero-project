@@ -1624,7 +1624,7 @@ const CustomFooter = () => {
               <form className="flex space-x-2">
                 <div className="flex-grow">
                   <Label htmlFor="email-footer" className="sr-only">Email</Label>
-                  <Input id="email-footer" placeholder="Enter your email" type="email" className="rounded-full" />
+                  <Input id="email-footer" placeholder="输入您的邮箱" type="email" className="rounded-full" />
                 </div>
                 <Button type="submit" variant="default" className="rounded-full">提交</Button>
               </form>
