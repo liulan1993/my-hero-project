@@ -313,7 +313,7 @@ const NavigationMenuViewport = React.forwardRef<
 NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName;
 
 // 导航栏组件
-const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick: () => void; onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void; }) => {
+const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick: () => void; onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => void; }) => {
     const navigationItems = [
         { title: "主页", href: "/", description: "" },
         {
@@ -781,7 +781,7 @@ const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
 );
 ImageContainer.displayName = 'ImageContainer';
 
-const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void; }) => {
+const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => void; }) => {
   const [active, setActive] = useState(0);
 
   const handleNext = useCallback(() => {
@@ -1916,8 +1916,8 @@ export default function HomePage() {
     setIsModalOpen(false);
   };
   
-  // 修复: 更新点击事件处理逻辑
-  const handleProtectedLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  // 修复: 更新点击事件处理逻辑以接受更广泛的事件类型
+  const handleProtectedLinkClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => {
     // 对于占位链接, 阻止导航并显示提示信息
     if (href === '#') {
         e.preventDefault();
