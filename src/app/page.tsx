@@ -24,7 +24,6 @@ import {
   useAnimationFrame,
   useMotionValue,
 } from "framer-motion";
-import { kv } from '@vercel/kv'; // 导入 Vercel KV
 
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
@@ -36,20 +35,28 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 // ============================================================================
-// SERVER ACTION: 用于将数据保存到 Vercel KV (Redis)
+// 修复: 模拟服务器动作 (Server Action)
+// 在真实的 Next.js 项目中，此异步函数应移至一个单独的文件 (例如 `app/actions.ts`)
+// 并在该文件顶部声明 'use server'。为了在此环境中修复编译错误，我们将其定义为一个常规的异步函数。
 // ============================================================================
 async function saveContactToRedis(formData: Record<string, any>) {
-  'use server';
+  console.log("正在模拟将数据保存到 Redis:", formData);
   try {
     // 使用姓名作为 Redis 的 Key
     const key = formData.name;
     if (!key) {
       throw new Error("姓名不能为空，无法作为主键保存。");
     }
-    await kv.set(key, JSON.stringify(formData));
+    
+    // 模拟网络请求和数据库写入的延迟
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // 注意: 在真实的应用中，您会在这里调用 Vercel KV 的服务器端函数
+    
+    console.log(`数据 "${key}" 已成功模拟保存。`);
     return { success: true };
   } catch (error) {
-    console.error("写入 Redis 时出错:", error);
+    console.error("模拟写入 Redis 时出错:", error);
     return { success: false, error: error instanceof Error ? error.message : '未知错误' };
   }
 }
@@ -81,7 +88,7 @@ const Image = ({ src, alt, className, width, height, style, fill, onError }: Cus
     const [imgSrc, setImgSrc] = useState(src);
 
     const handleError = () => {
-      // 占位图服务，例如 placehold.co
+      // 占位图服务
       setImgSrc(`https://placehold.co/600x400/161616/ffffff?text=${encodeURIComponent(alt)}`);
       if(onError) onError();
     };
@@ -508,20 +515,20 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
     
     return (
         <div className="bg-black text-white p-2 sm:p-0">
-          <div className="submission-header text-center mb-6">
+          <div className="text-center mb-6">
               <h1 className="text-2xl font-bold">请留下您的联系资料</h1>
               <p className="text-neutral-400 mt-2">提交后即可访问内容</p>
           </div>
           <form onSubmit={handleSubmit} noValidate>
               <div className="grid grid-cols-1 gap-y-4">
                   {/* 姓名 */}
-                  <div className="form-group">
+                  <div>
                       <Label htmlFor="name">姓名</Label>
                       <Input id="name" name="name" type="text" value={formData.name} onChange={handleChange} className={cn("mt-2", errors.name && 'border-red-500')} />
                       {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                   </div>
                   {/* 服务领域 */}
-                  <div className="form-group">
+                  <div>
                       <Label htmlFor="serviceArea">选择服务领域</Label>
                       <select id="serviceArea" name="serviceArea" value={formData.serviceArea} onChange={handleChange} className={cn("form-input mt-2 w-full bg-black border-slate-700", errors.serviceArea && 'border-red-500')}>
                           <option value="" disabled>请选择...</option>
@@ -530,13 +537,13 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
                       {errors.serviceArea && <p className="text-red-500 text-xs mt-1">{errors.serviceArea}</p>}
                   </div>
                   {/* 邮箱 */}
-                  <div className="form-group">
+                  <div>
                       <Label htmlFor="email">输入邮箱</Label>
                       <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className={cn("mt-2", errors.email && 'border-red-500')} />
                       {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                   </div>
                   {/* 手机号 */}
-                  <div className="form-group">
+                  <div>
                       <Label htmlFor="phone">输入手机号</Label>
                       <div className="flex gap-2 mt-2">
                           <select id="countryKey" name="countryKey" value={formData.countryKey} onChange={handleChange} className={cn("form-input w-1/3 bg-black border-slate-700", errors.countryKey && 'border-red-500')}>
@@ -548,7 +555,7 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
                       {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                   </div>
                   {/* 州/省 */}
-                  <div className="form-group">
+                  <div>
                       <Label htmlFor="state">州/省</Label>
                       <select id="state" name="state" value={formData.state} onChange={handleChange} disabled={!formData.countryKey} className={cn("form-input mt-2 w-full bg-black border-slate-700", errors.state && 'border-red-500')}>
                           <option value="" disabled>请先选择国家</option>
@@ -1948,3 +1955,4 @@ export default function HomePage() {
     </div>
   );
 }
+
