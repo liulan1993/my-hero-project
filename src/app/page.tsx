@@ -840,7 +840,7 @@ const CtaWithGallerySection = () => {
           <Image
             className="object-cover"
             fill
-            src="[https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D](https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)"
+            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Global network"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
@@ -988,7 +988,7 @@ const FeatureTourDialog = () => {
           <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
             <div className="flex flex-col gap-3">
               <Image
-                src="[https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png](https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png)"
+                src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png"
                 alt="Logo"
                 width={48}
                 height={48}
@@ -1058,7 +1058,7 @@ const FeatureTourDialog = () => {
               {/* Image */}
               <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center">
                 <Image
-                  src="[https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png](https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png)"
+                  src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
                   alt="Step Visual"
                   width={200}
                   height={200}
@@ -1103,28 +1103,28 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 const MemoizedCpu = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M9 2v2" /><path d="M9 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 15v-1.5" /><path d="M15 9.5V8" />
   </svg>
 ));
 MemoizedCpu.displayName = 'CpuIcon';
 
 const MemoizedShieldCheck = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /><path d="m9 12 2 2 4-4" />
   </svg>
 ));
 MemoizedShieldCheck.displayName = 'ShieldCheckIcon';
 
 const MemoizedLayers = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.91a2 2 0 0 0 1.66 0l8.57-3.91a1 1 0 0 0 0-1.84Z" /><path d="M2 12.12V16l8.57 3.91a2 2 0 0 0 1.66 0L21 16v-3.88" /><path d="M2 7.23V11l8.57 3.91a2 2 0 0 0 1.66 0L21 11V7.23" />
   </svg>
 ));
 MemoizedLayers.displayName = 'LayersIcon';
 
 const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
-  <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 ));
@@ -1146,7 +1146,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div>
             <Image 
-              src="[https://assets.aceternity.com/templates/startup-1.webp](https://assets.aceternity.com/templates/startup-1.webp)" 
+              src="https://assets.aceternity.com/templates/startup-1.webp" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1163,7 +1163,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div>
             <Image 
-              src="[https://assets.aceternity.com/pro/hero-sections.png](https://assets.aceternity.com/pro/hero-sections.png)" 
+              src="https://assets.aceternity.com/pro/hero-sections.png" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1180,7 +1180,7 @@ const timelineData = [
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
             <Image 
-              src="[https://assets.aceternity.com/pro/bento-grids.png](https://assets.aceternity.com/pro/bento-grids.png)" 
+              src="https://assets.aceternity.com/pro/bento-grids.png" 
               alt="新组件预览" 
               width={500}
               height={300}
@@ -1197,22 +1197,22 @@ const projectShowcaseData = [
     name: "Plum Cave",
     quote: '一个云备份解决方案，它采用 "ChaCha20 + Serpent-256 CBC + HMAC-SHA3-512" 认证加密方案进行数据加密，并使用 ML-KEM-1024 进行抗量子密钥交换。',
     designation: "Next.js 项目",
-    src: "[https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/plum-cave.webp](https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/plum-cave.webp)",
-    link: "[https://plum-cave.netlify.app/](https://plum-cave.netlify.app/)",
+    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/plum-cave.webp",
+    link: "https://plum-cave.netlify.app/",
   },
   {
     name: "Namer UI",
     quote: "一个现代、美观且独特的可重用 TypeScript 组件的全面集合，专为 Next.js 打造。",
     designation: "Next.js 项目",
-    src: "[https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui.webp](https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui.webp)",
-    link: "[https://namer-ui.netlify.app/](https://namer-ui.netlify.app/)",
+    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui.webp",
+    link: "https://namer-ui.netlify.app/",
   },
   {
     name: "Namer UI For Vue",
     quote: "一个为 Vue 3 打造的可定制、可重用的 TypeScript 和原生 CSS 组件集合。",
     designation: "Vue 项目",
-    src: "[https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui-for-vue.webp](https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui-for-vue.webp)",
-    link: "[https://namer-ui-for-vue.netlify.app/](https://namer-ui-for-vue.netlify.app/)",
+    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui-for-vue.webp",
+    link: "https://namer-ui-for-vue.netlify.app/",
   },
 ];
 
@@ -1234,8 +1234,8 @@ const infoSectionData1 = {
             值得关注的重要事件和财报。
         </>
     ),
-    primaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png](https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png)',
-    secondaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png](https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png)',
+    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png',
+    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png',
 };
 
 const infoSectionData2 = {
@@ -1255,8 +1255,8 @@ const infoSectionData2 = {
             都能够无缝扩展，满足您的业务需求。
         </>
     ),
-    primaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png](https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png)',
-    secondaryImageSrc: '[https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png](https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png)',
+    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png',
+    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png',
 };
 
 
@@ -1266,7 +1266,7 @@ const infoSectionData2 = {
 
 const scrollAnimationPages = [
   {
-    leftBgImage: '[https://images.unsplash.com/photo-1748968218568-a5eac621e65c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1M3x8fGVufDB8fHx8fA%3D%3D](https://images.unsplash.com/photo-1748968218568-a5eac621e65c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1M3x8fGVufDB8fHx8fA%3D%3D)',
+    leftBgImage: 'https://images.unsplash.com/photo-1748968218568-a5eac621e65c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1M3x8fGVufDB8fHx8fA%3D%3D',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1276,7 +1276,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: '[https://images.unsplash.com/photo-1749315099905-9cf6cabd9126?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw0Nnx8fGVufDB8fHx8fA%3D%3D](https://images.unsplash.com/photo-1749315099905-9cf6cabd9126?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw0Nnx8fGVufDB8fHx8fA%3D%3D)',
+    rightBgImage: 'https://images.unsplash.com/photo-1749315099905-9cf6cabd9126?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw0Nnx8fGVufDB8fHx8fA%3D%3D',
     leftContent: {
       heading: '第二页',
       description: '剧透一下：这里仍然是空的。让你的滚动手指保持灵活！',
@@ -1284,7 +1284,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: '[https://images.unsplash.com/photo-1747893541442-a139096ea39c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMzZ8fHxlbnwwfHx8fHw%3D](https://images.unsplash.com/photo-1747893541442-a139096ea39c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMzZ8fHxlbnwwfHx8fHw%3D)',
+    leftBgImage: 'https://images.unsplash.com/photo-1747893541442-a139096ea39c?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMzZ8fHxlbnwwfHx8fHw%3D',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1294,7 +1294,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: '[https://images.unsplash.com/photo-1748164521179-ae3b61c6dd90?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMjR8fHxlbnwwfHx8fHw%3D](https://images.unsplash.com/photo-1748164521179-ae3b61c6dd90?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMjR8fHxlbnwwfHx8fHw%3D)',
+    rightBgImage: 'https://images.unsplash.com/photo-1748164521179-ae3b61c6dd90?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMjR8fHxlbnwwfHx8fHw%3D',
     leftContent: {
       heading: '第四页',
       description: '再滚动一次，我保证——就快到了！',
@@ -1302,7 +1302,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: '[https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D](https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D)',
+    leftBgImage: 'https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1539,15 +1539,13 @@ TextMarquee.displayName = 'TextMarquee';
 // --- FIX: Removed duplicated component declaration ---
 const TextMarqueeSection = () => (
     <section className="py-24 md:py-32 w-full">
-        <div className="max-w-7xl mx-auto px-8">
-            <div className="space-y-1">
-                <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
-                   Framer Motion · 
-                </TextMarquee>
-                <TextMarquee baseVelocity={2} className='font-bold text-2xl text-purple-400'>
-                   Tailwind CSS · 
-                </TextMarquee>
-            </div>
+         <div className="space-y-1">
+            <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
+               Framer Motion · 
+            </TextMarquee>
+            <TextMarquee baseVelocity={2} className='font-bold text-2xl text-purple-400'>
+               Tailwind CSS · 
+            </TextMarquee>
         </div>
     </section>
 );
@@ -1612,7 +1610,9 @@ export default function HomePage() {
         </div>
 
         {/* ✨ 新增的跑马灯区域 ✨ */}
-        <TextMarqueeSection />
+        <div className="max-w-7xl mx-auto px-8">
+            <TextMarqueeSection />
+        </div>
 
       </main>
     </div>
