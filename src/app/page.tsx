@@ -1502,7 +1502,7 @@ const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
 
   // --- 关键修复逻辑 ---
   // 1. 定义重复次数。数字越大，在超宽屏上的表现越稳定。
-  const repetitions = 5; 
+  const repetitions = 15; 
   // 2. 计算一个重复单元所占的百分比宽度。
   const singleBlockPercentage = 100 / repetitions;
   // 3. 动态计算正确的循环范围，从 -16.66% 到 0% (以6次重复为例)
