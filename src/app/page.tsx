@@ -57,8 +57,12 @@ interface ContactFormData {
   state: string;
 }
 
+// 修复: 为模拟服务器动作定义一个健壮的返回类型
+type ServerActionResponse = { success: true } | { success: false; error?: string };
+
+
 // 模拟服务器动作
-async function saveContactToRedis(data: ContactFormData) {
+async function saveContactToRedis(data: ContactFormData): Promise<ServerActionResponse> {
   console.log("模拟保存联系人资料:", data);
   // 模拟网络延迟
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -66,7 +70,7 @@ async function saveContactToRedis(data: ContactFormData) {
   return { success: true };
 }
 
-async function saveFooterEmailToRedis(data: { email: string }) {
+async function saveFooterEmailToRedis(data: { email: string }): Promise<ServerActionResponse> {
   console.log("模拟保存页脚邮箱:", data);
   // 模拟网络延迟
   await new Promise(resolve => setTimeout(resolve, 1000));
