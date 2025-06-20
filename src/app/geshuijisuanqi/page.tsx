@@ -106,53 +106,66 @@ function TaxCalculator() {
   const currency = country === 'china' ? 'CNY' : 'SGD';
 
   return (
-    <div className="w-full max-w-lg mx-auto mt-8 sm:mt-12 p-4 sm:p-6 bg-white/70 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">个人所得税计算器</h2>
-      
-      <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-        <button 
-          onClick={() => setCountry('china')}
-          className={cn(
-            'px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300',
-            country === 'china' ? 'bg-gray-800 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'
-          )}
-        >
-          中国 (China)
-        </button>
-        <button 
-          onClick={() => setCountry('singapore')}
-          className={cn(
-            'px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300',
-            country === 'singapore' ? 'bg-gray-800 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'
-          )}
-        >
-          新加坡 (Singapore)
-        </button>
-      </div>
+    // 为税务计算器添加外层容器以包含新按钮
+    <div className="flex flex-col items-center">
+        <div className="w-full max-w-lg mx-auto p-4 sm:p-6 bg-white/70 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">个人所得税计算器</h2>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+                <button 
+                onClick={() => setCountry('china')}
+                className={cn(
+                    'px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300',
+                    country === 'china' ? 'bg-gray-800 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'
+                )}
+                >
+                中国 (China)
+                </button>
+                <button 
+                onClick={() => setCountry('singapore')}
+                className={cn(
+                    'px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300',
+                    country === 'singapore' ? 'bg-gray-800 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'
+                )}
+                >
+                新加坡 (Singapore)
+                </button>
+            </div>
 
-      <div className="relative mb-4">
-        <label className="block text-sm font-medium text-gray-600 mb-2">
-          {country === 'china' ? '年度应纳税所得额' : 'Chargeable Annual Income'}
-        </label>
-        <div className="relative">
-          <input 
-            type="number"
-            value={income}
-            onChange={(e) => setIncome(e.target.value)}
-            placeholder="在此输入年收入"
-            className="w-full px-4 py-3 pr-16 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:outline-none transition-all placeholder-gray-400"
-          />
-          <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 font-semibold">{currency}</span>
+            <div className="relative mb-4">
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                {country === 'china' ? '年度应纳税所得额' : 'Chargeable Annual Income'}
+                </label>
+                <div className="relative">
+                <input 
+                    type="number"
+                    value={income}
+                    onChange={(e) => setIncome(e.target.value)}
+                    placeholder="在此输入年收入"
+                    // 修改placeholder颜色
+                    className="w-full px-4 py-3 pr-16 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:outline-none transition-all placeholder-gray-500"
+                />
+                <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 font-semibold">{currency}</span>
+                </div>
+            </div>
+
+            <div className="text-center bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600 mb-1">应纳税额 (Tax Payable)</p>
+                <p className="text-3xl font-bold text-gray-800">
+                {tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <span className="text-lg ml-2">{currency}</span>
+                </p>
+            </div>
         </div>
-      </div>
-
-      <div className="text-center bg-gray-50 rounded-lg p-4">
-        <p className="text-sm text-gray-600 mb-1">应纳税额 (Tax Payable)</p>
-        <p className="text-3xl font-bold text-gray-800">
-          {tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          <span className="text-lg ml-2">{currency}</span>
-        </p>
-      </div>
+        {/* 新增返回主页按钮 */}
+        <a 
+            href="https://my-hero-project.vercel.app" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="mt-6 px-8 py-2 rounded-full text-sm font-semibold text-white bg-black/30 hover:bg-black/50 transition-all duration-300 backdrop-blur-sm"
+        >
+            返回主页
+        </a>
     </div>
   );
 }
@@ -261,17 +274,17 @@ function ApexHero({ title = "Apex" }: { title?: string }) {
     const words = title.split(" ");
 
     return (
-        <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
+        <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden text-white p-4" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
             <Scene />
 
-            <div className="relative z-10 container mx-auto px-4 md:px-6 text-center">
+            <div className="relative z-10 container mx-auto px-4 md:px-6 text-center flex flex-col items-center justify-center h-full">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 2 }}
-                    className="max-w-4xl mx-auto"
+                    className="max-w-4xl w-full mx-auto"
                 >
-                    <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tighter">
+                    <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-8 tracking-tighter">
                         {words.map((word, wordIndex) => (
                             <span
                                 key={wordIndex}
@@ -288,7 +301,7 @@ function ApexHero({ title = "Apex" }: { title?: string }) {
                                             stiffness: 150,
                                             damping: 25,
                                         }}
-                                        className="inline-block" // 移除了 text-transparent 和 bg-gradient
+                                        className="inline-block"
                                     >
                                         {letter}
                                     </motion.span>
@@ -298,7 +311,9 @@ function ApexHero({ title = "Apex" }: { title?: string }) {
                     </h1>
                 </motion.div>
                 
-                <TaxCalculator />
+                <div className="w-full mt-4">
+                    <TaxCalculator />
+                </div>
             </div>
         </div>
     );
