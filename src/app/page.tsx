@@ -55,10 +55,8 @@ interface ContactFormData {
   state: string;
 }
 
-// 定义服务器动作的返回类型，以便在客户端进行类型检查
-type ServerActionResponse = { success: true } | { success: false; error?: string };
-
-// 修复：此处的模拟函数已被删除，因为我们将直接导入并使用 actions.ts 中的真实函数
+// 修复：移除未使用的 'ServerActionResponse' 类型定义
+// TypeScript 现在可以从导入的 'actions.ts' 文件中自动推断返回类型
 
 
 interface CustomImageProps {
