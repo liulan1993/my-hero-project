@@ -47,8 +47,18 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// 为联系人表单数据定义类型接口
+interface ContactFormData {
+  name: string;
+  serviceArea: string;
+  email: string;
+  countryKey: string;
+  phone: string;
+  state: string;
+}
+
 // 模拟服务器动作
-async function saveContactToRedis(data: any) {
+async function saveContactToRedis(data: ContactFormData) {
   console.log("模拟保存联系人资料:", data);
   // 模拟网络延迟
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -479,7 +489,7 @@ const countryOptions = (Object.keys(countryData) as Array<keyof typeof countryDa
 const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:gmail|outlook|hotmail|qq|163|yahoo)\.com$/i;
 
 const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
-    const [formData, setFormData] = useState({ name: '', serviceArea: '', email: '', countryKey: '', phone: '', state: '' });
+    const [formData, setFormData] = useState<ContactFormData>({ name: '', serviceArea: '', email: '', countryKey: '', phone: '', state: '' });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [availableStates, setAvailableStates] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
