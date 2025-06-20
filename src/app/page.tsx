@@ -28,7 +28,7 @@ import {
 // 导入服务器动作
 import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
-import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Menu, MoveRight, X, CheckCircle2, ArrowRight, Plus, Minus } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
@@ -56,6 +56,7 @@ interface CustomImageProps {
     priority?: boolean;
     sizes?: string;
     onError?: () => void;
+    unoptimized?: boolean; // 修复：为接口添加 unoptimized 属性
 }
 
 
@@ -152,7 +153,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-// 修复: 将 Input 和 Label 组件移到文件顶部，使其可被所有组件访问
 const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, type, ...props }, ref) => {
     return (
@@ -1000,49 +1000,6 @@ const ContainerAnimated = React.forwardRef<
   );
 });
 ContainerAnimated.displayName = "ContainerAnimated";
-
-const CtaWithGallerySection = () => {
-  return (
-    <section className="bg-transparent py-24">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-16 px-8 py-12 md:grid-cols-2">
-        <ContainerStagger>
-          <ContainerAnimated className="mb-4 block text-xs font-medium text-rose-500 md:text-sm">
-            Innovate & Grow
-          </ContainerAnimated>
-          <ContainerAnimated className="text-4xl font-semibold md:text-[2.4rem] tracking-tight text-white">
-            Scale Your Business Through Innovation
-          </ContainerAnimated>
-          <ContainerAnimated className="my-4 text-base text-neutral-300 md:my-6 md:text-lg">
-            Transform your startup&apos;s potential through innovative solutions
-            and strategic growth. We help businesses adapt, evolve, and thrive
-            in today&apos;s competitive marketplace.
-          </ContainerAnimated>
-          <ContainerAnimated>
-            <FeatureTourDialog />
-          </ContainerAnimated>
-        </ContainerStagger>
-
-        <motion.div 
-            className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-2xl"
-            variants={filterVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            transition={{ ...SPRING_TRANSITION_CONFIG, delay: 0.4 }}
-        >
-          <Image
-            className="object-cover"
-            fill
-            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            alt="Global network"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </motion.div>
-      </div>
-    </section>
-  )
-}
-CtaWithGallerySection.displayName = "CtaWithGallerySection";
 
 // ============================================================================
 // 5. 新增: 对话框/拓展卡片组件
