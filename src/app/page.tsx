@@ -153,6 +153,33 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
+// 修复: 将 Input 和 Label 组件移到文件顶部，使其可被所有组件访问
+const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          'flex h-10 w-full rounded-md border border-slate-700 bg-black px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-50',
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Input.displayName = 'Input';
+
+const Label = React.forwardRef<
+  React.ElementRef<'label'>,
+  React.ComponentPropsWithoutRef<'label'>
+>(({ className, ...props }, ref) => (
+  <label ref={ref} className={cn('text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70', className)} {...props} />
+));
+Label.displayName = 'Label';
+
+
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
@@ -1551,21 +1578,15 @@ function ScrollAdventure() {
   }, [handleScroll]);
 
   return (
-    // 修复: 优化移动端布局，默认 flex-col, 大屏为 flex-row
     <div ref={componentRef} className="relative overflow-hidden w-full max-w-6xl h-[80vh] lg:h-[75vh] bg-black font-sans rounded-2xl border border-neutral-700 shadow-2xl flex flex-col lg:flex-row">
       {scrollAnimationPages.map((page, i) => {
         const idx = i + 1;
         const isActive = currentPage === idx;
         
-        const leftTrans = isActive ? 'translateY(0)' : 'translateY(100%)';
-        const rightTrans = isActive ? 'translateY(0)' : 'translateY(-100%)';
-        
-        // 修复：针对移动端优化，将左右分屏改为上下堆叠
         return (
           <div key={idx} className="absolute inset-0 flex flex-col lg:flex-row">
             <div
-              className="w-full h-1/2 lg:w-1/2 lg:h-full transition-transform duration-[1000ms] ease-in-out"
-              style={{ transform: isActive ? 'translateX(0)' : 'translateX(-100%)' }}
+              className={cn("w-full h-1/2 lg:w-1/2 lg:h-full transition-transform duration-[1000ms] ease-in-out", isActive ? 'translate-x-0' : '-translate-x-full')}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
@@ -1587,8 +1608,7 @@ function ScrollAdventure() {
             </div>
 
             <div
-              className="w-full h-1/2 lg:w-1/2 lg:h-full transition-transform duration-[1000ms] ease-in-out"
-              style={{ transform: isActive ? 'translateX(0)' : 'translateX(100%)' }}
+              className={cn("w-full h-1/2 lg:w-1/2 lg:h-full transition-transform duration-[1000ms] ease-in-out", isActive ? 'translate-x-0' : 'translate-x-full')}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
@@ -1694,10 +1714,7 @@ TextMarqueeSection.displayName = "TextMarqueeSection";
 // 9. ✨ 新增: 页脚组件 (Custom Footer)
 // ============================================================================
 
-interface SocialIconProps extends IconProps {
-    path: string | React.ReactElement;
-}
-// 内联 SVG 图标
+// --- 页脚所需的 SVG 图标 ---
 const XiaohongshuIcon = (props: IconProps) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
     <path d="M21.273 18.818H18.18v-3.09h-2.181v3.09h-3.09v2.182h3.09v3.091h2.182v-3.09h3.09v-2.182zM4.364 3.818h4.363V2.727H4.364v1.091zm4.363 9.818H4.364v1.091h4.363v-1.09zM15.455 6h-2.182v1.09h2.182V6zm-5.455 0H5.455v1.09h4.545V6zm-1.09 9.818H4.364v1.09h4.545v-1.09zm5.454-3.272H4.364v1.09h9.818v-1.09zM4.364 9.273h9.818v1.09H4.364v-1.09z"/>

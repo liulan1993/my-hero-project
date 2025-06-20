@@ -29,8 +29,7 @@ interface FooterEmailData {
  */
 export async function saveContactToRedis(formData: ContactFormData) {
   try {
-    // 使用姓名作为 Redis 的 Key。
-    // 在实际应用中，您可能需要考虑使用更唯一的标识符，比如用户ID或邮箱。
+    // 使用姓名和邮箱组合成更唯一的 Key
     const key = `contact:${formData.name}:${formData.email}`; 
     if (!formData.name) {
       throw new Error("姓名不能为空，无法作为主键保存。");
