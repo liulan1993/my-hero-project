@@ -54,13 +54,12 @@ interface CustomImageProps {
     style?: React.CSSProperties;
     fill?: boolean;
     priority?: boolean;
-    unoptimized?: boolean;
     sizes?: string;
     onError?: () => void;
 }
 
 
-const Image = ({ src, alt, className, width, height, style, fill, onError, unoptimized = false, priority = false }: CustomImageProps) => {
+const Image = ({ src, alt, className, width, height, style, fill, onError, priority = false }: CustomImageProps) => {
     const [imgSrc, setImgSrc] = useState(src);
 
     const handleError = () => {
@@ -258,7 +257,6 @@ const NavigationMenuLink = React.forwardRef<
     React.ComponentPropsWithoutRef<'a'> & { asChild?: boolean }
 >(({ className, asChild, ...props }, ref) => {
     const Comp = asChild ? Slot : 'a';
-    // eslint-disable-next-line jsx-a11y/anchor-has-content
     return <Comp ref={ref} className={cn("focus:shadow-md", className)} {...props} />;
 });
 NavigationMenuLink.displayName = 'NavigationMenuLink';
