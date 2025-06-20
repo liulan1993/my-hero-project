@@ -441,7 +441,7 @@ const countryData = {
     'ID': { name: '印度尼西亚', code: '+62', phoneRegex: /^8\d{9,11}$/, states: ['Jakarta', 'West Java', 'East Java', 'Central Java', 'Banten', 'North Sumatra', 'South Sulawesi', 'Bali', 'Riau', 'Lampung'] },
 };
 const serviceAreas = ['企业落地', '准证申请', '子女教育', '溯源体检', '健康管理'];
-const countryOptions = Object.keys(countryData).map(key => ({ value: key, label: `${countryData[key].name} (${countryData[key].code})` }));
+const countryOptions = Object.keys(countryData).map(key => ({ value: key, label: `${countryData[key as keyof typeof countryData].name} (${countryData[key as keyof typeof countryData].code})` }));
 const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:gmail|outlook|hotmail|qq|163|yahoo)\.com$/i;
 
 const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
@@ -1054,7 +1054,7 @@ const DialogOverlay = React.forwardRef<
     {...props}
   />
 ))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
@@ -1078,7 +1078,7 @@ const DialogContent = React.forwardRef<
     </DialogPrimitive.Content>
   </DialogPortal>
 ))
-DialogContent.displayName = DialogPrimitive.Content.displayName
+DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({
   className,
@@ -1107,7 +1107,7 @@ const DialogTitle = React.forwardRef<
     {...props}
   />
 ))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
@@ -1119,7 +1119,7 @@ const DialogDescription = React.forwardRef<
     {...props}
   />
 ))
-DialogDescription.displayName = DialogPrimitive.Description.displayName
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 const FeatureTourDialog = () => {
   const [step, setStep] = useState(0);
