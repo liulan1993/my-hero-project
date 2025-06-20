@@ -1527,7 +1527,8 @@ TextMarquee.displayName = 'TextMarquee';
 // --- Marquee 组件的容器 Section ---
 const TextMarqueeSection = () => (
     <section className="py-24 md:py-32 w-full">
-         <div className="space-y-2">
+        {/* MODIFIED: Changed space-y-8 to space-y-1 to reduce vertical gap */}
+         <div className="space-y-1">
             <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
                Framer Motion · 
             </TextMarquee>
