@@ -9,8 +9,8 @@ import React, {
     useMemo,
     useCallback
 } from 'react';
-// import Image from 'next/image'; // Removed: Replaced with <img>
-// import Link from 'next/link'; // Removed: Replaced with <a>
+import Image from 'next/image';
+import Link from 'next/link';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -221,11 +221,11 @@ const AppNavigationBar = () => {
                             {navigationItems.map((item) => (
                                 <NavigationMenuItem key={item.title}>
                                     {item.href ? (
-                                        <a href={item.href} >
+                                        <Link href={item.href} legacyBehavior passHref>
                                             <NavigationMenuLink asChild>
                                                 <Button variant="ghost">{item.title}</Button>
                                             </NavigationMenuLink>
-                                        </a>
+                                        </Link>
                                     ) : (
                                         <>
                                             <NavigationMenuTrigger className="font-medium text-sm">
@@ -246,14 +246,14 @@ const AppNavigationBar = () => {
                                                     </div>
                                                     <div className="flex flex-col text-sm h-full justify-end">
                                                         {item.items?.map((subItem) => (
-                                                          <a href={subItem.href} key={subItem.title}>
+                                                          <Link href={subItem.href} key={subItem.title} legacyBehavior passHref>
                                                             <NavigationMenuLink
                                                               className="flex flex-row justify-between items-center hover:bg-slate-800 py-2 px-4 rounded"
                                                             >
                                                                 <span>{subItem.title}</span>
                                                                 <MoveRight className="w-4 h-4 text-neutral-400" />
                                                             </NavigationMenuLink>
-                                                          </a>
+                                                          </Link>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -266,9 +266,9 @@ const AppNavigationBar = () => {
                     </NavigationMenu>
                 </div>
                 <div className="flex lg:justify-center">
-                    <a href="/" className="font-semibold text-xl">
+                    <Link href="/" className="font-semibold text-xl">
                       MyPortfolio
-                    </a>
+                    </Link>
                 </div>
                 <div className="flex justify-end w-full gap-2 md:gap-4">
                     <Button variant="ghost" className="hidden md:inline">
@@ -288,20 +288,20 @@ const AppNavigationBar = () => {
                                 <div key={item.title}>
                                     <div className="flex flex-col gap-2">
                                         {item.href ? (
-                                            <a
+                                            <Link
                                                 href={item.href}
                                                 className="flex justify-between items-center"
                                                 onClick={() => setOpen(false)}
                                             >
                                                 <span className="text-lg">{item.title}</span>
                                                 <MoveRight className="w-4 h-4 stroke-1 text-neutral-400" />
-                                            </a>
+                                            </Link>
                                         ) : (
                                             <p className="text-lg font-semibold">{item.title}</p>
                                         )}
                                         {item.items &&
                                             item.items.map((subItem) => (
-                                                <a
+                                                <Link
                                                     key={subItem.title}
                                                     href={subItem.href}
                                                     className="flex justify-between items-center pl-2"
@@ -311,7 +311,7 @@ const AppNavigationBar = () => {
                                                         {subItem.title}
                                                     </span>
                                                     <MoveRight className="w-4 h-4 stroke-1" />
-                                                </a>
+                                                </Link>
                                             ))}
                                     </div>
                                 </div>
@@ -482,10 +482,13 @@ type Testimonial = {
 
 const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
   <div className="relative h-full w-full rounded-2xl overflow-hidden p-px bg-zinc-800">
-    <img 
+    <Image 
       src={src} 
       alt={alt} 
-      className="object-cover object-center rounded-[15px] w-full h-full" 
+      fill
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      className="object-cover object-center rounded-[15px]" 
+      priority
     />
   </div>
 );
@@ -672,10 +675,12 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                              transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
                              viewport={{ once: true, amount: 0.5 }}
                         >
-                             <img
+                             <Image
                                 src={primaryImageSrc}
                                 alt={typeof title === 'string' ? title : 'Info Section Image'}
-                                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                                fill
+                                style={{ objectFit: 'cover' }}
+                                sizes="(max-width: 768px) 100vw, 50vw"
                             />
                         </motion.div>
                     </motion.div>
@@ -771,10 +776,12 @@ const CtaWithGallerySection = () => {
             viewport={{ once: true }}
             transition={{ ...SPRING_TRANSITION_CONFIG, delay: 0.4 }}
         >
-          <img
-            className="object-cover w-full h-full"
+          <Image
+            className="object-cover"
+            fill
             src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Global network"
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
         </motion.div>
       </div>
@@ -919,12 +926,13 @@ const FeatureTourDialog = () => {
           {/* Sidebar */}
           <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
             <div className="flex flex-col gap-3">
-              <img
+              <Image
                 src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png"
                 alt="Logo"
                 width={48}
                 height={48}
                 className="w-12 h-12 rounded-full border-4 border-neutral-800"
+                unoptimized
               />
               <h2 className="text-lg font-medium">Origin UI Onboarding</h2>
               <p className="text-sm text-neutral-400">
@@ -988,7 +996,7 @@ const FeatureTourDialog = () => {
 
               {/* Image */}
               <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center">
-                <img
+                <Image
                   src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
                   alt="Step Visual"
                   width={200}
@@ -1076,7 +1084,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">从零开始构建并发布了 Aceternity UI 和 Aceternity UI Pro。</p>
           <div>
-            <img 
+            <Image 
               src="https://assets.aceternity.com/templates/startup-1.webp" 
               alt="启动模板" 
               width={500}
@@ -1093,7 +1101,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我通常会用完文案，但当我看到这么大的内容时，我尝试整合一些占位文字。</p>
           <div>
-            <img 
+            <Image 
               src="https://assets.aceternity.com/pro/hero-sections.png" 
               alt="英雄区模板" 
               width={500}
@@ -1110,7 +1118,7 @@ const timelineData = [
         <div>
           <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
-            <img 
+            <Image 
               src="https://assets.aceternity.com/pro/bento-grids.png" 
               alt="新组件预览" 
               width={500}
