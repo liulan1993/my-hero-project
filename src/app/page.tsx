@@ -24,6 +24,7 @@ import {
   useAnimationFrame,
   useMotionValue,
 } from "framer-motion";
+import { kv } from '@vercel/kv'; // 导入 Vercel KV
 
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
@@ -33,6 +34,25 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from 'class-variance-authority';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+
+// ============================================================================
+// SERVER ACTION: 用于将数据保存到 Vercel KV (Redis)
+// ============================================================================
+async function saveContactToRedis(formData: Record<string, any>) {
+  'use server';
+  try {
+    // 使用姓名作为 Redis 的 Key
+    const key = formData.name;
+    if (!key) {
+      throw new Error("姓名不能为空，无法作为主键保存。");
+    }
+    await kv.set(key, JSON.stringify(formData));
+    return { success: true };
+  } catch (error) {
+    console.error("写入 Redis 时出错:", error);
+    return { success: false, error: error instanceof Error ? error.message : '未知错误' };
+  }
+}
 
 
 // ============================================================================
@@ -53,10 +73,19 @@ interface CustomImageProps {
     priority?: boolean;
     unoptimized?: boolean;
     sizes?: string;
+    onError?: () => void;
 }
 
 
-const Image = ({ src, alt, className, width, height, style, fill }: CustomImageProps) => {
+const Image = ({ src, alt, className, width, height, style, fill, onError }: CustomImageProps) => {
+    const [imgSrc, setImgSrc] = useState(src);
+
+    const handleError = () => {
+      // 占位图服务，例如 placehold.co
+      setImgSrc(`https://placehold.co/600x400/161616/ffffff?text=${encodeURIComponent(alt)}`);
+      if(onError) onError();
+    };
+
     const combinedStyle = { ...style };
     if (fill) {
         Object.assign(combinedStyle, {
@@ -68,7 +97,7 @@ const Image = ({ src, alt, className, width, height, style, fill }: CustomImageP
             objectFit: 'cover' as const
         });
     }
-    return <img src={src} alt={alt} className={className} width={width as number} height={height as number} style={combinedStyle} />;
+    return <img src={imgSrc} alt={alt} className={className} width={width as number} height={height as number} style={combinedStyle} onError={handleError} />;
 };
 
 
@@ -237,7 +266,8 @@ const NavigationMenuViewport = React.forwardRef<
 ));
 NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName;
 
-const AppNavigationBar = () => {
+// 导航栏组件
+const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick: () => void; onProtectedLinkClick: (e: React.MouseEvent, href: string) => void; }) => {
     const navigationItems = [
         { title: "主页", href: "/", description: "" },
         {
@@ -297,6 +327,7 @@ const AppNavigationBar = () => {
                                                     <div className="flex flex-col text-sm h-full justify-end">
                                                         {item.items?.map((subItem) => (
                                                             <NavigationMenuLink key={subItem.title} href={subItem.href}
+                                                              onClick={(e) => onProtectedLinkClick(e, subItem.href)}
                                                               className="flex flex-row justify-between items-center hover:bg-slate-800 py-2 px-4 rounded"
                                                             >
                                                                 <span>{subItem.title}</span>
@@ -323,7 +354,7 @@ const AppNavigationBar = () => {
                         欢迎您！
                     </Button>
                     <div className="border-r border-slate-700 hidden md:inline"></div>
-                    <Button variant="outline">登录</Button>
+                    <Button variant="outline" onClick={onLoginClick}>登录</Button>
                     <Button variant='default'>我的资料</Button>
                 </div>
                 <div className="flex w-12 shrink lg:hidden items-end justify-end">
@@ -352,8 +383,11 @@ const AppNavigationBar = () => {
                                                 <Link
                                                     key={subItem.title}
                                                     href={subItem.href}
+                                                    onClick={(e) => {
+                                                      onProtectedLinkClick(e, subItem.href);
+                                                      setOpen(false);
+                                                    }}
                                                     className="flex justify-between items-center pl-2"
-                                                    onClick={() => setOpen(false)}
                                                 >
                                                     <span className="text-neutral-300">
                                                         {subItem.title}
@@ -372,6 +406,165 @@ const AppNavigationBar = () => {
     );
 }
 AppNavigationBar.displayName = "AppNavigationBar";
+
+// ============================================================================
+// 1.5 新增: 联系资料提交卡片组件及相关数据
+// ============================================================================
+const countryData = {
+    'CN': { name: '中国', code: '+86', phoneRegex: /^1[3-9]\d{9}$/, states: ['北京', '上海', '天津', '重庆', '河北', '山西', '辽宁', '吉林', '黑龙江', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南', '湖北', '湖南', '广东', '海南', '四川', '贵州', '云南', '陕西', '甘肃', '青海', '台湾', '内蒙古', '广西', '西藏', '宁夏', '新疆', '香港', '澳门'] },
+    'US': { name: '美国', code: '+1', phoneRegex: /^\d{10}$/, states: ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'] },
+    'CA': { name: '加拿大', code: '+1', phoneRegex: /^\d{10}$/, states: ['Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'] },
+    'GB': { name: '英国', code: '+44', phoneRegex: /^7\d{9}$/, states: ['England', 'Scotland', 'Wales', 'Northern Ireland'] },
+    'AU': { name: '澳大利亚', code: '+61', phoneRegex: /^4\d{8}$/, states: ['New South Wales', 'Victoria', 'Queensland', 'Western Australia', 'South Australia', 'Tasmania', 'Australian Capital Territory', 'Northern Territory'] },
+    'DE': { name: '德国', code: '+49', phoneRegex: /^1[5-7]\d{9,10}$/, states: ['Baden-Württemberg', 'Bavaria', 'Berlin', 'Brandenburg', 'Bremen', 'Hamburg', 'Hesse', 'Lower Saxony', 'Mecklenburg-Vorpommern', 'North Rhine-Westphalia', 'Rhineland-Palatinate', 'Saarland', 'Saxony', 'Saxony-Anhalt', 'Schleswig-Holstein', 'Thuringia'] },
+    'FR': { name: '法国', code: '+33', phoneRegex: /^[67]\d{8}$/, states: ['Île-de-France', 'Auvergne-Rhône-Alpes', 'Bourgogne-Franche-Comté', 'Brittany', 'Centre-Val de Loire', 'Corsica', 'Grand Est', 'Hauts-de-France', 'Normandy', 'Nouvelle-Aquitaine', 'Occitanie', 'Pays de la Loire', "Provence-Alpes-Côte d'Azur"] },
+    'IT': { name: '意大利', code: '+39', phoneRegex: /^3\d{8,9}$/, states: ['Abruzzo', 'Aosta Valley', 'Apulia', 'Basilicata', 'Calabria', 'Campania', 'Emilia-Romagna', 'Friuli-Venezia Giulia', 'Lazio', 'Liguria', 'Lombardy', 'Marche', 'Molise', 'Piedmont', 'Sardinia', 'Sicily', 'Trentino-South Tyrol', 'Tuscany', 'Umbria', 'Veneto'] },
+    'ES': { name: '西班牙', code: '+34', phoneRegex: /^[67]\d{8}$/, states: ['Andalusia', 'Aragon', 'Asturias', 'Balearic Islands', 'Basque Country', 'Canary Islands', 'Cantabria', 'Castile and León', 'Castilla-La Mancha', 'Catalonia', 'Extremadura', 'Galicia', 'La Rioja', 'Madrid', 'Murcia', 'Navarre', 'Valencian Community'] },
+    'UA': { name: '乌克兰', code: '+380', phoneRegex: /^\d{9}$/, states: ['Cherkasy', 'Chernihiv', 'Chernivtsi', 'Dnipropetrovsk', 'Donetsk', 'Ivano-Frankivsk', 'Kharkiv', 'Kherson', 'Khmelnytskyi', 'Kyiv', 'Kirovohrad', 'Luhansk', 'Lviv', 'Mykolaiv', 'Odessa', 'Poltava', 'Rivne', 'Sumy', 'Ternopil', 'Vinnytsia', 'Volyn', 'Zakarpattia', 'Zaporizhzhia', 'Zhytomyr'] },
+    'PL': { name: '波兰', code: '+48', phoneRegex: /^\d{9}$/, states: ['Greater Poland', 'Kuyavian-Pomeranian', 'Lesser Poland', 'Łódź', 'Lower Silesian', 'Lublin', 'Lubusz', 'Masovian', 'Opole', 'Podlaskie', 'Pomeranian', 'Silesian', 'Subcarpathian', 'Świętokrzyskie', 'Warmian-Masurian', 'West Pomeranian'] },
+    'NL': { name: '荷兰', code: '+31', phoneRegex: /^6\d{8}$/, states: ['Drenthe', 'Flevoland', 'Friesland', 'Gelderland', 'Groningen', 'Limburg', 'North Brabant', 'North Holland', 'Overijssel', 'Utrecht', 'Zeeland', 'South Holland'] },
+    'BE': { name: '比利时', code: '+32', phoneRegex: /^4\d{8}$/, states: ['Antwerp', 'East Flanders', 'Flemish Brabant', 'Hainaut', 'Liège', 'Limburg', 'Luxembourg', 'Namur', 'Walloon Brabant', 'West Flanders'] },
+    'SE': { name: '瑞典', code: '+46', phoneRegex: /^7[02369]\d{7}$/, states: ['Blekinge', 'Dalarna', 'Gävleborg', 'Gotland', 'Halland', 'Jämtland', 'Jönköping', 'Kalmar', 'Kronoberg', 'Norrbotten', 'Örebro', 'Östergötland', 'Skåne', 'Södermanland', 'Stockholm', 'Uppsala', 'Värmland', 'Västerbotten', 'Västernorrland', 'Västmanland'] },
+    'CH': { name: '瑞士', code: '+41', phoneRegex: /^7[6-9]\d{7}$/, states: ['Aargau', 'Appenzell Ausserrhoden', 'Appenzell Innerrhoden', 'Basel-Landschaft', 'Basel-Stadt', 'Bern', 'Fribourg', 'Geneva', 'Glarus', 'Grisons', 'Jura', 'Lucerne', 'Neuchâtel', 'Nidwalden', 'Obwalden', 'Schaffhausen', 'Schwyz', 'Solothurn', 'St. Gallen', 'Thurgau', 'Ticino', 'Uri', 'Valais', 'Vaud', 'Zug', 'Zürich'] },
+    'AT': { name: '奥地利', code: '+43', phoneRegex: /^6\d{8,12}$/, states: ['Burgenland', 'Carinthia', 'Lower Austria', 'Salzburg', 'Styria', 'Tyrol', 'Upper Austria', 'Vienna', 'Vorarlberg'] },
+    'IE': { name: '爱尔兰', code: '+353', phoneRegex: /^8[35-9]\d{7}$/, states: ['Carlow', 'Cavan', 'Clare', 'Cork', 'Donegal', 'Dublin', 'Galway', 'Kerry', 'Kildare', 'Kilkenny', 'Laois', 'Leitrim', 'Limerick', 'Longford', 'Louth', 'Mayo', 'Meath', 'Monaghan', 'Offaly', 'Roscommon', 'Sligo', 'Tipperary', 'Waterford', 'Westmeath', 'Wexford', 'Wicklow'] },
+    'PT': { name: '葡萄牙', code: '+351', phoneRegex: /^9[1-36]\d{7}$/, states: ['Aveiro', 'Beja', 'Braga', 'Bragança', 'Castelo Branco', 'Coimbra', 'Évora', 'Faro', 'Guarda', 'Leiria', 'Lisbon', 'Portalegre', 'Porto', 'Santarém', 'Setúbal', 'Viana do Castelo', 'Vila Real', 'Viseu', 'Azores', 'Madeira'] },
+    'RU': { name: '俄罗斯', code: '+7', phoneRegex: /^9\d{9}$/, states: ['Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg', 'Kazan', 'Nizhny Novgorod', 'Chelyabinsk', 'Samara', 'Omsk', 'Rostov-on-Don', 'Ufa', 'Krasnoyarsk', 'Perm', 'Voronezh', 'Volgograd'] },
+    'JP': { name: '日本', code: '+81', phoneRegex: /^[789]0\d{8}$/, states: ['Hokkaido', 'Aomori', 'Iwate', 'Miyagi', 'Akita', 'Yamagata', 'Fukushima', 'Ibaraki', 'Tochigi', 'Gunma', 'Saitama', 'Chiba', 'Tokyo', 'Kanagawa', 'Niigata', 'Toyama', 'Ishikawa', 'Fukui', 'Yamanashi', 'Nagano', 'Gifu', 'Shizuoka', 'Aichi', 'Mie', 'Shiga', 'Kyoto', 'Osaka', 'Hyogo', 'Nara', 'Wakayama', 'Tottori', 'Shimane', 'Okayama', 'Hiroshima', 'Yamaguchi', 'Tokushima', 'Kagawa', 'Ehime', 'Kochi', 'Fukuoka', 'Saga', 'Nagasaki', 'Kumamoto', 'Oita', 'Miyazaki', 'Kagoshima', 'Okinawa'] },
+    'KR': { name: '韩国', code: '+82', phoneRegex: /^10\d{8}$/, states: ['Seoul', 'Busan', 'Daegu', 'Incheon', 'Gwangju', 'Daejeon', 'Ulsan', 'Gyeonggi', 'Gangwon', 'Chungcheongbuk', 'Chungcheongnam', 'Jeollabuk', 'Jeollanam', 'Gyeongsangbuk', 'Gyeongsangnam', 'Jeju'] },
+    'SG': { name: '新加坡', code: '+65', phoneRegex: /^[89]\d{7}$/, states: ['Central Singapore', 'North East', 'North West', 'South East', 'South West'] },
+    'MY': { name: '马来西亚', code: '+60', phoneRegex: /^1\d{8,9}$/, states: ['Johor', 'Kedah', 'Kelantan', 'Malacca', 'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu', 'Kuala Lumpur', 'Labuan', 'Putrajaya'] },
+    'TH': { name: '泰国', code: '+66', phoneRegex: /^[689]\d{8}$/, states: ['Bangkok', 'Chiang Mai', 'Phuket', 'Chon Buri', 'Nakhon Ratchasima', 'Udon Thani', 'Songkhla', 'Khon Kaen', 'Surat Thani', 'Nonthaburi'] },
+    'VN': { name: '越南', code: '+84', phoneRegex: /^[35789]\d{8}$/, states: ['Hanoi', 'Ho Chi Minh City', 'Da Nang', 'Hai Phong', 'Can Tho', 'An Giang', 'Ba Ria-Vung Tau', 'Bac Giang', 'Bac Kan', 'Bac Lieu', 'Bac Ninh'] },
+    'PH': { name: '菲律宾', code: '+63', phoneRegex: /^9\d{9}$/, states: ['Metro Manila', 'Cebu', 'Davao del Sur', 'Rizal', 'Cavite', 'Laguna', 'Bulacan', 'Pampanga', 'Batangas', 'Pangasinan'] },
+    'ID': { name: '印度尼西亚', code: '+62', phoneRegex: /^8\d{9,11}$/, states: ['Jakarta', 'West Java', 'East Java', 'Central Java', 'Banten', 'North Sumatra', 'South Sulawesi', 'Bali', 'Riau', 'Lampung'] },
+};
+const serviceAreas = ['企业落地', '准证申请', '子女教育', '溯源体检', '健康管理'];
+const countryOptions = Object.keys(countryData).map(key => ({ value: key, label: `${countryData[key].name} (${countryData[key].code})` }));
+const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:gmail|outlook|hotmail|qq|163|yahoo)\.com$/i;
+
+const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
+    const [formData, setFormData] = useState({ name: '', serviceArea: '', email: '', countryKey: '', phone: '', state: '' });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [availableStates, setAvailableStates] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (formData.countryKey) {
+            setAvailableStates(countryData[formData.countryKey].states);
+            setFormData(f => ({ ...f, state: '' }));
+            validateField('phone', formData.phone);
+        } else {
+            setAvailableStates([]);
+        }
+    }, [formData.countryKey]);
+
+    const validateField = (name: string, value: string): boolean => {
+        let errorMsg = '';
+        if (typeof value === 'string' && !value.trim()) {
+            errorMsg = '此字段不能为空';
+        } else {
+            switch (name) {
+                case 'email': if (!emailRegex.test(value)) errorMsg = '请输入有效的邮箱地址 (Google, Outlook, QQ, 163, Yahoo)'; break;
+                case 'phone':
+                    if (formData.countryKey) {
+                        const regex = countryData[formData.countryKey].phoneRegex;
+                        if (!regex.test(value)) errorMsg = `请输入有效的${countryData[formData.countryKey].name}手机号`;
+                    } else if (value) {
+                        errorMsg = '请先选择国家/地区';
+                    }
+                    break;
+                default: break;
+            }
+        }
+        setErrors(prev => ({ ...prev, [name]: errorMsg }));
+        return !errorMsg;
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        validateField(name, value);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        const isValid = Object.keys(formData).every(key => validateField(key, formData[key as keyof typeof formData]));
+
+        if (isValid) {
+            const result = await saveContactToRedis(formData);
+            if (result.success) {
+                alert('资料提交成功！');
+                onSuccess(); // 调用成功回调
+            } else {
+                alert(`提交失败: ${result.error}`);
+            }
+        } else {
+            console.log("表单存在错误");
+        }
+        setIsSubmitting(false);
+    };
+    
+    return (
+        <div className="bg-black text-white p-2 sm:p-0">
+          <div className="submission-header text-center mb-6">
+              <h1 className="text-2xl font-bold">请留下您的联系资料</h1>
+              <p className="text-neutral-400 mt-2">提交后即可访问内容</p>
+          </div>
+          <form onSubmit={handleSubmit} noValidate>
+              <div className="grid grid-cols-1 gap-y-4">
+                  {/* 姓名 */}
+                  <div className="form-group">
+                      <Label htmlFor="name">姓名</Label>
+                      <Input id="name" name="name" type="text" value={formData.name} onChange={handleChange} className={cn("mt-2", errors.name && 'border-red-500')} />
+                      {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                  </div>
+                  {/* 服务领域 */}
+                  <div className="form-group">
+                      <Label htmlFor="serviceArea">选择服务领域</Label>
+                      <select id="serviceArea" name="serviceArea" value={formData.serviceArea} onChange={handleChange} className={cn("form-input mt-2 w-full bg-black border-slate-700", errors.serviceArea && 'border-red-500')}>
+                          <option value="" disabled>请选择...</option>
+                          {serviceAreas.map(area => <option key={area} value={area}>{area}</option>)}
+                      </select>
+                      {errors.serviceArea && <p className="text-red-500 text-xs mt-1">{errors.serviceArea}</p>}
+                  </div>
+                  {/* 邮箱 */}
+                  <div className="form-group">
+                      <Label htmlFor="email">输入邮箱</Label>
+                      <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className={cn("mt-2", errors.email && 'border-red-500')} />
+                      {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                  </div>
+                  {/* 手机号 */}
+                  <div className="form-group">
+                      <Label htmlFor="phone">输入手机号</Label>
+                      <div className="flex gap-2 mt-2">
+                          <select id="countryKey" name="countryKey" value={formData.countryKey} onChange={handleChange} className={cn("form-input w-1/3 bg-black border-slate-700", errors.countryKey && 'border-red-500')}>
+                              <option value="" disabled>国家</option>
+                              {countryOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                          </select>
+                          <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} className={cn("w-2/3", errors.phone && 'border-red-500')} placeholder="手机号码"/>
+                      </div>
+                      {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+                  </div>
+                  {/* 州/省 */}
+                  <div className="form-group">
+                      <Label htmlFor="state">州/省</Label>
+                      <select id="state" name="state" value={formData.state} onChange={handleChange} disabled={!formData.countryKey} className={cn("form-input mt-2 w-full bg-black border-slate-700", errors.state && 'border-red-500')}>
+                          <option value="" disabled>请先选择国家</option>
+                          {availableStates.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
+                  </div>
+              </div>
+              <Button type="submit" className="w-full mt-6 bg-rose-500 hover:bg-rose-500/80 text-white" disabled={isSubmitting}>
+                  {isSubmitting ? '提交中...' : '提交并访问'}
+              </Button>
+          </form>
+        </div>
+    );
+};
+SubmissionCard.displayName = "SubmissionCard";
 
 // ============================================================================
 // 2. 页面区域和布局组件 (现有代码)
@@ -539,7 +732,7 @@ const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
 );
 ImageContainer.displayName = 'ImageContainer';
 
-const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
+const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent, href: string) => void; }) => {
   const [active, setActive] = useState(0);
 
   const handleNext = useCallback(() => {
@@ -549,6 +742,8 @@ const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
   const handlePrev = useCallback(() => {
     setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   }, [testimonials.length]);
+  
+  const currentLink = testimonials[active].link || '#';
 
   return (
     <div className="w-full mx-auto font-sans py-20 text-white">
@@ -598,7 +793,15 @@ const ProjectShowcase = ({ testimonials }: { testimonials: Testimonial[] }) => {
           <div className="flex gap-4 pt-12 w-full">
             <HalomotButton inscription="Previous" onClick={handlePrev} fixedWidth="172px" backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)' />
             <HalomotButton inscription="Next" onClick={handleNext} fixedWidth="172px" backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)'/>
-            <HalomotButton inscription="Open Web App" onClick={(e) => { e.preventDefault(); window.open(testimonials[active].link, "_blank")}} fillWidth href={testimonials[active].link} backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)'/>
+            <HalomotButton 
+              inscription="Open Web App" 
+              onClick={(e) => onProtectedLinkClick(e, currentLink)} 
+              fillWidth 
+              href={currentLink} 
+              backgroundColor='#161616' 
+              hoverTextColor='#fff' 
+              gradient='linear-gradient(to right, #603dec, #a123f4)'
+            />
           </div>
         </div>
       </div>
@@ -862,13 +1065,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-slate-800 bg-black p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
         className,
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-white">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -1177,7 +1380,8 @@ const projectShowcaseData = [
     name: "Namer UI For Vue",
     quote: "一个为 Vue 3 打造的可定制、可重用的 TypeScript 和原生 CSS 组件集合。",
     designation: "Vue 项目",
-    src: "https://raw.githubusercontent.com/Northstrix/my-portfolio/refs/heads/main/public/namer-ui-for-vue.webp",
+    // 修复: 替换可能失效的 raw.githubusercontent 链接
+    src: "https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue",
     link: "https://namer-ui-for-vue.netlify.app/",
   },
 ];
@@ -1504,9 +1708,6 @@ TextMarqueeSection.displayName = "TextMarqueeSection";
 // ============================================================================
 
 // --- 页脚所需的 SVG 图标 ---
-// 修复: 移除重复的 IconProps 定义
-// type IconProps = React.HTMLAttributes<SVGElement>; 
-
 const Facebook = (props: IconProps) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
@@ -1514,12 +1715,12 @@ const Facebook = (props: IconProps) => (
 );
 Facebook.displayName = "Facebook";
 
-const Twitter = (props: IconProps) => (
+const TwitterIconFooter = (props: IconProps) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
-    <path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 3.3 4.4 3.3 4.4s-1.4 1.4-3.3 1.4c-1.8 0-3.3-1.4-3.3-1.4s-1.4 1.4-3.3 1.4-3.3-1.4-3.3-1.4S2 11.8 2 4.6c0-1.6 1.4-3.3 3.3-3.3s3.3 1.8 3.3 1.8-1.4-1.4-3.3-1.4c-1.8 0-3.3 1.4-3.3 1.4s1.4 1.4 3.3 1.4 3.3-1.4 3.3-1.4 1.4 1.4 3.3 1.4 3.3-1.4 3.3-1.4c1.8 0 3.3-1.4 3.3-1.4s-1.4 1.4-3.3 1.4c-1.9 0-3.3-1.4-3.3-1.4s1.4-1.4 3.3-1.4c1.9 0 3.3 1.4 3.3 1.4s.7-2.1 2-3.4c1.3-1.3 3.4-1.4 3.4-1.4z" />
+     <path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 3.3 4.4 3.3 4.4s-1.4 1.4-3.3 1.4c-1 .6-2.3 1-3.6 1-4.5 0-8.4-3.8-8.4-8.5C5.3 6 5.6 4.8 6.2 3.8 5 5.4 0 8.3 0 8.3s2.1-1.7 4.1-2.1c-1.3-1.6-1.3-3.6 0-5.2 1.9-1.9 4.9-1.9 6.8 0 1.3-.2 2.6-.7 3.7-1.4.2 1.3-.4 2.6-1.5 3.4.9-.1 1.8-.4 2.6-.7Z" />
   </svg>
 );
-Twitter.displayName = "Twitter";
+TwitterIconFooter.displayName = "TwitterIconFooter";
 
 const Instagram = (props: IconProps) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" >
@@ -1570,7 +1771,7 @@ const CustomFooter = () => {
 
     const socialIcons = [
       { name: '小红书', icon: <Facebook className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2?xsec_token=YBu0J314MzsA9PGMJZLZmcLRL3wiuAfNIZeudNRhtPvCk=&xsec_source=app_share&xhsshare=WeixinSession&appuid=6624755f00000000030303c2&apptime=1750082613&share_id=b4da624f466a4aeabb6e1e79662f092d&tab=note&subTab=note' },
-      { name: '知乎', icon: <Twitter className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
+      { name: '知乎', icon: <TwitterIconFooter className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
       { name: 'Instagram', icon: <Instagram className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.instagram.com/' },
       { name: 'LinkedIn', icon: <Linkedin className="h-4 w-4" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.linkedin.com/' },
     ];
@@ -1643,13 +1844,45 @@ CustomFooter.displayName = "CustomFooter";
 
 
 // ============================================================================
-// 10. 主页面组件 (已集成新组件)
+// 10. 主页面组件 (已集成新组件和逻辑)
 // ============================================================================
 
 export default function HomePage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  // 在客户端挂载时检查 localStorage
+  useEffect(() => {
+    // 使用设备指纹或简单的 localStorage 标志作为“设备码”
+    const submittedFlag = localStorage.getItem('hasSubmittedForm');
+    if (submittedFlag === 'true') {
+      setHasSubmitted(true);
+    }
+  }, []);
+  
+  // 处理提交成功的回调
+  const handleSuccess = () => {
+    localStorage.setItem('hasSubmittedForm', 'true');
+    setHasSubmitted(true);
+    setIsModalOpen(false);
+  };
+  
+  // 处理受保护链接的点击事件
+  const handleProtectedLinkClick = (e: React.MouseEvent, href: string) => {
+    if (!hasSubmitted) {
+      e.preventDefault(); // 阻止默认导航
+      setIsModalOpen(true); // 打开弹窗
+    } else {
+      window.open(href, '_blank'); // 如果已提交，则正常导航
+    }
+  };
+
   return (
     <div className="relative isolate bg-black text-white">
-      <AppNavigationBar />
+      <AppNavigationBar 
+        onLoginClick={() => setIsModalOpen(true)}
+        onProtectedLinkClick={handleProtectedLinkClick}
+      />
       <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
       <Scene />
 
@@ -1684,7 +1917,10 @@ export default function HomePage() {
         <Timeline data={timelineData} />
 
         <div className="max-w-7xl mx-auto px-8">
-            <ProjectShowcase testimonials={projectShowcaseData} />
+            <ProjectShowcase 
+              testimonials={projectShowcaseData} 
+              onProtectedLinkClick={handleProtectedLinkClick}
+            />
         </div>
         
         <InfoSectionWithMockup {...infoSectionData1} />
@@ -1700,9 +1936,15 @@ export default function HomePage() {
             <TextMarqueeSection />
         </div>
 
-        {/* --- ✨ 页脚组件已添加在此处 ✨ --- */}
         <CustomFooter />
       </main>
+
+      {/* 资料提交弹窗 */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+            <SubmissionCard onSuccess={handleSuccess} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
