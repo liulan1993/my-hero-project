@@ -7,10 +7,12 @@ import React, {
     useEffect, 
     useState, 
     useMemo,
-    useCallback
+    useCallback,
+    forwardRef // 新增 forwardRef
 } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+// 修复: 移除 'next/image' 和 'next/link' 的导入，因为它们在标准React环境中不可用
+// import Image from 'next/image';
+// import Link from 'next/link';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -19,7 +21,12 @@ import {
   useTransform,
   AnimatePresence,
   type Variants,
-  type HTMLMotionProps
+  type HTMLMotionProps,
+  // --- 新增 Framer Motion 依赖 ---
+  useSpring,
+  useVelocity,
+  useAnimationFrame,
+  useMotionValue,
 } from "framer-motion";
 
 // --- 从新组件中添加的依赖项 ---
@@ -39,6 +46,33 @@ import { twMerge } from 'tailwind-merge';
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// 修复: 创建一个兼容的 Image 组件替代 next/image
+const Image = ({ src, alt, className, width, height, style, fill, sizes, priority, unoptimized }: any) => {
+    const combinedStyle = { ...style };
+    if (fill) {
+        Object.assign(combinedStyle, {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+        });
+    }
+    return <img src={src} alt={alt} className={className} width={width} height={height} style={combinedStyle} />;
+};
+
+// 修复: 创建一个兼容的 Link 组件替代 next/link
+const Link = ({ href, children, legacyBehavior, passHref, ...props }: any) => {
+  if (legacyBehavior) {
+    // 尝试克隆子元素并传递href，但这在某些情况下可能很棘手
+    // 一个更简单的替代方法是直接渲染一个 <a> 标签
+    const child = React.Children.only(children);
+    return React.cloneElement(child, { ...props, href });
+  }
+  return <a href={href} {...props}>{children}</a>;
+};
 
 
 // ============================================================================
@@ -166,7 +200,14 @@ const NavigationMenuContent = React.forwardRef<
 ));
 NavigationMenuContent.displayName = NavigationMenuPrimitive.Content.displayName;
 
-const NavigationMenuLink = NavigationMenuPrimitive.Link;
+const NavigationMenuLink = React.forwardRef<
+    React.ElementRef<'a'>,
+    React.ComponentPropsWithoutRef<'a'> & { asChild?: boolean }
+>(({ className, asChild, ...props }, ref) => {
+    const Comp = asChild ? Slot : 'a';
+    return <Comp ref={ref} className={className} {...props} />;
+});
+NavigationMenuLink.displayName = 'NavigationMenuLink';
 
 const NavigationMenuViewport = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
@@ -221,11 +262,11 @@ const AppNavigationBar = () => {
                             {navigationItems.map((item) => (
                                 <NavigationMenuItem key={item.title}>
                                     {item.href ? (
-                                        <Link href={item.href} legacyBehavior passHref>
-                                            <NavigationMenuLink asChild>
+                                        <NavigationMenuLink asChild>
+                                            <Link href={item.href}>
                                                 <Button variant="ghost">{item.title}</Button>
-                                            </NavigationMenuLink>
-                                        </Link>
+                                            </Link>
+                                        </NavigationMenuLink>
                                     ) : (
                                         <>
                                             <NavigationMenuTrigger className="font-medium text-sm">
@@ -246,14 +287,12 @@ const AppNavigationBar = () => {
                                                     </div>
                                                     <div className="flex flex-col text-sm h-full justify-end">
                                                         {item.items?.map((subItem) => (
-                                                          <Link href={subItem.href} key={subItem.title} legacyBehavior passHref>
-                                                            <NavigationMenuLink
+                                                            <NavigationMenuLink key={subItem.title} href={subItem.href}
                                                               className="flex flex-row justify-between items-center hover:bg-slate-800 py-2 px-4 rounded"
                                                             >
                                                                 <span>{subItem.title}</span>
                                                                 <MoveRight className="w-4 h-4 text-neutral-400" />
                                                             </NavigationMenuLink>
-                                                          </Link>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -1200,7 +1239,7 @@ const infoSectionData2 = {
 
 
 // ============================================================================
-// 7. 新增: 分屏滚动动画区域组件 (来自用户的 Canvas)
+// 7. 新增: 分屏滚动动画区域组件
 // ============================================================================
 
 const scrollAnimationPages = [
@@ -1278,7 +1317,6 @@ function ScrollAdventure() {
     const scrollComponent = componentRef.current;
 
     const handleWheel = (e: WheelEvent) => {
-      // 阻止主页面滚动
       e.preventDefault();
       if (scrolling.current) return;
       scrolling.current = true;
@@ -1296,13 +1334,11 @@ function ScrollAdventure() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (scrollComponent) {
         const rect = scrollComponent.getBoundingClientRect();
-        // 检查组件是否在视口内
         const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
 
         if (isVisible) {
-          // 只在组件可见时响应方向键
           if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            e.preventDefault(); // 阻止主页面滚动
+            e.preventDefault(); 
             if (scrolling.current) return;
             scrolling.current = true;
             
@@ -1320,16 +1356,11 @@ function ScrollAdventure() {
       }
     };
 
-    // 将滚轮事件监听器直接附加到组件上
     if (scrollComponent) {
-      // 使用 { passive: false } 以允许调用 e.preventDefault()
       scrollComponent.addEventListener('wheel', handleWheel, { passive: false });
     }
-
-    // 键盘事件监听器保留在 window 上以便全局捕获
     window.addEventListener('keydown', handleKeyDown);
 
-    // 清理函数
     return () => {
       if (scrollComponent) {
         scrollComponent.removeEventListener('wheel', handleWheel);
@@ -1412,7 +1443,83 @@ ScrollAdventure.displayName = "ScrollAdventure";
 
 
 // ============================================================================
-// 8. 主页面组件 (已修改)
+// 8. ✨ 新增: 文本跑马灯组件 (Text Marquee)
+// ============================================================================
+
+// --- 辅助函数：循环取值 ---
+const wrap = (min: number, max: number, v: number) => {
+  const rangeSize = max - min;
+  return ((((v - min) % rangeSize) + rangeSize) % rangeSize) + min;
+};
+
+// --- Marquee 组件属性接口 ---
+interface TextMarqueeProps {
+  children: string;
+  baseVelocity?: number;
+  className?: string;
+  scrollDependent?: boolean;
+}
+
+// --- Marquee 核心组件 ---
+const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
+  children,
+  baseVelocity = -5,
+  className,
+  scrollDependent = false,
+}, ref) => {
+  const baseX = useMotionValue(0);
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocity, {
+    damping: 50,
+    stiffness: 400,
+  });
+  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
+    clamp: false,
+  });
+  const x = useTransform(baseX, (v) => `${wrap(-20, -45, v)}%`);
+  const directionFactor = useRef<number>(1);
+
+  useAnimationFrame((t, delta) => {
+    let moveBy = directionFactor.current * baseVelocity * (delta / 1000);
+    if (scrollDependent && velocityFactor.get() !== 0) {
+      directionFactor.current = velocityFactor.get() > 0 ? 1 : -1;
+      moveBy += directionFactor.current * moveBy * velocityFactor.get();
+    }
+    baseX.set(baseX.get() + moveBy);
+  });
+
+  return (
+    <div className="overflow-hidden whitespace-nowrap flex flex-nowrap" ref={ref}>
+      <motion.div className="flex whitespace-nowrap flex-nowrap gap-x-10" style={{ x }}>
+        {[...Array(4)].map((_, i) => (
+          <span key={i} className={cn('block text-6xl md:text-8xl', className)}>{children}</span>
+        ))}
+      </motion.div>
+    </div>
+  );
+});
+TextMarquee.displayName = 'TextMarquee';
+
+
+// --- Marquee 组件的容器 Section ---
+const TextMarqueeSection = () => (
+    <section className="py-24 md:py-32 w-full">
+         <div className="container mx-auto px-8 space-y-8">
+            <TextMarquee baseVelocity={-2} className='font-bold text-blue-400'>
+               Framer Motion · 
+            </TextMarquee>
+            <TextMarquee baseVelocity={2} className='font-bold text-purple-400'>
+               Tailwind CSS · 
+            </TextMarquee>
+        </div>
+    </section>
+);
+TextMarqueeSection.displayName = "TextMarqueeSection";
+
+
+// ============================================================================
+// 9. 主页面组件 (已集成新组件)
 // ============================================================================
 
 export default function HomePage() {
@@ -1467,6 +1574,10 @@ export default function HomePage() {
         <div className="py-24 px-8 flex justify-center items-center">
             <ScrollAdventure />
         </div>
+
+        {/* ✨ 新增的跑马灯区域 ✨ */}
+        <TextMarqueeSection />
+
       </main>
     </div>
   );
