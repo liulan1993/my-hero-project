@@ -26,7 +26,7 @@ function WavyBackground({
   waveOpacity = 0.5,
   ...props
 }: {
-  children?: any;
+  children?: React.ReactNode;
   className?: string;
   containerClassName?: string;
   colors?: string[];
@@ -35,7 +35,7 @@ function WavyBackground({
   blur?: number;
   speed?: "slow" | "fast";
   waveOpacity?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -46,7 +46,7 @@ function WavyBackground({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let waveColors = colors || ["#38bdf8", "#818cf8", "#c084fc", "#e879f9", "#22d3ee"];
+    const waveColors = colors || ["#38bdf8", "#818cf8", "#c084fc", "#e879f9", "#22d3ee"];
     const waveWidthValue = waveWidth || 50;
     const backgroundFillValue = backgroundFill || "black";
     const waveOpacityValue = waveOpacity || 0.5;
@@ -230,7 +230,7 @@ function TaxCalculator() {
         setTax(0);
         return;
     }
-    let calculatedTax = country === 'china' ? calculateChinaTax(incomeValue) : calculateSingaporeTax(incomeValue);
+    const calculatedTax = country === 'china' ? calculateChinaTax(incomeValue) : calculateSingaporeTax(incomeValue);
     setTax(calculatedTax);
   }, [income, country]);
 
