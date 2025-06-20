@@ -421,7 +421,8 @@ const countryData = {
     'ID': { name: '印度尼西亚', code: '+62', phoneRegex: /^8\d{9,11}$/, states: ['Jakarta', 'West Java', 'East Java', 'Central Java', 'Banten', 'North Sumatra', 'South Sulawesi', 'Bali', 'Riau', 'Lampung'] },
 };
 const serviceAreas = ['企业落地', '准证申请', '子女教育', '溯源体检', '健康管理'];
-const countryOptions = Object.keys(countryData).map(key => ({ value: key, label: `${countryData[key].name} (${countryData[key].code})` }));
+// 修复: 通过对 Object.keys 的结果进行类型断言来解决 TypeScript 类型错误。
+const countryOptions = (Object.keys(countryData) as Array<keyof typeof countryData>).map(key => ({ value: key, label: `${countryData[key].name} (${countryData[key].code})` }));
 const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:gmail|outlook|hotmail|qq|163|yahoo)\.com$/i;
 
 const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
@@ -1584,7 +1585,7 @@ function ScrollAdventure() {
                   {page.rightContent && (
                      <div className="text-center">
                       <h2 className="text-3xl font-bold uppercase mb-4 tracking-widest">
-                        {page.rightContent.description}
+                        {page.rightContent.heading}
                       </h2>
                       {typeof page.rightContent.description === 'string' ? (
                         <p className="text-lg">
