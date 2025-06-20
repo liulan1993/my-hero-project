@@ -1275,49 +1275,65 @@ function ScrollAdventure() {
   }, [currentPage, numOfPages]);
 
   useEffect(() => {
+    const scrollComponent = componentRef.current;
+
     const handleWheel = (e: WheelEvent) => {
-        // 仅在鼠标悬停在组件上时触发
-        if (componentRef.current && componentRef.current.contains(e.target as Node)) {
-            if (scrolling.current) return;
-            scrolling.current = true;
-            if (e.deltaY > 0) {
-              navigateDown();
-            } else {
-              navigateUp();
-            }
-            setTimeout(() => {
-              scrolling.current = false;
-            }, animTime);
-        }
+      // 阻止主页面滚动
+      e.preventDefault();
+      if (scrolling.current) return;
+      scrolling.current = true;
+
+      if (e.deltaY > 0) {
+        navigateDown();
+      } else {
+        navigateUp();
+      }
+      setTimeout(() => {
+        scrolling.current = false;
+      }, animTime);
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-        // 仅在组件可见时触发
-        if(componentRef.current) {
-            const rect = componentRef.current.getBoundingClientRect();
-            const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
-            if(isVisible) {
-                if (scrolling.current) return;
-                scrolling.current = true;
-                if (e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  navigateUp();
-                } else if (e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  navigateDown();
-                }
-                setTimeout(() => {
-                  scrolling.current = false;
-                }, animTime);
+      if (scrollComponent) {
+        const rect = scrollComponent.getBoundingClientRect();
+        // 检查组件是否在视口内
+        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+
+        if (isVisible) {
+          // 只在组件可见时响应方向键
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault(); // 阻止主页面滚动
+            if (scrolling.current) return;
+            scrolling.current = true;
+            
+            if (e.key === 'ArrowUp') {
+                navigateUp();
+            } else {
+                navigateDown();
             }
+
+            setTimeout(() => {
+              scrolling.current = false;
+            }, animTime);
+          }
         }
+      }
     };
 
-    window.addEventListener('wheel', handleWheel, { passive: true });
+    // 将滚轮事件监听器直接附加到组件上
+    if (scrollComponent) {
+      // 使用 { passive: false } 以允许调用 e.preventDefault()
+      scrollComponent.addEventListener('wheel', handleWheel, { passive: false });
+    }
+
+    // 键盘事件监听器保留在 window 上以便全局捕获
     window.addEventListener('keydown', handleKeyDown);
 
+    // 清理函数
     return () => {
-      window.removeEventListener('wheel', handleWheel);
+      if (scrollComponent) {
+        scrollComponent.removeEventListener('wheel', handleWheel);
+      }
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [navigateUp, navigateDown]);
