@@ -157,11 +157,9 @@ function TaxCalculator() {
                 </p>
             </div>
         </div>
-        {/* 新增返回主页按钮 */}
+        {/* 新增返回主页按钮，并移除target="_blank"以在当前页面跳转 */}
         <a 
             href="https://my-hero-project.vercel.app" 
-            target="_blank" 
-            rel="noopener noreferrer"
             className="mt-6 px-8 py-2 rounded-full text-sm font-semibold text-white bg-black/30 hover:bg-black/50 transition-all duration-300 backdrop-blur-sm"
         >
             返回主页
