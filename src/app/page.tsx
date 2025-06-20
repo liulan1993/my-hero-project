@@ -280,7 +280,7 @@ const NavigationMenuViewport = React.forwardRef<
 NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName;
 
 // 导航栏组件
-const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick: () => void; onProtectedLinkClick: (e: React.MouseEvent, href: string) => void; }) => {
+const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick: () => void; onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void; }) => {
     const navigationItems = [
         { title: "主页", href: "/", description: "" },
         {
@@ -339,12 +339,15 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                     </div>
                                                     <div className="flex flex-col text-sm h-full justify-end">
                                                         {item.items?.map((subItem) => (
-                                                            <NavigationMenuLink key={subItem.title} href={subItem.href}
-                                                              onClick={(e) => onProtectedLinkClick(e, subItem.href)}
-                                                              className="flex flex-row justify-between items-center hover:bg-slate-800 py-2 px-4 rounded"
-                                                            >
-                                                                <span>{subItem.title}</span>
-                                                                <MoveRight className="w-4 h-4 text-neutral-400" />
+                                                            <NavigationMenuLink asChild key={subItem.title}>
+                                                                <a
+                                                                    href={subItem.href}
+                                                                    onClick={(e) => onProtectedLinkClick(e, subItem.href)}
+                                                                    className="flex flex-row justify-between items-center hover:bg-slate-800 py-2 px-4 rounded"
+                                                                >
+                                                                    <span>{subItem.title}</span>
+                                                                    <MoveRight className="w-4 h-4 text-neutral-400" />
+                                                                </a>
                                                             </NavigationMenuLink>
                                                         ))}
                                                     </div>
@@ -380,20 +383,20 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                 <div key={item.title}>
                                     <div className="flex flex-col gap-2">
                                         {item.href ? (
-                                            <Link
+                                            <a
                                                 href={item.href}
                                                 className="flex justify-between items-center"
                                                 onClick={() => setOpen(false)}
                                             >
                                                 <span className="text-lg">{item.title}</span>
                                                 <MoveRight className="w-4 h-4 stroke-1 text-neutral-400" />
-                                            </Link>
+                                            </a>
                                         ) : (
                                             <p className="text-lg font-semibold">{item.title}</p>
                                         )}
                                         {item.items &&
                                             item.items.map((subItem) => (
-                                                <Link
+                                                <a
                                                     key={subItem.title}
                                                     href={subItem.href}
                                                     onClick={(e) => {
@@ -406,7 +409,7 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                         {subItem.title}
                                                     </span>
                                                     <MoveRight className="w-4 h-4 stroke-1" />
-                                                </Link>
+                                                </a>
                                             ))}
                                     </div>
                                 </div>
@@ -717,8 +720,9 @@ const HalomotButton: React.FC<HalomotButtonProps> = ({
     onMouseLeave: () => setIsHovered(false),
   };
 
+  // 修复: 移除了 target="_blank"
   const ButtonElement = href ? (
-    <a href={href} {...commonProps} target="_blank" rel="noopener noreferrer">{ButtonContent}</a>
+    <a href={href} {...commonProps} rel="noopener noreferrer">{ButtonContent}</a>
   ) : (
     <button type="button" {...commonProps}>{ButtonContent}</button>
   );
@@ -744,7 +748,7 @@ const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
 );
 ImageContainer.displayName = 'ImageContainer';
 
-const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent, href: string) => void; }) => {
+const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void; }) => {
   const [active, setActive] = useState(0);
 
   const handleNext = useCallback(() => {
@@ -1719,7 +1723,7 @@ TextMarqueeSection.displayName = "TextMarqueeSection";
 // --- 页脚所需的 SVG 图标 ---
 const XiaohongshuIcon = (props: IconProps) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-    <path d="M21.273 18.818H18.18v-3.09h-2.181v3.09h-3.09v2.182h3.09v3.091h2.182v-3.09h3.09v-2.182zM4.364 3.818h4.363V2.727H4.364v1.091zm4.363 9.818H4.364v1.091h4.363v-1.09zM15.455 6h-2.182v1.09h2.182V6zm-5.455 0H5.455v1.09h4.545V6zm-1.09 9.818H4.364v1.09h4.545v-1.09zm5.454-3.272H4.364v1.09h9.818v-1.09zM4.364 9.273h9.818v1.09H4.364v-1.09z"/>
+    <path d="M21.273 18.818H18.18v-3.09h-2.181v3.09h-3.09v2.182h3.09v3.091h2.182v-3.09h3.09v-2.182zM4.364 3.818h4.363V2.727H4.364v1.091zm4.363 9.818H4.364v1.091h4.363v-1.09zM15.455 6h-2.182v1.09h2.182V6zm-5.455 6H5.455v1.09h4.545V6zm-1.09 9.818H4.364v1.09h4.545v-1.09zm5.454-3.272H4.364v1.09h9.818v-1.09zM4.364 9.273h9.818v1.09H4.364v-1.09z"/>
   </svg>
 );
 XiaohongshuIcon.displayName = "XiaohongshuIcon";
@@ -1879,14 +1883,22 @@ export default function HomePage() {
     setIsModalOpen(false);
   };
   
-  // 处理受保护链接的点击事件
-  const handleProtectedLinkClick = (e: React.MouseEvent, href: string) => {
-    if (!hasSubmitted) {
-      e.preventDefault(); // 阻止默认导航
-      setIsModalOpen(true); // 打开弹窗
-    } else {
-      window.open(href, '_blank'); // 如果已提交，则正常导航
+  // 修复: 更新点击事件处理逻辑
+  const handleProtectedLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    // 对于占位链接, 阻止导航并显示提示信息
+    if (href === '#') {
+        e.preventDefault();
+        alert("此功能正在开发中，敬请期待！");
+        return;
     }
+
+    // 如果表单尚未提交, 则阻止导航并显示弹窗
+    if (!hasSubmitted) {
+        e.preventDefault();
+        setIsModalOpen(true);
+    }
+    // 如果表单已提交, 此函数不执行任何操作,
+    // 允许链接的默认导航行为在当前标签页中继续进行。
   };
 
   return (
