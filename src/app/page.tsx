@@ -25,11 +25,9 @@ import {
   useMotionValue,
 } from "framer-motion";
 
-// 修复：移除了对 './actions' 的导入，因为该文件不存在
-// 在此独立的组件环境中，我们将模拟这些服务器动作
-// import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
+// 修复：导入真实的 Server Actions
+import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
-// 修复：移除了未使用的 'Plus' 和 'Minus'
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
@@ -57,26 +55,10 @@ interface ContactFormData {
   state: string;
 }
 
-// 修复: 为模拟服务器动作定义一个健壮的返回类型
+// 定义服务器动作的返回类型，以便在客户端进行类型检查
 type ServerActionResponse = { success: true } | { success: false; error?: string };
 
-
-// 模拟服务器动作
-async function saveContactToRedis(data: ContactFormData): Promise<ServerActionResponse> {
-  console.log("模拟保存联系人资料:", data);
-  // 模拟网络延迟
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  // 模拟成功响应
-  return { success: true };
-}
-
-async function saveFooterEmailToRedis(data: { email: string }): Promise<ServerActionResponse> {
-  console.log("模拟保存页脚邮箱:", data);
-  // 模拟网络延迟
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  // 模拟成功响应
-  return { success: true };
-}
+// 修复：此处的模拟函数已被删除，因为我们将直接导入并使用 actions.ts 中的真实函数
 
 
 interface CustomImageProps {
