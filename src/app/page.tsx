@@ -55,10 +55,6 @@ interface ContactFormData {
   state: string;
 }
 
-// 修复：移除未使用的 'ServerActionResponse' 类型定义
-// TypeScript 现在可以从导入的 'actions.ts' 文件中自动推断返回类型
-
-
 interface CustomImageProps {
     src: string;
     alt: string;
@@ -174,7 +170,6 @@ const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
         type={type}
         className={cn(
           'flex h-10 w-full rounded-md border border-slate-700 bg-black px-3 py-2 text-white placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-50',
-          // 修改: 统一字体大小
           "text-base md:text-lg",
           className
         )}
@@ -231,7 +226,6 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName;
 const NavigationMenuItem = NavigationMenuPrimitive.Item;
 NavigationMenuItem.displayName = "NavigationMenuItem";
 
-// 修改: 移除 text-sm font-medium
 const navigationMenuTriggerStyle = cva(
   "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-slate-800/50 data-[state=open]:bg-slate-800/50"
 );
@@ -242,7 +236,6 @@ const NavigationMenuTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Trigger
     ref={ref}
-    // 修改: 统一字体大小
     className={cn(navigationMenuTriggerStyle(), "group", "text-base md:text-lg", className)}
     {...props}
   >
@@ -333,13 +326,11 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                     {item.href ? (
                                         <NavigationMenuLink asChild>
                                             <Link href={item.href}>
-                                                {/* 修改: 统一字体大小 */}
                                                 <Button variant="ghost" className="text-base md:text-lg">{item.title}</Button>
                                             </Link>
                                         </NavigationMenuLink>
                                     ) : (
                                         <>
-                                            {/* 修改: 统一字体大小 */}
                                             <NavigationMenuTrigger className="text-base md:text-lg">
                                                 {item.title}
                                             </NavigationMenuTrigger>
@@ -348,7 +339,6 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                     <div className="flex flex-col h-full justify-between">
                                                         <div className="flex flex-col">
                                                             <p className="font-semibold text-base md:text-lg">{item.title}</p>
-                                                            {/* 修改: 统一字体大小 */}
                                                             <p className="text-neutral-400 text-base md:text-lg">
                                                                 {item.description}
                                                             </p>
@@ -357,7 +347,6 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                             商业洞察
                                                         </Button>
                                                     </div>
-                                                    {/* 修改: 统一字体大小 */}
                                                     <div className="flex flex-col text-base md:text-lg h-full justify-end">
                                                         {item.items?.map((subItem) => (
                                                             <NavigationMenuLink asChild key={subItem.title}>
@@ -382,13 +371,11 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                     </NavigationMenu>
                 </div>
                 <div className="flex lg:justify-center">
-                    {/* 修改: 统一Logo字体大小和格式 */}
                     <Link href="/" className="text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                       Apex
                     </Link>
                 </div>
                 <div className="flex justify-end w-full gap-2 md:gap-4">
-                    {/* 修改: 统一字体大小 */}
                     <Button variant="ghost" className="hidden md:inline text-base md:text-lg">
                         欢迎您！
                     </Button>
@@ -411,7 +398,6 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                 className="flex justify-between items-center"
                                                 onClick={() => setOpen(false)}
                                             >
-                                                {/* 修改: 统一字体大小 */}
                                                 <span className="text-base md:text-lg">{item.title}</span>
                                                 <MoveRight className="w-4 h-4 stroke-1 text-neutral-400" />
                                             </a>
@@ -429,7 +415,6 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                     }}
                                                     className="flex justify-between items-center pl-2"
                                                 >
-                                                    {/* 修改: 统一字体大小 */}
                                                     <span className="text-neutral-300 text-base md:text-lg">
                                                         {subItem.title}
                                                     </span>
@@ -691,9 +676,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   return (
     <div className="w-full bg-transparent font-sans md:px-10" ref={containerRef}>
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        {/* 修改: 统一标题字体 */}
         <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">留学教育&Study Abroad Education</h2>
-        {/* 修改: 统一正文字体 */}
         <p className="text-neutral-300 max-w-sm text-base md:text-lg">植根新加坡，兼具中国基因。中新团队双语服务，沟通无碍，执行高效。</p>
       </div>
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
@@ -703,11 +686,9 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
-              {/* 修改: 统一标题字体和颜色 */}
               <h3 className="hidden md:block md:pl-20 font-semibold text-white text-3xl md:text-[40px] leading-tight md:leading-[53px]">{item.title}</h3>
             </div>
             <div className="relative pl-20 pr-4 md:pl-4 w-full">
-              {/* 修改: 统一标题字体和颜色 */}
               <h3 className="md:hidden block mb-4 text-left font-semibold text-white text-3xl md:text-[40px] leading-tight md:leading-[53px]">{item.title}</h3>
               {item.content}
             </div>
@@ -824,17 +805,10 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className='flex flex-col justify-center space-y-4'
           >
-            {/* 修改: 统一标题字体 */}
             <h3 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
               {testimonials[active].name}
             </h3>
             
-            {/* 修改: 删除副标题 */}
-            {/* <p className="text-sm text-neutral-400">
-              {testimonials[active].designation}
-            </p> */}
-            
-            {/* 修改: 统一正文字体 */}
             <motion.p className="text-neutral-200 leading-relaxed text-base md:text-lg">
               {testimonials[active].quote}
             </motion.p>
@@ -860,7 +834,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
 ProjectShowcase.displayName = "ProjectShowcase";
 
 // ============================================================================
-// 3. 新增: 带模型图的信息卡片区域组件
+// 3. 带模型图的信息卡片区域组件
 // ============================================================================
 interface InfoSectionProps {
     title: string | React.ReactNode;
@@ -924,7 +898,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                             </h2>
                         </div>
 
-                        {/* 修改: 统一正文字体 */}
                         <p className="text-[#868f97] leading-6 text-base md:text-lg">
                             {description}
                         </p>
@@ -985,7 +958,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 
 // ============================================================================
-// 4. ✨ 修复并新增: 带图库的行动号召(CTA)区域组件
+// 4. 带图库的行动号召(CTA)区域组件
 // ============================================================================
 
 const CtaWithGallerySection = () => {
@@ -1013,16 +986,14 @@ const CtaWithGallerySection = () => {
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.3 }}
                 >
-                    {/* 修改: 统一标题字体 */}
                     <motion.h2 variants={itemVariants} className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         加入我们，共创未来
                     </motion.h2>
-                    {/* 修改: 统一正文字体 */}
                     <motion.p variants={itemVariants} className="text-neutral-300 max-w-2xl mx-auto mb-8 text-base md:text-lg">
                         探索我们的创新解决方案，了解我们如何帮助全球客户取得成功。立即开始，释放您的全部潜力。
                     </motion.p>
-                    <motion.div variants={itemVariants}>
-                      {/* 修改: 使用 DialogTrigger 和 HalomotButton 替换原按钮，以统一大小和样式 */}
+                    {/* 修改: 添加 flex justify-center 来居中按钮 */}
+                    <motion.div variants={itemVariants} className="flex justify-center">
                       <Dialog>
                         <DialogTrigger asChild>
                            <HalomotButton 
@@ -1292,7 +1263,6 @@ const FeatureTourDialog = () => {
                 </div>
               </DialogHeader>
 
-              {/* 修复: 使图片填充其容器 */}
               <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
                 <Image
                   src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
@@ -1328,7 +1298,7 @@ const FeatureTourDialog = () => {
 FeatureTourDialog.displayName = "FeatureTourDialog";
 
 // ============================================================================
-// 7. 页面级别的静态数据 (现有代码)
+// 7. 页面级别的静态数据
 // ============================================================================
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
@@ -1363,7 +1333,6 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
 MemoizedZap.displayName = 'ZapIcon';
 
 const features = [
-  // 修改: 统一标题和正文字体
   { icon: MemoizedCpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
   { icon: MemoizedShieldCheck, title: "安全可靠", description: "先进的保护措施，让您高枕无忧。" },
   { icon: MemoizedLayers, title: "模块化设计", description: "轻松与现有架构集成。" },
@@ -1375,7 +1344,6 @@ const timelineData = [
       title: "教育路径规划",
       content: (
         <div>
-          {/* 修改: 统一正文字体 */}
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
           <div>
             <Image 
@@ -1393,7 +1361,6 @@ const timelineData = [
       title: "学校申请支持",
       content: (
         <div>
-          {/* 修改: 统一正文字体 */}
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。</p>
           <div>
             <Image 
@@ -1411,7 +1378,6 @@ const timelineData = [
       title: "长期成长陪伴",
       content: (
         <div>
-          {/* 修改: 统一正文字体 */}
           <p className="text-neutral-200 mb-4 text-base md:text-lg">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
             <Image 
@@ -1647,7 +1613,6 @@ function ScrollAdventure() {
                 <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.leftContent && (
                     <div className="text-center">
-                      {/* 修改: 统一标题字体 */}
                       <h2 className="mb-4 tracking-widest text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         {page.leftContent.heading}
                       </h2>
@@ -1670,7 +1635,6 @@ function ScrollAdventure() {
                 <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.rightContent && (
                      <div className="text-center">
-                      {/* 修改: 统一标题字体 */}
                       <h2 className="mb-4 tracking-widest text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         {page.rightContent.heading}
                       </h2>
@@ -1691,7 +1655,7 @@ function ScrollAdventure() {
 ScrollAdventure.displayName = "ScrollAdventure";
 
 // ============================================================================
-// 9. 文本跑马灯组件 (Text Marquee)
+// 9. 文本跑马灯组件
 // ============================================================================
 
 const wrap = (min: number, max: number, v: number) => {
@@ -1765,10 +1729,9 @@ const TextMarqueeSection = () => (
 TextMarqueeSection.displayName = "TextMarqueeSection";
 
 // ============================================================================
-// 10. 页脚组件 (Custom Footer)
+// 10. 页脚组件
 // ============================================================================
 
-// --- 页脚所需的 SVG 图标 ---
 const XiaohongshuIcon = (props: IconProps) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
     <path d="M21.273 18.818H18.18v-3.09h-2.181v3.09h-3.09v2.182h3.09v3.091h2.182v-3.09h3.09v-2.182zM4.364 3.818h4.363V2.727H4.364v1.091zm4.363 9.818H4.364v1.091h4.363v-1.09zM15.455 6h-2.182v1.09h2.182V6zm-5.455 6H5.455v1.09h4.545V6zm-1.09 9.818H4.364v1.09h4.545v-1.09zm5.454-3.272H4.364v1.09h9.818v-1.09zM4.364 9.273h9.818v1.09H4.364v-1.09z"/>
@@ -1803,7 +1766,6 @@ const CustomFooter = () => {
     const [email, setEmail] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 优化: 更换为国内常用社交媒体平台
     const socialIcons = [
       { name: '小红书', icon: <XiaohongshuIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2' },
       { name: '知乎', icon: <ZhihuIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
@@ -1842,7 +1804,6 @@ const CustomFooter = () => {
                 className="w-full h-full object-contain rounded-lg"
               />
             </div>
-            {/* 修改: 统一字体大小 */}
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300 text-base md:text-lg">
               <Link href="#" className="hover:text-white">Apex</Link>
               <Link href="#" className="hover:text-white">留学</Link>
@@ -1909,45 +1870,37 @@ CustomFooter.displayName = "CustomFooter";
 
 
 // ============================================================================
-// 11. 主页面组件 (已集成新组件和逻辑)
+// 11. 主页面组件
 // ============================================================================
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // 在客户端挂载时检查 localStorage
   useEffect(() => {
-    // 使用设备指纹或简单的 localStorage 标志作为“设备码”
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
     if (submittedFlag === 'true') {
       setHasSubmitted(true);
     }
   }, []);
   
-  // 处理提交成功的回调
   const handleSuccess = () => {
     localStorage.setItem('hasSubmittedForm', 'true');
     setHasSubmitted(true);
     setIsModalOpen(false);
   };
   
-  // 修复: 更新点击事件处理逻辑以接受更广泛的事件类型
   const handleProtectedLinkClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => {
-    // 对于占位链接, 阻止导航并显示提示信息
     if (href === '#') {
         e.preventDefault();
         alert("此功能正在开发中，敬请期待！");
         return;
     }
 
-    // 如果表单尚未提交, 则阻止导航并显示弹窗
     if (!hasSubmitted) {
         e.preventDefault();
         setIsModalOpen(true);
     }
-    // 如果表单已提交, 此函数不执行任何操作,
-    // 允许链接的默认导航行为在当前标签页中继续进行。
   };
 
   return (
@@ -1967,7 +1920,6 @@ export default function HomePage() {
                   <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
                     为您而来，不止于此
                   </h1>
-                  {/* 修改: 统一正文字体 */}
                   <p className="text-neutral-300 max-w-2xl text-base md:text-lg">
                     我们深知您当下的每一步在未来都至关重要。
                   </p>
@@ -1980,9 +1932,7 @@ export default function HomePage() {
                     className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
                   >
                     <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
-                    {/* 修改: 统一按钮/特性标题字体 */}
                     <h3 className="text-base font-bold text-white">{feature.title}</h3>
-                    {/* 修改: 统一正文字体 */}
                     <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
                   </div>
                 ))}
