@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
-import { OpenAIStream, StreamingTextResponse } from 'ai'; // [修复] 引入流处理工具
+// [修复] 将导入语句分为两行，以匹配 ai 库 v3 版本的模块结构
+import { StreamingTextResponse } from 'ai';
+import { OpenAIStream } from 'ai/openai';
 
 // 定义从前端接收的消息和选项的类型
 interface Message {
@@ -51,7 +53,6 @@ export async function POST(req: NextRequest) {
 
         const DEEPSEEK_API_KEY = process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY;
         if (!DEEPSEEK_API_KEY) {
-            // [修复] 返回标准的 Response 对象以兼容流式错误处理
             return new Response('DeepSeek API key not configured', { status: 500 });
         }
 
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
             messages: messagesToSend,
             temperature: 1.0,
             max_tokens: 8192,
-            stream: true, // [修复] 开启流模式，这是解决504超时的核心
+            stream: true, 
         };
 
         if (enableDeepSearch) {
@@ -108,18 +109,15 @@ export async function POST(req: NextRequest) {
 
         if (!response.ok) {
             const errorText = await response.text();
-             // [修复] 返回标准的 Response 对象
             return new Response(errorText, { status: response.status });
         }
         
-        // [修复] 将原始响应流通过 AI SDK 转换为 StreamingTextResponse 并返回
         const stream = OpenAIStream(response);
         return new StreamingTextResponse(stream);
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         console.error('API Route Error:', errorMessage);
-        // [修复] 返回标准的 Response 对象
         return new Response(errorMessage, { status: 500 });
     }
 }
