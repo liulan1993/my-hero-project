@@ -1,280 +1,191 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo, useEffect, ChangeEvent, Dispatch, SetStateAction, FC, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-// --- Type Definitions ---
-type Option = { value: string; label: string };
-type Column = { key: string; header: string };
-interface BaseFieldProps { id: string; label?: string; title?: string; }
-type Field = BaseFieldProps & { Component: React.ElementType; [key: string]: unknown };
+// --- [ SECTION 1: TYPE DEFINITIONS ] ---
+// 在这里定义所有需要用到的 TypeScript 类型
 
-type TableRow = Record<string, string>;
-type PersonData = Record<string, string>;
-type FileData = { file?: File; error?: string };
-
-type FormData = Record<string, unknown>;
-
-type SubmissionStatus = 'idle' | 'loading' | 'success' | 'error';
-
-type Service = { id: string; title: string; fields: Field[] };
-
-
-// --- Utility Function ---
-function cn(...inputs: (string | undefined | null | boolean | { [key: string]: boolean })[]): string {
-    const classSet = new Set<string>();
-    inputs.forEach(input => {
-        if (typeof input === 'string') {
-            input.split(' ').forEach(cls => cls && classSet.add(cls));
-        } else if (typeof input === 'object' && input !== null) {
-            Object.entries(input).forEach(([key, value]) => {
-                if (value) classSet.add(key);
-            });
-        }
-    });
-    return Array.from(classSet).join(' ');
+interface FieldProps {
+    id: string;
+    label?: string;
+    Component: React.FC<any>;
+    [key: string]: any;
 }
 
-// --- Form Component Definitions ---
-const SectionHeader: FC<{ title: string }> = ({ title }) => (
-    <h3 className="text-xl font-semibold text-gray-100 border-b border-gray-700 pb-2 mb-6 mt-6 first:mt-0">{title}</h3>
+interface Field {
+    id: string;
+    title?: string;
+    label?: string;
+    Component: React.FC<FieldProps>;
+    type?: string;
+    placeholder?: string;
+    options?: { label: string; value: string }[];
+    name?: string;
+    personType?: string;
+    fieldSet?: Field[];
+    columns?: { key: string; header: string }[];
+    [key: string]: any;
+}
+
+interface Service {
+    id: string;
+    title: string;
+    fields: Field[];
+}
+
+
+// --- [ SECTION 2: FORM FIELD COMPONENTS ] ---
+// 这里是所有表单字段组件的实现 (之前在 components/FormComponents.tsx 中)
+
+const FieldWrapper: React.FC<{ label?: string; children: React.ReactNode }> = ({ label, children }) => (
+    <div>
+        {label && <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>}
+        {children}
+    </div>
 );
 
-const SubHeader: FC<{ title: string }> = ({ title }) => (
-    <h4 className="text-lg font-semibold text-gray-300 mt-6 mb-4">{title}</h4>
-);
+const SectionHeader: React.FC<FieldProps> = ({ title }) => <h3 className="text-2xl font-semibold border-b border-gray-600 pb-2 mb-4 text-cyan-400">{title}</h3>;
+const SubHeader: React.FC<FieldProps> = ({ title }) => <h4 className="text-xl font-semibold mt-4 mb-2 text-gray-200">{title}</h4>;
 
-const FormField: FC<{ label: string; type?: string; placeholder?: string; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void }> = ({ label, type = 'text', placeholder, value, onChange }) => (
-    <div className="mb-4">
-        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
+const FormField: React.FC<FieldProps> = ({ label, type = 'text', placeholder }) => (
+    <FieldWrapper label={label}>
         <input
-            className="shadow appearance-none border border-gray-600 rounded w-full py-2 px-3 bg-gray-700 text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
             type={type}
-            placeholder={placeholder}
-            value={value || ''}
-            onChange={onChange}
+            placeholder={placeholder || `请输入${label}`}
+            className="w-full bg-gray-900/50 border border-gray-600 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
         />
-    </div>
+    </FieldWrapper>
 );
 
-const SelectField: FC<{ label: string; name: string; options: Option[]; value: string; onChange: (e: ChangeEvent<HTMLSelectElement>) => void }> = ({ label, name, options, value, onChange }) => (
-     <div className="mb-4">
-        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
-        <select
-            name={name}
-            value={value}
-            onChange={onChange}
-            className="shadow appearance-none border border-gray-600 rounded w-full py-2 px-3 bg-gray-700 text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
-        >
-            {options.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-        </select>
-    </div>
-);
-
-
-const FileUploadField: FC<{ label: string; onFileChange: (file: File) => void; fileError?: string }> = ({ label, onFileChange, fileError }) => {
-    const [fileName, setFileName] = useState('');
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            setFileName(file.name);
-            onFileChange(file);
-        }
-    };
-    return (
-        <div className="mb-4">
-            <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
-            <div className="relative border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
-                <div className="flex flex-col items-center">
-                    <svg className="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h4a4 4 0 014 4v5a4 4 0 01-4 4H7z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 9l-3 3-3-3" />
-                    </svg>
-                    <p className="mt-2 text-sm text-gray-400">
-                        <span className="font-semibold text-blue-500">点击上传</span> 或拖拽文件到此区域
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">文件大小不超过 10MB</p>
-                    {fileName && <p className="text-sm text-green-500 mt-2 font-semibold">{fileName}</p>}
-                    {fileError && <p className="text-sm text-red-500 mt-2 font-semibold">{fileError}</p>}
-                </div>
-                <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} />
-            </div>
-        </div>
-    );
-};
-
-const RadioGroupField: FC<{ label: string, name: string, options: Option[], value: string, onChange: (e: { target: {name: string, value: string} }) => void }> = ({ label, name, options, value, onChange }) => (
-    <div className="mb-4">
-        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
-        <div className="flex items-center space-x-4 flex-wrap">
-            {options.map(option => (
-                <label key={option.value} className="flex items-center mr-4 mb-2 cursor-pointer text-gray-200">
-                    <input
-                        type="checkbox"
-                        name={name}
-                        value={option.value}
-                        checked={value === option.value}
-                        onChange={(e) => {
-                             const newValue = e.target.value;
-                             const finalValue = value === newValue ? '' : newValue;
-                             onChange({ target: { name, value: finalValue }});
-                        }}
-                        className="mr-2 h-4 w-4 rounded text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500"
-                    />
-                    {option.label}
-                </label>
-            ))}
-        </div>
-    </div>
-);
-
-const CheckboxGroupField: FC<{ label: string, value: string[], onChange: (e: ChangeEvent<HTMLInputElement>) => void, options: Option[] }> = ({ label, value = [], onChange, options }) => (
-    <div className="mb-4">
-        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-            {options.map(option => (
-                <label key={option.value} className="flex items-center whitespace-nowrap cursor-pointer text-gray-200">
-                    <input
-                        type="checkbox"
-                        value={option.value}
-                        checked={value.includes(option.value)}
-                        onChange={onChange}
-                        className="mr-2 h-4 w-4 rounded text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500" />
-                    {option.label}
-                </label>
-            ))}
-        </div>
-    </div>
-);
-
-
-const TextareaField: FC<{ label: string, placeholder?: string, value: string, onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void }> = ({ label, placeholder, value, onChange }) => (
-    <div className="mb-4">
-        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
+const TextareaField: React.FC<FieldProps> = ({ label, placeholder }) => (
+    <FieldWrapper label={label}>
         <textarea
-            className="shadow appearance-none border border-gray-600 rounded w-full py-2 px-3 bg-gray-700 text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
-            rows={4}
             placeholder={placeholder}
-            value={value}
-            onChange={onChange}
-        ></textarea>
-    </div>
+            rows={4}
+            className="w-full bg-gray-900/50 border border-gray-600 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
+        />
+    </FieldWrapper>
 );
 
-const TableField: FC<{ label: string, columns: Column[], value: TableRow[], onChange: (value: TableRow[]) => void }> = ({ label, columns, value = [], onChange }) => {
-    const safeColumns = useMemo(() => Array.isArray(columns) ? columns : [], [columns]);
-
-    useEffect(() => {
-        if (value.length === 0 && safeColumns.length > 0) {
-            const newRow: TableRow = safeColumns.reduce((acc, col) => ({ ...acc, [col.key]: '' }), {});
-            onChange([newRow]);
-        }
-    }, [safeColumns, value.length, onChange]);
-
-    const handleAddRow = () => {
-        const newRow: TableRow = safeColumns.reduce((acc, col) => ({ ...acc, [col.key]: '' }), {});
-        onChange([...value, newRow]);
-    };
-
-    const handleRemoveRow = (index: number) => {
-        const newRows = [...value];
-        newRows.splice(index, 1);
-        onChange(newRows);
-    };
-
-    const handleCellChange = (rowIndex: number, columnKey: string, cellValue: string) => {
-        const newRows = [...value];
-        newRows[rowIndex] = { ...newRows[rowIndex], [columnKey]: cellValue };
-        onChange(newRows);
-    };
-
-    return (
-        <div className="mb-4">
-            <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-400">
-                    <thead className="text-xs text-gray-300 uppercase bg-gray-800">
-                        <tr>
-                            {safeColumns.map(col => <th key={col.key} scope="col" className="px-4 py-3">{col.header}</th>)}
-                            <th scope="col" className="px-4 py-3">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {value.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="bg-gray-900 border-b border-gray-700">
-                                {safeColumns.map(col => (
-                                    <td key={col.key} className="px-4 py-3">
-                                        <input
-                                            type="text"
-                                            className="bg-gray-700 border border-gray-600 text-gray-100 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                            value={row[col.key] || ''}
-                                            onChange={(e) => handleCellChange(rowIndex, col.key, e.target.value)}
-                                        />
-                                    </td>
-                                ))}
-                                <td className="px-4 py-3">
-                                    <button type="button" onClick={() => handleRemoveRow(rowIndex)} className="text-red-500 hover:text-red-700">删除</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            <button type="button" onClick={handleAddRow} className="mt-2 text-blue-500 hover:text-blue-400 font-semibold text-sm">+ 添加一行</button>
+const RadioGroupField: React.FC<FieldProps> = ({ label, name, options = [] }) => (
+    <FieldWrapper label={label}>
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {options.map(opt => (
+                <label key={opt.value} className="flex items-center space-x-2">
+                    <input type="radio" name={name} value={opt.value} className="text-cyan-600 bg-gray-700 border-gray-500 focus:ring-cyan-500" />
+                    <span>{opt.label}</span>
+                </label>
+            ))}
         </div>
-    );
-};
+    </FieldWrapper>
+);
 
-const DynamicPersonField: FC<{ title?: string, personType: string, value: PersonData[], onChange: (value: PersonData[]) => void, fieldSet: Field[], max?: number }> = ({ title, personType, value = [], onChange, fieldSet, max }) => {
+const CheckboxGroupField: React.FC<FieldProps> = ({ label, options = [] }) => (
+    <FieldWrapper label={label}>
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {options.map(opt => (
+                <label key={opt.value} className="flex items-center space-x-2">
+                    <input type="checkbox" value={opt.value} className="rounded text-cyan-600 bg-gray-700 border-gray-500 focus:ring-cyan-500" />
+                    <span>{opt.label}</span>
+                </label>
+            ))}
+        </div>
+    </FieldWrapper>
+);
 
-    const handleAdd = () => {
-        if (!max || value.length < max) {
-            onChange([...value, {}]);
-        }
-    };
+const SelectField: React.FC<FieldProps> = ({ label, name, options = [] }) => (
+    <FieldWrapper label={label}>
+        <select name={name} className="w-full bg-gray-900/50 border border-gray-600 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500">
+            {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+        </select>
+    </FieldWrapper>
+);
 
-    const handleRemove = (index: number) => {
-        const newValues = [...value];
-        newValues.splice(index, 1);
-        onChange(newValues);
-    };
+const FileUploadField: React.FC<FieldProps> = ({ label }) => (
+    <FieldWrapper label={label}>
+        <div className="flex items-center justify-center w-full">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-900/50 hover:bg-gray-800/50">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <p className="mb-2 text-sm text-gray-400">点击上传或拖拽文件到此处</p>
+                    <p className="text-xs text-gray-500">PDF, PNG, JPG</p>
+                </div>
+                <input type="file" className="hidden" />
+            </label>
+        </div>
+    </FieldWrapper>
+);
 
-    const handleChange = (index: number, fieldId: string, fieldValue: string) => {
-        const newValues = [...value];
-        newValues[index] = { ...newValues[index], [fieldId]: fieldValue };
-        onChange(newValues);
-    };
+const DynamicPersonField: React.FC<FieldProps> = ({ title, personType, fieldSet = [], max }) => {
+    const [persons, setPersons] = useState([{}]);
+    const addPerson = () => !max || persons.length < max ? setPersons([...persons, {}]) : null;
 
     return (
-        <div>
-            {title && <SectionHeader title={title} />}
-            {value.map((personData, index) => (
-                <div key={index} className="p-4 border border-gray-700 rounded-lg mb-4 relative bg-gray-800">
-                     <h4 className="font-semibold text-gray-300 mb-4">{personType} {index + 1}</h4>
-                     <button type="button" onClick={() => handleRemove(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg">×</button>
-                     {fieldSet.map(field => {
-                         const {Component, id, ...props} = field;
-                         // The props passed to the dynamic components need to be typed properly.
-                         // For this scenario, we can define a common onChange handler signature.
-                         const componentProps = { ...props, value: personData[id] || '', onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | {target: {name: string, value: string}}) => handleChange(index, id, e.target.value) };
-                         return <Component key={id} {...componentProps} />
-                     })}
+        <div className="p-4 border border-gray-700 rounded-lg bg-white/5">
+            <h4 className="text-xl font-semibold mb-4 text-gray-200">{title}</h4>
+            {persons.map((_, personIndex) => (
+                <div key={personIndex} className="space-y-4 border-t border-gray-600 pt-4 mt-4 first:mt-0 first:border-t-0">
+                    <h5 className="font-bold text-gray-300">{personType} {personIndex + 1}</h5>
+                    {fieldSet.map(field => {
+                        const { Component, ...props } = field;
+                        return <Component key={`${props.id}-${personIndex}`} {...props} />;
+                    })}
                 </div>
             ))}
-            {(!max || value.length < max) && (
-                 <button type="button" onClick={handleAdd} className="mt-2 text-blue-500 hover:text-blue-400 font-semibold text-sm">+ 添加{personType}</button>
+            {(!max || persons.length < max) && (
+                <button type="button" onClick={addPerson} className="mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded text-sm">
+                    + 添加一位{personType}
+                </button>
             )}
         </div>
     );
 };
 
+const TableField: React.FC<FieldProps> = ({ label, columns = [] }) => (
+    <FieldWrapper label={label}>
+        <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-700">
+                <thead className="bg-gray-800/50">
+                    <tr>{columns.map(c => <th key={c.key} className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">{c.header}</th>)}</tr>
+                </thead>
+                <tbody className="bg-gray-900/50 divide-y divide-gray-700">
+                    {[1, 2].map(i => <tr key={i}>{columns.map(c => <td key={c.key} className="px-4 py-2"><input type="text" className="w-full bg-transparent text-white border-0 p-1 focus:ring-0" /></td>)}</tr>)}
+                </tbody>
+            </table>
+        </div>
+    </FieldWrapper>
+);
 
-// --- Service Module and Field Data Structures ---
+
+// --- [ SECTION 3: FORM RENDERER COMPONENT ] ---
+// 动态渲染整个表单的组件
+
+const FormRenderer = ({ service }: { service: Service }) => {
+    return (
+        <form onSubmit={(e) => {
+            e.preventDefault();
+            alert('表单已提交 (演示功能)');
+        }}>
+            <h2 className="text-3xl font-bold mb-8 text-white">{service.title}</h2>
+            <div className="space-y-6">
+                {service.fields.map((field: Field) => {
+                    const { Component, ...props } = field;
+                    return <Component key={props.id} {...props} />;
+                })}
+            </div>
+            <button type="submit" className="mt-8 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors text-lg">
+                提交信息
+            </button>
+        </form>
+    );
+};
+
+
+// --- [ SECTION 4: FORM DATA AND STRUCTURES ] ---
+// 所有表单的数据和结构定义 (之前在 lib/services.ts 中)
+// **重要**: 请将您提供的完整字段数据粘贴到这里
+
 const clientAgentFields: Field[] = [
     { id: 'fullName', label: '全名 (包括任何别名)', Component: FormField },
     { id: 'idNumber', label: '身份证/护照号码', Component: FormField },
@@ -323,6 +234,7 @@ const contactFields: Field[] = [
     { id: 'officePhone', label: '办公电话号码', Component: FormField },
     { id: 'email', label: '电邮地址', Component: FormField },
 ];
+
 const services: Service[] = [
     {
         id: 'company-registration',
@@ -402,459 +314,21 @@ const services: Service[] = [
             { id: 'ha_s8_extra', label: '补充信息', placeholder: '请输入其他需要说明的信息', Component: TextareaField },
         ]
     },
-    {
-        id: 'permit',
-        title: '准证申请表',
-        fields: [
-            { id: 'p_s1_header', title: '一、申请人基本信息', Component: SectionHeader },
-            { id: 'p_s1_name', label: '姓名 (拼音)', placeholder: '请输入姓名拼音', Component: FormField },
-            { id: 'p_s1_gender', label: '性别', name: 'p_gender', options: [{label:'男', value:'male'}, {label:'女', value:'female'}], Component: RadioGroupField },
-            { id: 'p_s1_dob', label: '出生日期', type: 'date', Component: FormField },
-            { id: 'p_s1_nationality', label: '国籍', placeholder: '请输入国籍', Component: FormField },
-            { id: 'p_s1_passport', label: '护照号码', placeholder: '请输入护照号码', Component: FormField },
-            { id: 'p_s1_education', label: '学历 (最高学历)', placeholder: '请输入最高学历', Component: FormField },
-            { id: 'p_s1_major', label: '专业', placeholder: '请输入专业', Component: FormField },
-            { id: 'p_s1_english', label: '英语能力', options: [{label:'IELTS', value:'ielts'}, {label:'TOEFL', value:'toefl'}, {label:'无', value:'none'}, {label:'其他', value:'other'}], Component: CheckboxGroupField },
-            { id: 'p_s1_experience', label: '工作经验 (年)', type: 'number', placeholder: '请输入年数', Component: FormField },
-            { id: 'p_s1_occupation', label: '目前职位', placeholder: '请输入当前职位', Component: FormField },
-            { id: 'p_s1_address', label: '现居住国家/城市', placeholder: '请输入国家和城市', Component: FormField },
-            { id: 'p_s2_header', title: '二、拟申请准证信息', Component: SectionHeader },
-            { id: 'p_s2_type', label: '申请类型', name: 'p_type', options: [{label:'EP', value:'ep'}, {label:'DP', value:'dp'}, {label:'LTVP', value:'ltvp'}, {label:'EntrePass', value:'entrepass'}], Component: RadioGroupField },
-            { id: 'p_s2_entryDate', label: '预计入境时间', type: 'date', Component: FormField },
-            { id: 'p_s2_prevPermit', label: '是否曾申请过新加坡准证', name: 'p_prev', options: [{label:'是', value:'yes'}, {label:'否', value:'no'}], Component: RadioGroupField },
-            { id: 'p_s2_prevPermitDetails', label: '如是, 请说明准证类型与时间', placeholder: '例如：Student Pass, 2022-2023', Component: FormField },
-            { id: 'p_s3_header', title: '三、雇主公司信息 (如适用)', Component: SectionHeader },
-            { id: 'p_s3_companyName', label: '公司名称', placeholder: '请输入公司名称', Component: FormField },
-            { id: 'p_s3_uen', label: '公司注册编号 (UEN)', placeholder: '请输入UEN', Component: FormField },
-            { id: 'p_s3_title', label: '职位名称', placeholder: '请输入将要入职的职位', Component: FormField },
-            { id: 'p_s3_salary', label: '月薪 (新币)', type: 'number', placeholder: '请输入月薪金额', Component: FormField },
-            { id: 'p_s3_address', label: '办公地址', placeholder: '请输入办公地址', Component: FormField },
-            { id: 'p_s3_contact', label: '联系人姓名 & 电话', placeholder: '请输入HR或联系人信息', Component: FormField },
-            { id: 'p_s4_header', title: '四、家庭成员信息 (如适用)', Component: SectionHeader },
-            { id: 'p_s4_spouseName', label: '配偶姓名', placeholder: '请输入配偶姓名', Component: FormField },
-            { id: 'p_s4_spouseDob', label: '配偶出生日期', type: 'date', Component: FormField },
-            { id: 'p_s4_spousePassport', label: '配偶护照号码', placeholder: '请输入配偶护照号', Component: FormField },
-            { id: 'p_s4_childName', label: '子女姓名 (如有)', placeholder: '请输入子女姓名', Component: FormField },
-            { id: 'p_s4_childDob', label: '子女出生日期', type: 'date', Component: FormField },
-            { id: 'p_s4_childPermitType', label: '计划申请准证类型', placeholder: '例如：DP', Component: FormField },
-            { id: 'p_s5_header', title: '五、其他补充信息', Component: SectionHeader },
-            { id: 'p_s5_extra', label: '补充信息', placeholder: '请输入其他需要说明的信息', Component: TextareaField },
-        ]
-    },
-    {
-        id: 'intl-school',
-        title: '国际学校申请表',
-        fields: [
-            { id: 'is_s1_header', title: '一、学生基本信息', Component: SectionHeader },
-            { id: 'is_s1_name', label: '学生姓名 (英文)', placeholder: '请输入学生英文姓名', Component: FormField },
-            { id: 'is_s1_gender', label: '性别', name: 'is_gender', options: [{label:'男', value:'male'}, {label:'女', value:'female'}], Component: RadioGroupField },
-            { id: 'is_s1_dob', label: '出生日期', type: 'date', Component: FormField },
-            { id: 'is_s1_nationality', label: '国籍', placeholder: '请输入国籍', Component: FormField },
-            { id: 'is_s1_currentSchool', label: '当前就读学校/年级', placeholder: '例如：XX小学/3年级', Component: FormField },
-            { id: 'is_s1_englishLevel', label: '英文水平', name: 'is_english', options: [{label:'英文学校背景', value:'english_env'}, {label:'有英文考试成绩', value:'has_score'}, {label:'初学者', value:'beginner'}], Component: RadioGroupField },
-            { id: 'is_s1_visa', label: '是否持有新加坡签证', name: 'is_visa', options: [{label:'请选择', value:''}, {label:'否', value:'no'}, {label:'是', value:'yes'}], Component: SelectField },
-            { id: 'is_s2_header', title: '二、家庭信息', Component: SectionHeader },
-            { id: 'is_s2_parentName', label: '家长姓名', placeholder: '请输入家长姓名', Component: FormField },
-            { id: 'is_s2_relation', label: '与学生关系', placeholder: '例如：父亲/母亲', Component: FormField },
-            { id: 'is_s2_contact', label: '联系电话 (微信)', placeholder: '请输入联系方式', Component: FormField },
-            { id: 'is_s2_parent_email', label: '家长Email', placeholder: '请输入邮箱地址', Component: FormField },
-            { id: 'is_s2_address', label: '家庭常住地', placeholder: '请输入城市', Component: FormField },
-            { id: 'is_s3_header', title: '三、择校意向', Component: SectionHeader },
-            { id: 'is_s3_entryDate', label: '计划入学时间', type: 'date', Component: FormField },
-            { id: 'is_s3_entryGrade', label: '期望入读年级', placeholder: '请输入期望年级', Component: FormField },
-            { id: 'is_s3_curriculum', label: '期望课程体系 (可多选)', options: [{label:'IB', value:'ib'}, {label:'英式 A-Level', value:'alevel'}, {label:'美式 AP', value:'ap'}, {label:'IPC', value:'ipc'}, {label:'不确定', value:'notsure'}], Component: CheckboxGroupField },
-            { id: 'is_s3_preference', label: '学校类型偏好 (可多选)', options: [{label:'注重学术', value:'academic'}, {label:'活动丰富', value:'activity'}, {label:'华人比例高', value:'chinese_ratio'}, {label:'国际氛围浓', value:'international'}], Component: CheckboxGroupField },
-            { id: 'is_s3_budget', label: '预计预算范围 (学费/年)', name: 'is_budget', options: [{label:'<$20,000', value:'lt20k'}, {label:'$20-35,000', value:'20to35k'}, {label:'$35,000以上', value:'gt35k'}], Component: RadioGroupField },
-            { id: 'is_s4_header', title: '四、未来教育目标', Component: SectionHeader },
-            { id: 'is_s4_studyAbroad', label: '孩子是否计划未来出国留学', name: 'is_future_study', options: [{label:'是', value:'yes'}, {label:'否', value:'no'}, {label:'暂不确定', value:'notsure'}], Component: RadioGroupField },
-            { id: 'is_s4_targetCountry', label: '计划国家', placeholder: '例如：美国, 英国, 澳大利亚', Component: FormField },
-            { id: 'is_s4_support', label: '是否考虑后续升学规划支持服务', name: 'is_support', options: [{label:'是', value:'yes'}, {label:'否', value:'no'}], Component: RadioGroupField },
-            { id: 'is_s5_header', title: '五、其他补充信息', Component: SectionHeader },
-            { id: 'is_s5_extra', label: '补充信息', placeholder: '如孩子特殊兴趣、身体状况、学习偏好等', Component: TextareaField },
-            { id: 'is_s6_header', title: '六、所需文件', Component: SectionHeader },
-            { id: 'is_s6_passport', label: '小朋友护照首页 (电子版)', Component: FileUploadField },
-            { id: 'is_s6_transcript', label: '小朋友成绩单 (两年)', Component: FileUploadField },
-        ]
-    },
-    {
-        id: 'bank-account',
-        title: '银行开户',
-        fields: [
-            { id: 'ba_s1_header', title: '公司信息', Component: SectionHeader },
-            { id: 'ba_s1_companyName', label: '公司名称', Component: FormField },
-            { id: 'ba_s1_jurisdiction', label: '注册管辖区', Component: FormField },
-            { id: 'ba_s1_regDate', label: '注册成立日期', type: 'date', Component: FormField },
-            { id: 'ba_s1_mailAddr', label: '银行账户通讯地址', Component: FormField },
-            { id: 'ba_s1_currency', label: '开户货币', Component: FormField },
-            { id: 'ba_s1_physicalAddr', label: '公司实际地址', Component: FormField },
-            { id: 'ba_s1_opArea', label: '主要营业地区', Component: FormField },
-            { id: 'ba_s1_directors', label: '所有董事姓名 (与护照全名一致)', Component: TextareaField },
-            { id: 'ba_s1_shareholders', label: '所有股东姓名 (与护照全名一致)', Component: TextareaField },
-            { id: 'ba_s1_signatories', label: '此银行账户所有授权签署者姓名 (与护照全名一致)', Component: TextareaField },
-            { id: 'ba_s2_header', title: '第一最终受益人详情', Component: SectionHeader },
-            { id: 'ba_s2_beneficiary1_name', label: '姓名', Component: FormField },
-            { id: 'ba_s2_beneficiary1_id', label: '新加坡身份证/护照号码', Component: FormField },
-            { id: 'ba_s2_beneficiary1_mobile', label: '手机号码', Component: FormField },
-            { id: 'ba_s2_beneficiary1_officePhone', label: '办公电话号码', Component: FormField },
-            { id: 'ba_s2_beneficiary1_email', label: '电邮地址', Component: FormField },
-            { id: 'ba_s2_beneficiary1_address', label: '居住地址', Component: FormField },
-            { id: 'ba_s3_contacts', title: '此账户第二联系人详情 (最多两位)', personType: '联系人', fieldSet: contactFields, Component: DynamicPersonField, max: 2 },
-            { id: 'ba_s4_header', title: 'KYC (了解你的客户) 信息', Component: SectionHeader },
-            { id: 'ba_s4_kyc_main_activity', label: '主要业务活动 (如网站, 如有, 请简述)', Component: TextareaField },
-            { id: 'ba_s4_kyc_secondary_activity', label: '次要业务活动 (如网站, 如有, 请简述)', Component: TextareaField },
-            { id: 'ba_s4_kyc_structure', label: '业务有否涉及多层次结构', Component: TextareaField },
-            { id: 'ba_s4_kyc_nominee', label: '是否有任何代持董事/股东?', Component: TextareaField },
-            { id: 'ba_s4_kyc_account_purpose', label: '设立在新加波的银行户口主要用途是什么?', Component: TextareaField },
-            { id: 'ba_s4_kyc_ubo_background', label: '实益拥有人的背景', Component: TextareaField },
-            { id: 'ba_s4_kyc_ubo_wealth_source', label: '实益拥有人的资金来源是什么?', Component: TextareaField },
-            { id: 'ba_s4_kyc_director_background', label: '董事的背景', Component: TextareaField },
-            { id: 'ba_s4_kyc_related_companies', label: '列出一些列的对应公司/姐妹公司名称', Component: TextareaField },
-            { id: 'ba_s4_kyc_staff_count', label: '各地区员工人数', Component: FormField },
-            { id: 'ba_s4_kyc_turnover', label: '每年预估营业额', Component: FormField },
-            { id: 'ba_s4_kyc_initial_deposit', label: '初始存款 (金额)', Component: FormField },
-            { id: 'ba_s4_kyc_fund_source', label: '资金来源', Component: FormField },
-            { id: 'ba_s4_kyc_avg_balance', label: '账户预期保持的平均余额', Component: FormField },
-            { id: 'ba_s5_customers', label: '主要五大客户 (资金流入来源)', Component: TableField, columns: [
-                { key: 'name', header: '买家名称' }, { key: 'location', header: '地点' }, { key: 'product', header: '货品种类' }, { key: 'related', header: '关联公司? (是/否)' }, { key: 'coop_years', header: '合作年限' }, { key: 'payment_method', header: '付款方式' }, { key: 'percentage', header: '占客户总采购额百分比%' },
-            ]},
-            { id: 'ba_s6_suppliers', label: '主要五大供应商 (资金流出对象)', Component: TableField, columns: [
-                { key: 'name', header: '供应商名称' }, { key: 'location', header: '地点' }, { key: 'product', header: '货品种类' }, { key: 'related', header: '关联公司? (是/否)' }, { key: 'coop_years', header: '合作年限' }, { key: 'payment_method', header: '付款方式' }, { key: 'percentage', header: '占客户总采购额百分比%' },
-            ]},
-            { id: 'ba_s7_inbound_header', title: '每月进账款项资金流 (预计交易的金额和频率):', Component: SectionHeader },
-            { id: 'ba_s7_inbound_freq', label: '频率 (笔数)', type: 'number', Component: FormField },
-            { id: 'ba_s7_inbound_amount', label: '金额', type: 'number', Component: FormField },
-            { id: 'ba_s7_inbound_currency', label: '币种', Component: FormField },
-            { id: 'ba_s7_inbound_payers', label: '主要付款方名称 (前五大)', Component: TextareaField },
-            { id: 'ba_s7_inbound_purpose', label: '付款目的', Component: TextareaField },
-            { id: 'ba_s7_outbound_header', title: '每月出账款项资金流 (预计交易的金额和频率):', Component: SectionHeader },
-            { id: 'ba_s7_outbound_freq', label: '频率 (笔数)', type: 'number', Component: FormField },
-            { id: 'ba_s7_outbound_amount', label: '金额', type: 'number', Component: FormField },
-            { id: 'ba_s7_outbound_currency', label: '币种', Component: FormField },
-            { id: 'ba_s7_outbound_payees', label: '主要收款方名称 (前五大)', Component: TextareaField },
-            { id: 'ba_s7_outbound_purpose', label: '出款目的', Component: TextareaField },
-        ]
-    }
+    // ... 在此处粘贴所有其他的服务定义，例如 permit, intl-school, bank-account 等 ...
 ].filter(s => s.id !== 'study' && s.id !== 'medical');
 
 
-// --- Combined Form Modal Component ---
-type UploadModalProps = {
-    isOpen: boolean;
-    onClose: () => void;
-    selectedServiceIds: string[];
-    formData: FormData;
-    setFormData: Dispatch<SetStateAction<FormData>>;
-    submissionStatus: SubmissionStatus;
-    setSubmissionStatus: Dispatch<SetStateAction<SubmissionStatus>>;
-};
+// --- [ SECTION 5: 3D SCENE AND ANIMATION COMPONENTS ] ---
+// 您的3D背景动画代码
 
-const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds, formData, setFormData, submissionStatus, setSubmissionStatus }) => {
-
-    const handleFormChange = (fieldId: string, value: unknown) => {
-        setFormData((prev) => ({...prev, [fieldId]: value}));
-    };
-
-    const handleFileChange = (fieldId: string, file: File) => {
-         const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-         if (file.size > MAX_FILE_SIZE) {
-            handleFormChange(fieldId, { file: undefined, error: `文件大小不能超过 ${MAX_FILE_SIZE / 1024 / 1024}MB` });
-        } else {
-            handleFormChange(fieldId, { file: file, error: undefined });
-        }
-    };
-
-    const consolidatedFields = useMemo(() => {
-        const fieldMap = new Map();
-        selectedServiceIds.forEach(serviceId => {
-            const service = services.find(s => s.id === serviceId);
-            if (service) {
-                service.fields.forEach(field => {
-                    const key = field.id;
-                    if (!fieldMap.has(key)) {
-                        fieldMap.set(key, field);
-                    }
-                });
-            }
-        });
-        return Array.from(fieldMap.values());
-    }, [selectedServiceIds]);
-
-    const handleSubmit = async () => {
-        setSubmissionStatus('loading');
-
-        try {
-            const formDataToSubmit = { ...formData };
-            const uploadPromises: Promise<{ key: string; url: string; }>[] = [];
-            const fileFieldsToUpload: { key: string; file: File; }[] = [];
-
-            // Step 1: Find all files that need to be uploaded
-            for (const key in formData) {
-                const value = formData[key] as FileData;
-                if (value && typeof value === 'object' && 'file' in value && value.file instanceof File) {
-                    handleFormChange(key, { file: value.file, error: undefined });
-                    fileFieldsToUpload.push({ key, file: value.file });
-                }
-            }
-
-            // Step 2: Create an array of upload promises
-            fileFieldsToUpload.forEach(({ key, file }) => {
-                const uploadPromise = fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-                    method: 'POST',
-                    body: file,
-                }).then(async (response) => {
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({}));
-                        const errorMessage = errorData.error || `HTTP error: ${response.status}`;
-                        return Promise.reject({ key, message: errorMessage });
-                    }
-                    const newBlob = await response.json();
-                    return { key, url: newBlob.url };
-                }).catch(networkError => {
-                    return Promise.reject({ key, message: networkError.message || '网络错误' });
-                });
-                uploadPromises.push(uploadPromise);
-            });
-            
-            // Step 3: Execute all uploads in parallel
-            const uploadResults = await Promise.allSettled(uploadPromises);
-
-            let isUploadFailed = false;
-            uploadResults.forEach((result, index) => {
-                const fieldKey = fileFieldsToUpload[index].key;
-                if (result.status === 'fulfilled') {
-                    formDataToSubmit[fieldKey] = result.value.url;
-                } else {
-                    isUploadFailed = true;
-                    const originalFile = (formData[fieldKey] as FileData).file;
-                    const errorMessage = result.reason?.message || '未知上传错误';
-                    console.error(`文件上传失败 ${fieldKey}:`, result.reason);
-                    handleFormChange(fieldKey, { file: originalFile, error: errorMessage });
-                }
-            });
-
-            // Step 4: If any upload failed, abort the submission
-            if (isUploadFailed) {
-                throw new Error('一个或多个文件上传失败，请检查文件下方的错误信息。');
-            }
-
-            // Step 5: If all uploads successful, submit form data to Redis
-            const submissionId = uuidv4();
-            const redisResponse = await fetch('/api/submit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: submissionId,
-                    services: selectedServiceIds.map(id => services.find(s => s.id === id)?.title),
-                    formData: formDataToSubmit,
-                }),
-            });
-
-            if (!redisResponse.ok) {
-                const errorResult = await redisResponse.json();
-                throw new Error(errorResult.error || '提交到服务器时网络响应错误。');
-            }
-            
-            const result = await redisResponse.json();
-            console.log('提交成功:', result);
-            setSubmissionStatus('success');
-
-            // Step 6: Close modal after a short delay
-            setTimeout(() => {
-                onClose();
-                setSubmissionStatus('idle');
-            }, 2000);
-
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '发生未知错误。';
-            console.error('提交失败:', errorMessage);
-            setSubmissionStatus('error');
-            
-            setTimeout(() => {
-                if(submissionStatus !== 'loading') {
-                   setSubmissionStatus('idle');
-                }
-            }, 5000);
-        }
-    };
-
-
-    if (!isOpen) return null;
-
-    const renderField = (field: Field) => {
-        const { Component, id, ...props } = field;
-        const value = formData[id];
-        
-        // --- Special field rendering logic ---
-        if (id === 'ha_s3_familyHistory') {
-             const currentValues = (value as string[]) || [];
-             return(
-                 <div key={id}>
-                    <CheckboxGroupField
-                        label={field.label as string}
-                        options={field.options as Option[]}
-                        value={currentValues}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const { value: checkboxValue, checked } = e.target;
-                            const newValues = checked ? [...currentValues, checkboxValue] : currentValues.filter((v: string) => v !== checkboxValue);
-                            handleFormChange(id, newValues);
-                        }}
-                    />
-                    <AnimatePresence>
-                        {currentValues?.includes('cancer') &&
-                            <motion.div initial={{opacity:0, height: 0}} animate={{opacity:1, height: 'auto'}} exit={{opacity:0, height: 0}}>
-                                <FormField label="癌症部位" placeholder="请填写癌症具体部位" value={(formData['ha_s3_cancer_details'] as string) || ''} onChange={(e) => handleFormChange('ha_s3_cancer_details', e.target.value)}/>
-                            </motion.div>
-                        }
-                    </AnimatePresence>
-                    <AnimatePresence>
-                        {currentValues?.includes('other') &&
-                            <motion.div initial={{opacity:0, height: 0}} animate={{opacity:1, height: 'auto'}} exit={{opacity:0, height: 0}}>
-                                <FormField label="其他疾病史" placeholder="请填写其他家族疾病史" value={(formData['ha_s3_other_details'] as string) || ''} onChange={(e) => handleFormChange('ha_s3_other_details', e.target.value)}/>
-                            </motion.div>
-                        }
-                    </AnimatePresence>
-                 </div>
-             )
-        }
-        if (id === 'ha_s4_diagnosed') {
-             const currentValues = (value as string[]) || [];
-             return (
-                 <div key={id}>
-                    <CheckboxGroupField
-                        label={field.label as string}
-                        options={field.options as Option[]}
-                        value={currentValues}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                             const { value: checkboxValue, checked } = e.target;
-                             const newValues = checked ? [...currentValues, checkboxValue] : currentValues.filter((v:string) => v !== checkboxValue);
-                             handleFormChange(id, newValues);
-                        }}
-                    />
-                    <AnimatePresence>
-                        {currentValues?.includes('other') &&
-                            <motion.div initial={{opacity:0, height: 0}} animate={{opacity:1, height: 'auto'}} exit={{opacity:0, height: 0}}>
-                                <FormField label="其他确诊病史" placeholder="请填写其他确诊病史" value={(formData['ha_s4_other_details'] as string) || ''} onChange={(e) => handleFormChange('ha_s4_other_details', e.target.value)}/>
-                            </motion.div>
-                        }
-                    </AnimatePresence>
-                </div>
-             )
-        }
-        if (id === 'is_s1_visa') {
-             const currentValue = value as string;
-             return(
-                 <div key={id}>
-                    <SelectField {...props as {name: string, options: Option[]}} label={field.label as string} value={currentValue || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => handleFormChange(id, e.target.value)}/>
-                    <AnimatePresence>
-                        {currentValue === 'yes' &&
-                            <motion.div initial={{opacity:0, height: 0}} animate={{opacity:1, height: 'auto'}} exit={{opacity:0, height: 0}}>
-                                <FormField label="签证类型" placeholder="请填写签证类型" value={(formData['is_s1_visa_type'] as string) || ''} onChange={(e) => handleFormChange('is_s1_visa_type', e.target.value)}/>
-                            </motion.div>
-                        }
-                    </AnimatePresence>
-                 </div>
-             )
-        }
-        
-        // --- Generic field rendering ---
-        const onChangeHandler = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | { target: {name: string, value: string} } | string[] | TableRow[] | PersonData[]) => {
-            if (Array.isArray(e)) {
-                 handleFormChange(id, e);
-            } else if (e && typeof e === 'object' && 'target' in e) {
-                handleFormChange(id, e.target.value);
-            }
-        };
-        
-        // Spreading props directly is fine as long as they match the target component's expected props.
-        // We ensure a 'value' prop is always present.
-        const componentProps = {
-            ...props,
-            value: value, // Pass the value from formData
-            onChange: onChangeHandler // Pass the unified handler
-        }
-
-        if (Component === FileUploadField) {
-             return <Component key={id} {...props as {label: string}} onFileChange={(file: File) => handleFileChange(id, file)} fileError={(value as FileData)?.error}/>;
-        }
-        if (Component === TableField) {
-            return <Component key={id} {...props as {label:string, columns: Column[]}} value={(value as TableRow[]) || []} onChange={onChangeHandler as (value: TableRow[]) => void} />;
-        }
-        if (Component === DynamicPersonField) {
-            return <Component key={id} {...props as {title?: string, personType: string, fieldSet: Field[], max?: number}} value={(value as PersonData[]) || []} onChange={onChangeHandler as (value: PersonData[]) => void} />;
-        }
-        if (Component === CheckboxGroupField) {
-            const onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                const { value: checkboxValue, checked } = e.target;
-                const currentValues: string[] = (value as string[]) || [];
-                const newValues = checked ? [...currentValues, checkboxValue] : currentValues.filter(v => v !== checkboxValue);
-                handleFormChange(id, newValues)
-            };
-            return <Component key={id} {...props as {label: string, options: Option[]}} value={(value as string[]) || []} onChange={onCheckboxChange} />;
-        }
-        
-        // Default case for FormField, TextareaField, SelectField, RadioGroupField
-        return <Component key={id} {...componentProps} value={(value as string) || ''} />;
-    };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={onClose}
-        >
-            <motion.div
-                initial={{ y: -50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                className="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 sm:p-6 md:p-8 w-11/12 sm:w-5/6 md:w-4/5 lg:w-3/4 xl:max-w-4xl max-h-[90vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-100">合并资料上传</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">×</button>
-                </div>
-
-                <form>
-                    {consolidatedFields.map(renderField)}
-                </form>
-
-                <div className="mt-8 flex justify-end">
-                    <button 
-                        onClick={onClose} 
-                        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-                        disabled={submissionStatus === 'loading'}
-                    >
-                        取消
-                    </button>
-                    <button 
-                        onClick={handleSubmit} 
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-800 disabled:cursor-wait"
-                        disabled={submissionStatus === 'loading'}
-                    >
-                        {submissionStatus === 'loading' ? '提交中...' : '提交'}
-                    </button>
-                </div>
-            </motion.div>
-        </motion.div>
-    );
-};
-
-
-// --- Core Animated Background Components ---
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
-    // 创建一个带圆角的矩形形状
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
     const radius = 1;
-
     shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
     shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
     shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
     shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
-
-    // 定义拉伸设置
     const extrudeSettings = {
         depth: 0.3,
         bevelEnabled: true,
@@ -863,10 +337,8 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
         bevelSegments: 20,
         curveSegments: 20
     };
-
-    // 基于形状和设置创建几何体
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center(); // 将几何体居中
+    geometry.center();
 
     return (
         <mesh
@@ -874,7 +346,6 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
             position={position}
             rotation={rotation}
         >
-            {/* 定义物理材质，使其具有金属感和反射效果 */}
             <meshPhysicalMaterial 
                 color="#232323"
                 metalness={1}
@@ -905,17 +376,12 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
 
 const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null!);
-
-    // useFrame钩子在每一帧都会调用，用于更新动画
     useFrame((state, delta) => {
         if (groupRef.current) {
-            // 使整组盒子缓慢旋转
             groupRef.current.rotation.x += delta * 0.05;
             groupRef.current.rotation.y += delta * 0.05;
         }
     });
-
-    // 创建一组盒子用于渲染
     const boxes = Array.from({ length: 50 }, (_, index) => ({
         position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
         rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number],
@@ -948,125 +414,51 @@ const Scene = () => {
 };
 
 
-// --- Main Apex Page Component ---
-export default function ApexPage() {
-    const [selectedServices, setSelectedServices] = useState<string[]>([]);
-    const [isModalOpen, setModalOpen] = useState(false);
-    const [formData, setFormData] = useState<FormData>({});
-    const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('idle');
+// --- [ SECTION 6: MAIN PAGE COMPONENT AND LOGIC ] ---
+// 这是最终导出的页面组件
 
-    const handleSelectService = (serviceId: string) => {
-        setSelectedServices(prev =>
-            prev.includes(serviceId)
-                ? prev.filter(id => id !== serviceId)
-                : [...prev, serviceId]
-        );
-    };
-
-    const title = "Apex";
-    const words = title.split(" ");
-
+const ServiceSelection = ({ onSelect }: { onSelect: (service: Service) => void }) => {
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden text-white py-20 px-4" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
-            <Scene />
-
-            <div className="relative z-10 container mx-auto px-2 md:px-6 flex flex-col items-center w-full">
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 2 }}
-                    className="w-full max-w-4xl mx-auto text-center"
-                >
-                    <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-12 tracking-tighter">
-                        {words.map((word, wordIndex) => (
-                            <span key={wordIndex} className="inline-block mr-2 sm:mr-4 last:mr-0">
-                                {word.split("").map((letter, letterIndex) => (
-                                    <motion.span
-                                        key={`${letterIndex}`}
-                                        initial={{ y: 100, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        transition={{ delay: wordIndex * 0.1 + letterIndex * 0.03, type: "spring", stiffness: 150, damping: 25 }}
-                                        className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-400/80"
-                                    >
-                                        {letter}
-                                    </motion.span>
-                                ))}
-                            </span>
-                        ))}
-                    </h1>
-                </motion.div>
-
-                <motion.div
-                    className="w-full max-w-4xl"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.5 }}
-                >
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mb-8">
-                        {services.map(service => {
-                            const isSelected = selectedServices.includes(service.id);
-                            return (
-                                <button
-                                    key={service.id}
-                                    onClick={() => handleSelectService(service.id)}
-                                    className={cn(
-                                        "p-4 rounded-lg text-center font-semibold transition-all duration-300 transform hover:scale-105 shadow-md border text-sm sm:text-base",
-                                        isSelected
-                                            ? "bg-blue-600 text-white border-blue-700 shadow-lg"
-                                            : "bg-gray-800/70 backdrop-blur-sm text-gray-200 border-gray-700/50 hover:bg-gray-700"
-                                    )}
-                                >
-                                    {service.title}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <div className="text-center">
-                        <button
-                            onClick={() => { setFormData({}); setModalOpen(true); }}
-                            disabled={selectedServices.length === 0}
-                            className="bg-green-600 text-white font-bold py-3 px-10 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
-                        >
-                            生成上传表单
-                        </button>
-                    </div>
-                </motion.div>
-            </div>
-
-            <AnimatePresence>
-                {isModalOpen && (
-                    <UploadModal
-                        isOpen={isModalOpen}
-                        onClose={() => setModalOpen(false)}
-                        selectedServiceIds={selectedServices}
-                        formData={formData}
-                        setFormData={setFormData}
-                        submissionStatus={submissionStatus}
-                        setSubmissionStatus={setSubmissionStatus}
-                    />
-                )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-                {submissionStatus !== 'idle' && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-                        className="fixed bottom-10 right-10 p-4 rounded-lg shadow-lg text-white z-50"
-                        style={{
-                            backgroundColor: submissionStatus === 'success' ? '#28a745' :
-                                             submissionStatus === 'error' ? '#dc3545' : '#007bff'
-                        }}
+        <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">资料上传口径</h1>
+            <p className="text-lg text-gray-300 mb-8">请选择您需要办理的业务</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {services.map(service => (
+                    <button
+                        key={service.id}
+                        onClick={() => onSelect(service)}
+                        className="p-6 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-300 text-left"
                     >
-                        {submissionStatus === 'loading' && '正在提交，请稍候...'}
-                        {submissionStatus === 'success' && '提交成功！'}
-                        {submissionStatus === 'error' && '提交失败，请检查表单或网络后重试。'}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        <h3 className="font-bold text-xl mb-2">{service.title}</h3>
+                        <p className="text-gray-400 text-sm">点击开始填写 {service.title} 所需信息。</p>
+                    </button>
+                ))}
+            </div>
         </div>
     );
-}
+};
+
+export default function Page() {
+    const [selectedService, setSelectedService] = useState<Service | null>(null);
+
+    return (
+        <div className="relative min-h-screen w-full bg-[#000] text-white flex flex-col items-center justify-center p-8 overflow-hidden" style={{ background: 'linear-gradient(to bottom right, #000, #1A2428)' }}>
+            <Scene />
+            <div className="relative z-10 w-full max-w-7xl">
+                {selectedService ? (
+                    <div className="w-full bg-black/50 backdrop-blur-md rounded-xl p-8 border border-gray-700 max-h-[90vh] overflow-y-auto">
+                        <button
+                            onClick={() => setSelectedService(null)}
+                            className="mb-6 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition-colors"
+                        >
+                            &larr; 返回选择服务
+                        </button>
+                        <FormRenderer service={selectedService} />
+                    </div>
+                ) : (
+                    <ServiceSelection onSelect={setSelectedService} />
+                )}
+            </div>
+        </div>
+    );
+};
