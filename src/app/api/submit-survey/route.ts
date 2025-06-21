@@ -1,5 +1,6 @@
 // 文件路径: app/api/submit-survey/route.ts
 // [备用方案] 这个版本适用于 Vercel KV 数据库。
+// 无需修改：此文件已可以正确处理前端发送的包含问题和答案的详细数据。
 
 import { kv } from '@vercel/kv';
 import { NextResponse } from 'next/server';

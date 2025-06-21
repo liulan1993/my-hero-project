@@ -1,12 +1,12 @@
-"use client"; // 必须添加此指令，因为页面包含客户端交互（useState, onClick等）
+"use client";
 
 import React, { useState, useRef } from 'react';
+import Link from 'next/link'; // 新增：用于“返回主页”按钮
 import { motion } from 'framer-motion';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-// --- 3D动画库导入 ---
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -236,10 +236,36 @@ function SurveyForm() {
         e.preventDefault();
         setStatus('submitting');
 
+        // !! 修改处：构建包含问题和答案的详细数据结构
+        const detailedAnswers = Object.entries(formData)
+            .filter(([, answer]) => answer && answer.length > 0) // 过滤掉没有答案的条目
+            .map(([qId, answer]) => {
+                const isDetailsField = qId.endsWith('_details');
+                const baseQId = isDetailsField ? qId.replace('_details', '') : qId;
+                const question = surveyQuestions.find(q => q.id === baseQId);
+
+                let questionText = `未找到问题文本 (ID: ${qId})`; // Fallback
+                if (question) {
+                    if (isDetailsField) {
+                        // 对于附加说明字段，组合原问题和提示
+                        questionText = `${question.text} - (${question.textPrompt || '附加说明'})`;
+                    } else {
+                        // 对于普通问题，直接使用问题文本
+                        questionText = question.text;
+                    }
+                }
+                
+                return {
+                    qId,
+                    question: questionText,
+                    answer,
+                };
+        });
+
         const submissionData = {
             id: crypto.randomUUID(),
             submittedAt: new Date().toISOString(),
-            answers: formData,
+            answers: detailedAnswers, // 使用新的详细数据结构
         };
 
         try {
@@ -324,8 +350,14 @@ function SurveyForm() {
               <Button type="submit" size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-bold" disabled={status === 'submitting'}>
                 {status === 'submitting' ? '提交中...' : '提交问卷'}
               </Button>
+              {/* !! 修改处：根据图片要求，增加“返回主页”按钮 */}
+              <div className="mt-4">
+                <Button asChild variant="link" className="text-slate-400 hover:text-slate-200 text-sm">
+                    <Link href="/">返回主页</Link>
+                </Button>
+              </div>
               {status === 'success' && <p className="text-green-400 mt-4">感谢您的参与，问卷已成功提交！</p>}
-              {status === 'error' && <p className="text-red-400 mt-4">抱歉，提交失败，请稍后重试。</p>}
+              {status === 'error' && <p className="text-red-500 mt-4">抱歉，提交失败，请稍后重试。</p>}
             </div>
         </form>
     );
@@ -342,17 +374,12 @@ function ApexSurveyComponent({
 
     return (
         <div className="relative w-full min-h-screen">
-            {/* 背景层: 固定定位 */}
             <div
                 className="fixed inset-0 -z-10"
                 style={{ background: 'linear-gradient(to bottom right, #000, #1A2428)' }}
             >
-                {/* 3D动画场景 */}
                 <BackgroundScene />
-                {/* !! 修正：已移除导致背景模糊的 DIV !! */}
             </div>
-
-            {/* 内容层：可滚动 */}
             <div className="relative z-0 w-full h-screen overflow-y-auto flex flex-col items-center pt-12 sm:pt-16 md:pt-24">
                 <div className="container mx-auto px-4 md:px-6 text-center">
                     <motion.div
@@ -384,7 +411,6 @@ function ApexSurveyComponent({
                             ))}
                         </h1>
                     </motion.div>
-
                     <SurveyForm />
                 </div>
             </div>
