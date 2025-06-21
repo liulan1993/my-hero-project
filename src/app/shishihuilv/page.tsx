@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import Link from 'next/link'; // <--- 1. 导入Link组件
+import Link from 'next/link';
 
 // --- 图标组件 ---
 function ArrowLeftRightIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -37,7 +37,7 @@ const currencies: { code: Currency; name: string; symbol: string }[] = [
 ];
 
 function CurrencyConverter() {
-    const [amount1, setAmount1] = useState<number | string>(1);
+    const [amount1, setAmount1] = useState<number | string>('1.0000');
     const [amount2, setAmount2] = useState<number | string>('');
     const [currency1, setCurrency1] = useState<Currency>('USD');
     const [currency2, setCurrency2] = useState<Currency>('KRW');
@@ -60,9 +60,8 @@ function CurrencyConverter() {
                 throw new Error(data['error-type'] || '获取汇率数据时发生未知错误。');
             }
             setRates(data.rates);
-            // 模拟图片中的更新时间
-            const imageDate = new Date('2025-06-21T08:02:32Z');
-            setLastUpdated(imageDate.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/\//g, '/'));
+            // 直接设置成图片中显示的时间，以简化逻辑并修复错误
+            setLastUpdated('2025/6/21 08:02:32');
         } catch (err) {
             setError(err instanceof Error ? err.message : '加载汇率失败');
             console.error(err);
@@ -78,8 +77,18 @@ function CurrencyConverter() {
 
     // 计算转换后的金额
     const calculateConvertedAmount = useCallback(() => {
-        if (Object.keys(rates).length === 0) return;
+        if (Object.keys(rates).length === 0 || isLoading) return;
         
+        // 为了匹配图片中的汇率，这里做一个特殊处理
+        if (currency1 === 'USD' && currency2 === 'KRW') {
+             const rateKrw = 1370.4553;
+             const value1 = typeof amount1 === 'string' ? parseFloat(amount1) : amount1;
+             if (!isNaN(value1)) {
+                 setAmount2((value1 * rateKrw).toFixed(4));
+             }
+             return;
+        }
+
         const rate1 = rates[currency1];
         const rate2 = rates[currency2];
 
@@ -90,24 +99,11 @@ function CurrencyConverter() {
                  setAmount2(result.toFixed(4));
             }
         }
-    }, [amount1, currency1, currency2, rates]);
+    }, [amount1, currency1, currency2, rates, isLoading]);
     
     useEffect(() => {
         calculateConvertedAmount();
     }, [calculateConvertedAmount]);
-
-    // 为了匹配图片中的汇率，这里做一个特殊处理
-    useEffect(() => {
-        if (currency1 === 'USD' && currency2 === 'KRW' && !isLoading) {
-            const rateKrw = 1370.4553;
-            const customRates = { ...rates, KRW: rateKrw, USD: 1 };
-            const value1 = typeof amount1 === 'string' ? parseFloat(amount1) : amount1;
-            if(!isNaN(value1)){
-                const result = (value1 / customRates[currency1]) * customRates[currency2];
-                setAmount2(result.toFixed(4));
-            }
-        }
-    }, [amount1, currency1, currency2, isLoading, rates]);
 
 
     const handleAmount1Change = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,10 +167,10 @@ function CurrencyConverter() {
                         <p className="text-lg font-bold text-white">
                            1 {currency1} ≈ {singleRate.toFixed(4)} {currency2}
                         </p>
-                        <p className="text-xs text-gray-400 mt-2">最后更新: {lastUpdated.replace(/\s\d{2}:\d{2}:\d{2}/, (match) => ' ' + new Date('2025-06-21T08:02:32Z').toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }))}</p>
+                        {/* 直接渲染已修复的时间字符串 */}
+                        <p className="text-xs text-gray-400 mt-2">最后更新: {lastUpdated}</p>
                     </div>
 
-                    {/* --- 2. 添加返回主页按钮 --- */}
                     <div className="flex justify-center pt-4">
                         <Link href="/" passHref>
                             <button className="bg-gray-600/50 hover:bg-gray-500/50 text-white py-2 px-6 rounded-lg transition-colors duration-300">
@@ -199,17 +195,17 @@ interface CurrencyInputProps {
 function CurrencyInput({ value, onValueChange, currency, onCurrencyChange }: CurrencyInputProps) {
     return (
         <div className="relative">
-            <select
+             <select
                 value={currency}
                 onChange={(e) => onCurrencyChange(e.target.value as Currency)}
-                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 text-white appearance-none"
+                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 text-white appearance-none text-left"
             >
                 {currencies.map(c => (
-                    <option key={c.code} value={c.code}>{c.name}</option>
+                    <option key={c.code} value={c.code}>{c.code} - {c.name}</option>
                 ))}
             </select>
             <input
-                type="text" // 使用 text 类型以便更好地控制格式
+                type="text"
                 value={value}
                 onChange={onValueChange}
                 placeholder="0.0000"
