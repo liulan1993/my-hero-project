@@ -21,11 +21,12 @@ export default getRequestConfig(async ({locale}) => {
     messages = {}; 
   }
 
-  // --- 这是本次的修复 ---
-  // 除了 messages，我们还需要将 locale 本身也返回，
-  // 这是 next-intl 的要求。
+  // --- 这是最终的修复 ---
+  // 我们使用类型断言 (as string) 来明确告诉 TypeScript，
+  // 经过我们的验证逻辑后，locale 变量肯定是一个字符串。
+  // 这将解决顽固的类型不兼容问题。
   return {
-    locale,
+    locale: locale as string,
     messages
   };
 });
