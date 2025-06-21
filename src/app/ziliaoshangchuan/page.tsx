@@ -263,12 +263,12 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
                      <h4 className="font-semibold text-gray-700 mb-4">{personType} {index + 1}</h4>
                      <button type="button" onClick={() => handleRemove(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg">×</button>
                      {fieldSet.map(field => {
-                         const {Component, id, ...props} = field;
-                         const componentProps = { ...props, value: personData[id] || '', onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | {target: {name: string, value: string}}) => handleChange(index, id, e.target.value) };
-                         // ------------------- FIX IS HERE -------------------
-                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                         return <Component key={id} {...componentProps as any} />
-                         // ---------------------------------------------------
+                        // ------------------- NEW FIX IS HERE -------------------
+                        const {Component, id, ...props} = field;
+                        const componentProps = { ...props, value: personData[id] || '', onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | {target: {name: string, value: string}}) => handleChange(index, id, e.target.value) };
+                        const AnyComponent = Component as any;
+                        return <AnyComponent key={id} {...componentProps} />
+                        // -------------------------------------------------------
                      })}
                 </div>
             ))}
