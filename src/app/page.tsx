@@ -8,7 +8,8 @@ import React, {
     useState, 
     useMemo,
     useCallback,
-    forwardRef 
+    forwardRef,
+    memo // 新增: 导入 memo
 } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -19,10 +20,6 @@ import {
   AnimatePresence,
   type Variants,
   type HTMLMotionProps,
-  useSpring,
-  useVelocity,
-  useAnimationFrame,
-  useMotionValue,
 } from "framer-motion";
 
 // 修复：导入真实的 Server Actions
@@ -1291,10 +1288,6 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
-// 修复: 此组件的逻辑已合并到 CtaWithGallerySection 中，可以安全删除
-// const FeatureTourDialog = () => { ... }
-
-
 // ============================================================================
 // 7. 页面级别的静态数据
 // ============================================================================
@@ -1653,78 +1646,211 @@ function ScrollAdventure() {
 ScrollAdventure.displayName = "ScrollAdventure";
 
 // ============================================================================
-// 9. 文本跑马灯组件
+// 9. 文本揭示卡片组件 (新)
 // ============================================================================
 
-const wrap = (min: number, max: number, v: number) => {
-  const rangeSize = max - min;
-  return ((((v - min) % rangeSize) + rangeSize) % rangeSize) + min;
-};
-
-interface TextMarqueeProps {
-  children: string;
-  baseVelocity?: number;
-  className?: string;
-  scrollDependent?: boolean;
-}
-
-const TextMarquee = forwardRef<HTMLDivElement, TextMarqueeProps>(({
-  children,
-  baseVelocity = -5,
-  className,
-  scrollDependent = false,
-}, ref) => {
-  const baseX = useMotionValue(0);
-  const { scrollY } = useScroll();
-  const scrollVelocity = useVelocity(scrollY);
-  const smoothVelocity = useSpring(scrollVelocity, {
-    damping: 50,
-    stiffness: 400,
-  });
-  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
-    clamp: false,
-  });
-
-  const repetitions = 30; 
-  const singleBlockPercentage = 100 / repetitions;
-  const x = useTransform(baseX, (v) => `${wrap(-singleBlockPercentage, 0, v)}%`);
-  
-  const directionFactor = useRef<number>(1);
-
-  useAnimationFrame((t, delta) => {
-    let moveBy = directionFactor.current * baseVelocity * (delta / 1000);
-    if (scrollDependent && velocityFactor.get() !== 0) {
-      directionFactor.current = velocityFactor.get() > 0 ? 1 : -1;
-      moveBy += directionFactor.current * moveBy * velocityFactor.get();
-    }
-    baseX.set(baseX.get() + moveBy);
-  });
-
+// Stars 子组件，用于背景的星星动画
+const Stars = () => {
+  const randomMove = () => Math.random() * 4 - 2;
+  const randomOpacity = () => Math.random();
+  const random = () => Math.random();
   return (
-    <div className="overflow-hidden whitespace-nowrap flex flex-nowrap" ref={ref}>
-      <motion.div className="flex whitespace-nowrap flex-nowrap gap-x-10" style={{ x }}>
-        {[...Array(repetitions)].map((_, i) => (
-          <span key={i} className={cn('block', className)}>{children}</span>
-        ))}
-      </motion.div>
+    <div className="absolute inset-0">
+      {[...Array(80)].map((_, i) => (
+        <motion.span
+          key={`star-${i}`}
+          animate={{
+            top: `calc(${random() * 100}% + ${randomMove()}px)`,
+            left: `calc(${random() * 100}% + ${randomMove()}px)`,
+            opacity: randomOpacity(),
+            scale: [1, 1.2, 0],
+          }}
+          transition={{
+            duration: random() * 10 + 20,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          style={{
+            position: "absolute",
+            top: `${random() * 100}%`,
+            left: `${random() * 100}%`,
+            width: `2px`,
+            height: `2px`,
+            backgroundColor: "white",
+            borderRadius: "50%",
+            zIndex: 1,
+          }}
+          className="inline-block"
+        ></motion.span>
+      ))}
     </div>
   );
-});
-TextMarquee.displayName = 'TextMarquee';
+};
+const MemoizedStars = memo(Stars);
+MemoizedStars.displayName = "MemoizedStars";
 
-const TextMarqueeSection = () => (
-    <section className="py-24 md:py-32 w-full">
-         <div className="space-y-1">
-            <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
-               Framer Motion · 
-            </TextMarquee>
-            <TextMarquee baseVelocity={2} className='font-bold text-2xl text-purple-400'>
-               Tailwind CSS · 
-            </TextMarquee>
-        </div>
-    </section>
-);
-TextMarqueeSection.displayName = "TextMarqueeSection";
+// TextRevealCardTitle 子组件
+const TextRevealCardTitle = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <h2 className={cn("text-white text-lg mb-2", className)}>
+      {children}
+    </h2>
+  );
+};
+TextRevealCardTitle.displayName = "TextRevealCardTitle";
+
+// TextRevealCardDescription 子组件
+const TextRevealCardDescription = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <p className={cn("text-[#a9a9a9] text-sm", className)}>{children}</p>
+  );
+};
+TextRevealCardDescription.displayName = "TextRevealCardDescription";
+
+// TextRevealCard 核心组件
+const TextRevealCard = ({
+  text,
+  revealText,
+  children,
+  className,
+}: {
+  text: string;
+  revealText: string;
+  children?: React.ReactNode;
+  className?: string;
+}) => {
+  const [widthPercentage, setWidthPercentage] = useState(0);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [left, setLeft] = useState(0);
+  const [localWidth, setLocalWidth] = useState(0);
+  const [isMouseOver, setIsMouseOver] = useState(false);
+
+  useEffect(() => {
+    if (cardRef.current) {
+      const { left, width } = cardRef.current.getBoundingClientRect();
+      setLeft(left);
+      setLocalWidth(width);
+    }
+    const handleResize = () => {
+        if (cardRef.current) {
+            const { left, width } = cardRef.current.getBoundingClientRect();
+            setLeft(left);
+            setLocalWidth(width);
+        }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+        window.removeEventListener('resize', handleResize);
+    }
+  }, []);
+
+  const mouseMoveHandler = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (cardRef.current) {
+      const relativeX = event.clientX - left;
+      setWidthPercentage((relativeX / localWidth) * 100);
+    }
+  };
+
+  const touchMoveHandler = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (cardRef.current) {
+      const relativeX = event.touches[0].clientX - left;
+      setWidthPercentage((relativeX / localWidth) * 100);
+    }
+  };
+
+  const mouseLeaveHandler = () => {
+    setIsMouseOver(false);
+    setWidthPercentage(0);
+  };
+
+  const mouseEnterHandler = () => {
+    setIsMouseOver(true);
+  };
+
+  const rotateDeg = (widthPercentage - 50) * 0.1;
+
+  return (
+    <div
+      onMouseEnter={mouseEnterHandler}
+      onMouseLeave={mouseLeaveHandler}
+      onMouseMove={mouseMoveHandler}
+      onTouchStart={mouseEnterHandler}
+      onTouchEnd={mouseLeaveHandler}
+      onTouchMove={touchMoveHandler}
+      ref={cardRef}
+      className={cn(
+        // 更新：移除了背景色和边框，使卡片透明
+        "bg-transparent w-full rounded-lg p-8 relative overflow-hidden",
+        className
+      )}
+    >
+      {children}
+
+      <div className="h-40 relative flex items-center overflow-hidden">
+        <motion.div
+          style={{ width: "100%" }}
+          animate={
+            isMouseOver
+              ? {
+                  opacity: widthPercentage > 0 ? 1 : 0,
+                  clipPath: `inset(0 ${100 - widthPercentage}% 0 0)`,
+                }
+              : {
+                  clipPath: `inset(0 ${100 - widthPercentage}% 0 0)`,
+                }
+          }
+          transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
+          // 更新：移除了此处的背景色
+          className="absolute bg-transparent z-20 will-change-transform"
+        >
+          <p
+            style={{ textShadow: "4px 4px 15px rgba(0,0,0,0.5)" }}
+            className="text-base sm:text-[3rem] py-10 font-bold text-white bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-300"
+          >
+            {revealText}
+          </p>
+        </motion.div>
+        <motion.div
+          animate={{
+            left: `${widthPercentage}%`,
+            rotate: `${rotateDeg}deg`,
+            opacity: widthPercentage > 0 ? 1 : 0,
+          }}
+          transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
+          className="h-40 w-[8px] bg-gradient-to-b from-transparent via-neutral-800 to-transparent absolute z-50 will-change-transform"
+        ></motion.div>
+
+        {/* 更新：为底层文本添加 motion.div 以动画化 clipPath */}
+        <motion.div
+          animate={{
+            clipPath: `inset(0 0 0 ${widthPercentage}%)`
+          }}
+          transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
+          className="overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,white,transparent)] w-full"
+        >
+          <p className="text-base sm:text-[3rem] py-10 font-bold bg-clip-text text-transparent bg-[#323238]">
+            {text}
+          </p>
+          <MemoizedStars />
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+TextRevealCard.displayName = "TextRevealCard";
 
 // ============================================================================
 // 10. 页脚组件
@@ -1956,8 +2082,20 @@ export default function HomePage() {
             <ScrollAdventure />
         </div>
 
-        <div className="max-w-7xl mx-auto px-8">
-            <TextMarqueeSection />
+        {/* 替换 TextMarqueeSection 的部分 */}
+        <div className="py-12 md:py-20 flex items-center justify-center">
+            <TextRevealCard
+                text="你知道生意"
+                revealText="我懂化学"
+                className="w-full max-w-4xl"
+            >
+                <TextRevealCardTitle>
+                有时候，眼见为实。
+                </TextRevealCardTitle>
+                <TextRevealCardDescription>
+                这是一个文本揭示卡片。将鼠标悬停在卡片上以显示隐藏的文本。在移动设备上，请触摸并滑动。
+                </TextRevealCardDescription>
+            </TextRevealCard>
         </div>
 
         <CustomFooter />
