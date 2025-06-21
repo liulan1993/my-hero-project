@@ -269,7 +269,7 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
             items: [
                 { title: "实时汇率", href: "https://singapore.apex-elite-service.com/shishihuilv" },
                 { title: "个税计算器", href: "https://singapore.apex-elite-service.com/geshuijisuanqi" },
-                { title: "专属AI", href: "hhttps://singapore.apex-elite-service.com/zhuanshuAI" },
+                { title: "专属AI", href: "https://singapore.apex-elite-service.com/zhuanshuAI" },
                 { title: "敬请期待", href: "#" },
             ],
         },
