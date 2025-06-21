@@ -265,7 +265,9 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
                      {fieldSet.map(field => {
                          const {Component, id, ...props} = field;
                          const componentProps = { ...props, value: personData[id] || '', onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | {target: {name: string, value: string}}) => handleChange(index, id, e.target.value) };
-                         return <Component key={id} {...componentProps} />
+                         // ------------------- FIX IS HERE -------------------
+                         return <Component key={id} {...componentProps as any} />
+                         // ---------------------------------------------------
                      })}
                 </div>
             ))}
