@@ -1,10 +1,8 @@
 'use client';
 
-// --- Imports ---
-import React, { useState, useMemo, useEffect, ChangeEvent, Dispatch, SetStateAction, FC } from 'react';
+import React, { useState, useMemo, useEffect, ChangeEvent, Dispatch, SetStateAction, FC, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -12,27 +10,18 @@ import * as THREE from 'three';
 type Option = { value: string; label: string };
 type Column = { key: string; header: string };
 interface BaseFieldProps { id: string; label?: string; title?: string; }
-
-type Field = BaseFieldProps & {
-    Component: React.ElementType;
-    type?: string;
-    placeholder?: string;
-    name?: string;
-    options?: Option[];
-    columns?: Column[];
-    personType?: string;
-    fieldSet?: Field[];
-    max?: number;
-    value?: unknown;
-    onChange?: (...args: unknown[]) => void;
-};
+type Field = BaseFieldProps & { Component: React.ElementType; [key: string]: unknown };
 
 type TableRow = Record<string, string>;
 type PersonData = Record<string, string>;
 type FileData = { file?: File; error?: string };
+
 type FormData = Record<string, unknown>;
+
 type SubmissionStatus = 'idle' | 'loading' | 'success' | 'error';
+
 type Service = { id: string; title: string; fields: Field[] };
+
 
 // --- Utility Function ---
 function cn(...inputs: (string | undefined | null | boolean | { [key: string]: boolean })[]): string {
@@ -51,18 +40,18 @@ function cn(...inputs: (string | undefined | null | boolean | { [key: string]: b
 
 // --- Form Component Definitions ---
 const SectionHeader: FC<{ title: string }> = ({ title }) => (
-    <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-6 mt-6 first:mt-0">{title}</h3>
+    <h3 className="text-xl font-semibold text-gray-100 border-b border-gray-700 pb-2 mb-6 mt-6 first:mt-0">{title}</h3>
 );
 
 const SubHeader: FC<{ title: string }> = ({ title }) => (
-    <h4 className="text-lg font-semibold text-gray-700 mt-6 mb-4">{title}</h4>
+    <h4 className="text-lg font-semibold text-gray-300 mt-6 mb-4">{title}</h4>
 );
 
 const FormField: FC<{ label: string; type?: string; placeholder?: string; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void }> = ({ label, type = 'text', placeholder, value, onChange }) => (
     <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2 text-left">{label}</label>
+        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
         <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border border-gray-600 rounded w-full py-2 px-3 bg-gray-700 text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
             type={type}
             placeholder={placeholder}
             value={value || ''}
@@ -73,12 +62,12 @@ const FormField: FC<{ label: string; type?: string; placeholder?: string; value:
 
 const SelectField: FC<{ label: string; name: string; options: Option[]; value: string; onChange: (e: ChangeEvent<HTMLSelectElement>) => void }> = ({ label, name, options, value, onChange }) => (
      <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2 text-left">{label}</label>
+        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
         <select
             name={name}
             value={value}
             onChange={onChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border border-gray-600 rounded w-full py-2 px-3 bg-gray-700 text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
         >
             {options.map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -99,19 +88,19 @@ const FileUploadField: FC<{ label: string; onFileChange: (file: File) => void; f
     };
     return (
         <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2 text-left">{label}</label>
-            <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+            <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
+            <div className="relative border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
                 <div className="flex flex-col items-center">
-                    <svg className="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h4a4 4 0 014 4v5a4 4 0 01-4 4H7z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 9l-3 3-3-3" />
                     </svg>
-                    <p className="mt-2 text-sm text-gray-600">
-                        <span className="font-semibold text-blue-600">点击上传</span> 或拖拽文件到此区域
+                    <p className="mt-2 text-sm text-gray-400">
+                        <span className="font-semibold text-blue-500">点击上传</span> 或拖拽文件到此区域
                     </p>
                     <p className="text-xs text-gray-500 mt-1">文件大小不超过 10MB</p>
-                    {fileName && <p className="text-sm text-green-600 mt-2 font-semibold">{fileName}</p>}
-                    {fileError && <p className="text-sm text-red-600 mt-2 font-semibold">{fileError}</p>}
+                    {fileName && <p className="text-sm text-green-500 mt-2 font-semibold">{fileName}</p>}
+                    {fileError && <p className="text-sm text-red-500 mt-2 font-semibold">{fileError}</p>}
                 </div>
                 <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} />
             </div>
@@ -121,10 +110,10 @@ const FileUploadField: FC<{ label: string; onFileChange: (file: File) => void; f
 
 const RadioGroupField: FC<{ label: string, name: string, options: Option[], value: string, onChange: (e: { target: {name: string, value: string} }) => void }> = ({ label, name, options, value, onChange }) => (
     <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2 text-left">{label}</label>
+        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
         <div className="flex items-center space-x-4 flex-wrap">
             {options.map(option => (
-                <label key={option.value} className="flex items-center mr-4 mb-2 cursor-pointer text-gray-800">
+                <label key={option.value} className="flex items-center mr-4 mb-2 cursor-pointer text-gray-200">
                     <input
                         type="checkbox"
                         name={name}
@@ -135,7 +124,7 @@ const RadioGroupField: FC<{ label: string, name: string, options: Option[], valu
                              const finalValue = value === newValue ? '' : newValue;
                              onChange({ target: { name, value: finalValue }});
                         }}
-                        className="mr-2 h-4 w-4 rounded text-blue-600 border-gray-300 focus:ring-blue-500"
+                        className="mr-2 h-4 w-4 rounded text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500"
                     />
                     {option.label}
                 </label>
@@ -146,16 +135,16 @@ const RadioGroupField: FC<{ label: string, name: string, options: Option[], valu
 
 const CheckboxGroupField: FC<{ label: string, value: string[], onChange: (e: ChangeEvent<HTMLInputElement>) => void, options: Option[] }> = ({ label, value = [], onChange, options }) => (
     <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2 text-left">{label}</label>
+        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
             {options.map(option => (
-                <label key={option.value} className="flex items-center whitespace-nowrap cursor-pointer text-gray-800">
+                <label key={option.value} className="flex items-center whitespace-nowrap cursor-pointer text-gray-200">
                     <input
                         type="checkbox"
                         value={option.value}
                         checked={value.includes(option.value)}
                         onChange={onChange}
-                        className="mr-2 h-4 w-4 rounded text-blue-600 border-gray-300 focus:ring-blue-500" />
+                        className="mr-2 h-4 w-4 rounded text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500" />
                     {option.label}
                 </label>
             ))}
@@ -166,9 +155,9 @@ const CheckboxGroupField: FC<{ label: string, value: string[], onChange: (e: Cha
 
 const TextareaField: FC<{ label: string, placeholder?: string, value: string, onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void }> = ({ label, placeholder, value, onChange }) => (
     <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2 text-left">{label}</label>
+        <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
         <textarea
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border border-gray-600 rounded w-full py-2 px-3 bg-gray-700 text-gray-200 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
             rows={4}
             placeholder={placeholder}
             value={value}
@@ -206,10 +195,10 @@ const TableField: FC<{ label: string, columns: Column[], value: TableRow[], onCh
 
     return (
         <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2 text-left">{label}</label>
+            <label className="block text-gray-300 text-sm font-bold mb-2 text-left">{label}</label>
             <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-500">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                <table className="w-full text-sm text-left text-gray-400">
+                    <thead className="text-xs text-gray-300 uppercase bg-gray-800">
                         <tr>
                             {safeColumns.map(col => <th key={col.key} scope="col" className="px-4 py-3">{col.header}</th>)}
                             <th scope="col" className="px-4 py-3">操作</th>
@@ -217,33 +206,30 @@ const TableField: FC<{ label: string, columns: Column[], value: TableRow[], onCh
                     </thead>
                     <tbody>
                         {value.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="bg-white border-b">
+                            <tr key={rowIndex} className="bg-gray-900 border-b border-gray-700">
                                 {safeColumns.map(col => (
                                     <td key={col.key} className="px-4 py-3">
                                         <input
                                             type="text"
-                                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+                                            className="bg-gray-700 border border-gray-600 text-gray-100 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
                                             value={row[col.key] || ''}
                                             onChange={(e) => handleCellChange(rowIndex, col.key, e.target.value)}
                                         />
                                     </td>
                                 ))}
                                 <td className="px-4 py-3">
-                                    <button type="button" onClick={() => handleRemoveRow(rowIndex)} className="text-red-600 hover:text-red-900">删除</button>
+                                    <button type="button" onClick={() => handleRemoveRow(rowIndex)} className="text-red-500 hover:text-red-700">删除</button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-            <button type="button" onClick={handleAddRow} className="mt-2 text-blue-600 hover:text-blue-900 font-semibold text-sm">+ 添加一行</button>
+            <button type="button" onClick={handleAddRow} className="mt-2 text-blue-500 hover:text-blue-400 font-semibold text-sm">+ 添加一行</button>
         </div>
     );
 };
 
-
-// ------------------- 问题修复开始 -------------------
-// 修复了 DynamicPersonField 组件中的 props 类型问题。
 const DynamicPersonField: FC<{ title?: string, personType: string, value: PersonData[], onChange: (value: PersonData[]) => void, fieldSet: Field[], max?: number }> = ({ title, personType, value = [], onChange, fieldSet, max }) => {
 
     const handleAdd = () => {
@@ -268,36 +254,24 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
         <div>
             {title && <SectionHeader title={title} />}
             {value.map((personData, index) => (
-                <div key={index} className="p-4 border rounded-lg mb-4 relative bg-gray-50">
-                     <h4 className="font-semibold text-gray-700 mb-4">{personType} {index + 1}</h4>
+                <div key={index} className="p-4 border border-gray-700 rounded-lg mb-4 relative bg-gray-800">
+                     <h4 className="font-semibold text-gray-300 mb-4">{personType} {index + 1}</h4>
                      <button type="button" onClick={() => handleRemove(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg">×</button>
                      {fieldSet.map(field => {
-                        const {Component, id, ...props} = field;
-                        // The 'e' parameter is typed as 'any' to satisfy the various possible signatures
-                        // of the onChange handlers for different input components (e.g., FormField, RadioGroupField).
-                        // The underlying logic is safe because we only access `e.target.value`, which is common.
-                        const componentProps = {
-                            ...props,
-                            value: personData[id] || '',
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            onChange: (e: any) => handleChange(index, id, e.target.value)
-                        };
-                        
-                        return (
-                            <React.Fragment key={`${index}-${id}`}>
-                                <Component {...componentProps} />
-                            </React.Fragment>
-                        );
+                         const {Component, id, ...props} = field;
+                         // The props passed to the dynamic components need to be typed properly.
+                         // For this scenario, we can define a common onChange handler signature.
+                         const componentProps = { ...props, value: personData[id] || '', onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | {target: {name: string, value: string}}) => handleChange(index, id, e.target.value) };
+                         return <Component key={id} {...componentProps} />
                      })}
                 </div>
             ))}
             {(!max || value.length < max) && (
-                 <button type="button" onClick={handleAdd} className="mt-2 text-blue-600 hover:text-blue-900 font-semibold text-sm">+ 添加{personType}</button>
+                 <button type="button" onClick={handleAdd} className="mt-2 text-blue-500 hover:text-blue-400 font-semibold text-sm">+ 添加{personType}</button>
             )}
         </div>
     );
 };
-// -------------------- 问题修复结束 --------------------
 
 
 // --- Service Module and Field Data Structures ---
@@ -705,9 +679,7 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
 
 
     if (!isOpen) return null;
-    
-    // ------------------- 问题修复开始 -------------------
-    // 修复了 renderField 函数中的 props 传递问题。
+
     const renderField = (field: Field) => {
         const { Component, id, ...props } = field;
         const value = formData[id];
@@ -716,7 +688,7 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
         if (id === 'ha_s3_familyHistory') {
              const currentValues = (value as string[]) || [];
              return(
-                 <div>
+                 <div key={id}>
                     <CheckboxGroupField
                         label={field.label as string}
                         options={field.options as Option[]}
@@ -747,7 +719,7 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
         if (id === 'ha_s4_diagnosed') {
              const currentValues = (value as string[]) || [];
              return (
-                 <div>
+                 <div key={id}>
                     <CheckboxGroupField
                         label={field.label as string}
                         options={field.options as Option[]}
@@ -771,7 +743,7 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
         if (id === 'is_s1_visa') {
              const currentValue = value as string;
              return(
-                 <div>
+                 <div key={id}>
                     <SelectField {...props as {name: string, options: Option[]}} label={field.label as string} value={currentValue || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => handleFormChange(id, e.target.value)}/>
                     <AnimatePresence>
                         {currentValue === 'yes' &&
@@ -793,14 +765,22 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
             }
         };
         
+        // Spreading props directly is fine as long as they match the target component's expected props.
+        // We ensure a 'value' prop is always present.
+        const componentProps = {
+            ...props,
+            value: value, // Pass the value from formData
+            onChange: onChangeHandler // Pass the unified handler
+        }
+
         if (Component === FileUploadField) {
-             return <Component {...props as {label: string}} onFileChange={(file: File) => handleFileChange(id, file)} fileError={(value as FileData)?.error}/>;
+             return <Component key={id} {...props as {label: string}} onFileChange={(file: File) => handleFileChange(id, file)} fileError={(value as FileData)?.error}/>;
         }
         if (Component === TableField) {
-            return <Component {...props as {label:string, columns: Column[]}} value={(value as TableRow[]) || []} onChange={onChangeHandler as (value: TableRow[]) => void} />;
+            return <Component key={id} {...props as {label:string, columns: Column[]}} value={(value as TableRow[]) || []} onChange={onChangeHandler as (value: TableRow[]) => void} />;
         }
         if (Component === DynamicPersonField) {
-            return <Component {...props as {title?: string, personType: string, fieldSet: Field[], max?: number}} value={(value as PersonData[]) || []} onChange={onChangeHandler as (value: PersonData[]) => void} />;
+            return <Component key={id} {...props as {title?: string, personType: string, fieldSet: Field[], max?: number}} value={(value as PersonData[]) || []} onChange={onChangeHandler as (value: PersonData[]) => void} />;
         }
         if (Component === CheckboxGroupField) {
             const onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -809,19 +789,12 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
                 const newValues = checked ? [...currentValues, checkboxValue] : currentValues.filter(v => v !== checkboxValue);
                 handleFormChange(id, newValues)
             };
-            return <Component {...props as {label: string, options: Option[]}} value={(value as string[]) || []} onChange={onCheckboxChange} />;
+            return <Component key={id} {...props as {label: string, options: Option[]}} value={(value as string[]) || []} onChange={onCheckboxChange} />;
         }
         
-        // Default case for simple components like FormField, TextareaField, etc.
-        const componentProps = {
-            ...props,
-            value: (value as string) || '', // Cast value to string and provide a fallback
-            onChange: onChangeHandler
-        };
-        
-        return <Component {...componentProps} />;
+        // Default case for FormField, TextareaField, SelectField, RadioGroupField
+        return <Component key={id} {...componentProps} value={(value as string) || ''} />;
     };
-     // -------------------- 问题修复结束 --------------------
 
     return (
         <motion.div
@@ -835,33 +808,29 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -50, opacity: 0 }}
-                className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 w-11/12 sm:w-5/6 md:w-4/5 lg:w-3/4 xl:max-w-4xl max-h-[90vh] overflow-y-auto"
+                className="bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4 sm:p-6 md:p-8 w-11/12 sm:w-5/6 md:w-4/5 lg:w-3/4 xl:max-w-4xl max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">合并资料上传</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl">×</button>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-100">合并资料上传</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">×</button>
                 </div>
 
                 <form>
-                    {consolidatedFields.map(field => (
-                        <React.Fragment key={field.id}>
-                            {renderField(field)}
-                        </React.Fragment>
-                    ))}
+                    {consolidatedFields.map(renderField)}
                 </form>
 
                 <div className="mt-8 flex justify-end">
                     <button 
                         onClick={onClose} 
-                        className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
+                        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
                         disabled={submissionStatus === 'loading'}
                     >
                         取消
                     </button>
                     <button 
                         onClick={handleSubmit} 
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-400 disabled:cursor-wait"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-800 disabled:cursor-wait"
                         disabled={submissionStatus === 'loading'}
                     >
                         {submissionStatus === 'loading' ? '提交中...' : '提交'}
@@ -873,8 +842,9 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
 };
 
 
-// --- Background Animation Components ---
+// --- Core Animated Background Components ---
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
+    // 创建一个带圆角的矩形形状
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
     const radius = 1;
@@ -884,6 +854,7 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
     shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
     shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
 
+    // 定义拉伸设置
     const extrudeSettings = {
         depth: 0.3,
         bevelEnabled: true,
@@ -893,8 +864,9 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
         curveSegments: 20
     };
 
+    // 基于形状和设置创建几何体
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center(); 
+    geometry.center(); // 将几何体居中
 
     return (
         <mesh
@@ -902,6 +874,7 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
             position={position}
             rotation={rotation}
         >
+            {/* 定义物理材质，使其具有金属感和反射效果 */}
             <meshPhysicalMaterial 
                 color="#232323"
                 metalness={1}
@@ -933,13 +906,16 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
 const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null!);
 
+    // useFrame钩子在每一帧都会调用，用于更新动画
     useFrame((state, delta) => {
         if (groupRef.current) {
+            // 使整组盒子缓慢旋转
             groupRef.current.rotation.x += delta * 0.05;
             groupRef.current.rotation.y += delta * 0.05;
         }
     });
 
+    // 创建一组盒子用于渲染
     const boxes = Array.from({ length: 50 }, (_, index) => ({
         position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
         rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number],
@@ -972,7 +948,7 @@ const Scene = () => {
 };
 
 
-// --- Main Page Component ---
+// --- Main Apex Page Component ---
 export default function ApexPage() {
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [isModalOpen, setModalOpen] = useState(false);
@@ -991,10 +967,7 @@ export default function ApexPage() {
     const words = title.split(" ");
 
     return (
-        <div 
-          className="relative min-h-screen w-full flex items-center justify-center overflow-hidden text-white py-20 px-4" 
-          style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}
-        >
+        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden text-white py-20 px-4" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
             <Scene />
 
             <div className="relative z-10 container mx-auto px-2 md:px-6 flex flex-col items-center w-full">
@@ -1013,7 +986,7 @@ export default function ApexPage() {
                                         initial={{ y: 100, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
                                         transition={{ delay: wordIndex * 0.1 + letterIndex * 0.03, type: "spring", stiffness: 150, damping: 25 }}
-                                        className="inline-block text-neutral-100"
+                                        className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-400/80"
                                     >
                                         {letter}
                                     </motion.span>
@@ -1040,7 +1013,7 @@ export default function ApexPage() {
                                         "p-4 rounded-lg text-center font-semibold transition-all duration-300 transform hover:scale-105 shadow-md border text-sm sm:text-base",
                                         isSelected
                                             ? "bg-blue-600 text-white border-blue-700 shadow-lg"
-                                            : "bg-neutral-800/60 backdrop-blur-sm text-neutral-100 border-neutral-700/50 hover:bg-neutral-700"
+                                            : "bg-gray-800/70 backdrop-blur-sm text-gray-200 border-gray-700/50 hover:bg-gray-700"
                                     )}
                                 >
                                     {service.title}
@@ -1053,7 +1026,7 @@ export default function ApexPage() {
                         <button
                             onClick={() => { setFormData({}); setModalOpen(true); }}
                             disabled={selectedServices.length === 0}
-                            className="bg-green-600 text-white font-bold py-3 px-10 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:scale-100"
+                            className="bg-green-600 text-white font-bold py-3 px-10 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed disabled:scale-100"
                         >
                             生成上传表单
                         </button>
