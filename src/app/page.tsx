@@ -307,7 +307,7 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
             items: [
                 { title: "实时汇率", href: "#" },
                 { title: "个税计算器", href: "https://my-hero-project.vercel.app/geshuijisuanqi" },
-                { title: "专属AI", href: "#" },
+                { title: "专属AI", href: "https://my-hero-project.vercel.app/zhuanshuAI" },
                 { title: "敬请期待", href: "#" },
             ],
         },
