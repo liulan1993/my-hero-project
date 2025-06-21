@@ -10,6 +10,8 @@ import React, {
     useCallback,
     memo
 } from 'react';
+// 1. 导入 Next.js 官方的 Image 组件
+import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -51,46 +53,10 @@ interface ContactFormData {
   state: string;
 }
 
-interface CustomImageProps {
-    src: string;
-    alt: string;
-    className?: string;
-    width?: number | string;
-    height?: number | string;
-    style?: React.CSSProperties;
-    fill?: boolean;
-    priority?: boolean;
-    sizes?: string;
-    onError?: () => void;
-    unoptimized?: boolean;
-}
+// 2. 移除了之前自定义的 Image 组件和 CustomImageProps 接口
 
 
-const Image = ({ src, alt, className, width, height, style, fill, onError, priority = false }: CustomImageProps) => {
-    const [imgSrc, setImgSrc] = useState(src);
-
-    const handleError = () => {
-      setImgSrc(`https://placehold.co/600x400/161616/ffffff?text=${encodeURIComponent(alt)}`);
-      if(onError) onError();
-    };
-
-    const combinedStyle = { ...style };
-    if (fill) {
-        Object.assign(combinedStyle, {
-            position: 'absolute' as const,
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover' as const
-        });
-    }
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={imgSrc} alt={alt} className={className} width={width as number} height={height as number} style={combinedStyle} onError={handleError} loading={priority ? 'eager' : 'lazy'} />;
-};
-Image.displayName = "Image";
-
-
+// 这是一个标准的 Link 组件，保持不变
 interface CustomLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
   children: React.ReactNode;
