@@ -122,7 +122,7 @@ Link.displayName = "Link";
 // ============================================================================
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -173,7 +173,9 @@ const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
       <input
         type={type}
         className={cn(
-          'flex h-10 w-full rounded-md border border-slate-700 bg-black px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-50',
+          'flex h-10 w-full rounded-md border border-slate-700 bg-black px-3 py-2 text-white placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-50',
+          // 修改: 统一字体大小
+          "text-base md:text-lg",
           className
         )}
         ref={ref}
@@ -188,7 +190,7 @@ const Label = React.forwardRef<
   React.ElementRef<'label'>,
   React.ComponentPropsWithoutRef<'label'>
 >(({ className, ...props }, ref) => (
-  <label ref={ref} className={cn('text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70', className)} {...props} />
+  <label ref={ref} className={cn('font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70', className)} {...props} />
 ));
 Label.displayName = 'Label';
 
@@ -229,8 +231,9 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName;
 const NavigationMenuItem = NavigationMenuPrimitive.Item;
 NavigationMenuItem.displayName = "NavigationMenuItem";
 
+// 修改: 移除 text-sm font-medium
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-slate-800/50 data-[state=open]:bg-slate-800/50"
+  "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-slate-800/50 data-[state=open]:bg-slate-800/50"
 );
 
 const NavigationMenuTrigger = React.forwardRef<
@@ -239,7 +242,8 @@ const NavigationMenuTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Trigger
     ref={ref}
-    className={cn(navigationMenuTriggerStyle(), "group", className)}
+    // 修改: 统一字体大小
+    className={cn(navigationMenuTriggerStyle(), "group", "text-base md:text-lg", className)}
     {...props}
   >
     {children}{" "}
@@ -329,28 +333,32 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                     {item.href ? (
                                         <NavigationMenuLink asChild>
                                             <Link href={item.href}>
-                                                <Button variant="ghost">{item.title}</Button>
+                                                {/* 修改: 统一字体大小 */}
+                                                <Button variant="ghost" className="text-base md:text-lg">{item.title}</Button>
                                             </Link>
                                         </NavigationMenuLink>
                                     ) : (
                                         <>
-                                            <NavigationMenuTrigger className="font-medium text-sm">
+                                            {/* 修改: 统一字体大小 */}
+                                            <NavigationMenuTrigger className="text-base md:text-lg">
                                                 {item.title}
                                             </NavigationMenuTrigger>
                                             <NavigationMenuContent className="!w-[450px] p-4">
                                                 <div className="flex flex-col lg:grid grid-cols-2 gap-4">
                                                     <div className="flex flex-col h-full justify-between">
                                                         <div className="flex flex-col">
-                                                            <p className="text-base font-semibold">{item.title}</p>
-                                                            <p className="text-neutral-400 text-sm">
+                                                            <p className="font-semibold text-base md:text-lg">{item.title}</p>
+                                                            {/* 修改: 统一字体大小 */}
+                                                            <p className="text-neutral-400 text-base md:text-lg">
                                                                 {item.description}
                                                             </p>
                                                         </div>
-                                                        <Button size="sm" className="mt-10" variant="outline">
+                                                        <Button size="sm" className="mt-10 text-base md:text-lg" variant="outline">
                                                             商业洞察
                                                         </Button>
                                                     </div>
-                                                    <div className="flex flex-col text-sm h-full justify-end">
+                                                    {/* 修改: 统一字体大小 */}
+                                                    <div className="flex flex-col text-base md:text-lg h-full justify-end">
                                                         {item.items?.map((subItem) => (
                                                             <NavigationMenuLink asChild key={subItem.title}>
                                                                 <a
@@ -374,17 +382,19 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                     </NavigationMenu>
                 </div>
                 <div className="flex lg:justify-center">
-                    <Link href="/" className="font-semibold text-xl">
+                    {/* 修改: 统一Logo字体大小和格式 */}
+                    <Link href="/" className="text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                       Apex
                     </Link>
                 </div>
                 <div className="flex justify-end w-full gap-2 md:gap-4">
-                    <Button variant="ghost" className="hidden md:inline">
+                    {/* 修改: 统一字体大小 */}
+                    <Button variant="ghost" className="hidden md:inline text-base md:text-lg">
                         欢迎您！
                     </Button>
                     <div className="border-r border-slate-700 hidden md:inline"></div>
-                    <Button variant="outline" onClick={onLoginClick}>提交</Button>
-                    <Button variant='default'>敬请期待</Button>
+                    <Button variant="outline" onClick={onLoginClick} className="text-base md:text-lg">登录</Button>
+                    <Button variant='default' className="text-base md:text-lg">我的资料</Button>
                 </div>
                 <div className="flex w-12 shrink lg:hidden items-end justify-end">
                     <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
@@ -401,11 +411,12 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                 className="flex justify-between items-center"
                                                 onClick={() => setOpen(false)}
                                             >
-                                                <span className="text-lg">{item.title}</span>
+                                                {/* 修改: 统一字体大小 */}
+                                                <span className="text-base md:text-lg">{item.title}</span>
                                                 <MoveRight className="w-4 h-4 stroke-1 text-neutral-400" />
                                             </a>
                                         ) : (
-                                            <p className="text-lg font-semibold">{item.title}</p>
+                                            <p className="font-semibold text-base md:text-lg">{item.title}</p>
                                         )}
                                         {item.items &&
                                             item.items.map((subItem) => (
@@ -418,7 +429,8 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                     }}
                                                     className="flex justify-between items-center pl-2"
                                                 >
-                                                    <span className="text-neutral-300">
+                                                    {/* 修改: 统一字体大小 */}
+                                                    <span className="text-neutral-300 text-base md:text-lg">
                                                         {subItem.title}
                                                     </span>
                                                     <MoveRight className="w-4 h-4 stroke-1" />
@@ -679,8 +691,10 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   return (
     <div className="w-full bg-transparent font-sans md:px-10" ref={containerRef}>
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="text-lg md:text-4xl mb-4 text-white max-w-4xl">留学教育&Study Abroad Education</h2>
-        <p className="text-neutral-300 text-sm md:text-base max-w-sm">植根新加坡，兼具中国基因。中新团队双语服务，沟通无碍，执行高效。</p>
+        {/* 修改: 统一标题字体 */}
+        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">留学教育&Study Abroad Education</h2>
+        {/* 修改: 统一正文字体 */}
+        <p className="text-neutral-300 max-w-sm text-base md:text-lg">植根新加坡，兼具中国基因。中新团队双语服务，沟通无碍，执行高效。</p>
       </div>
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
         {data.map((item, index) => (
@@ -689,10 +703,12 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
-              <h3 className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-neutral-500">{item.title}</h3>
+              {/* 修改: 统一标题字体和颜色 */}
+              <h3 className="hidden md:block md:pl-20 font-semibold text-white text-3xl md:text-[40px] leading-tight md:leading-[53px]">{item.title}</h3>
             </div>
             <div className="relative pl-20 pr-4 md:pl-4 w-full">
-              <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500">{item.title}</h3>
+              {/* 修改: 统一标题字体和颜色 */}
+              <h3 className="md:hidden block mb-4 text-left font-semibold text-white text-3xl md:text-[40px] leading-tight md:leading-[53px]">{item.title}</h3>
               {item.content}
             </div>
           </div>
@@ -733,7 +749,6 @@ const HalomotButton: React.FC<HalomotButtonProps> = ({
     onMouseLeave: () => setIsHovered(false),
   };
 
-  // 修复: 移除了 target="_blank"
   const ButtonElement = href ? (
     <a href={href} {...commonProps} rel="noopener noreferrer">{ButtonContent}</a>
   ) : (
@@ -809,13 +824,18 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className='flex flex-col justify-center space-y-4'
           >
-            <h3 className="font-bold text-2xl text-white">
+            {/* 修改: 统一标题字体 */}
+            <h3 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
               {testimonials[active].name}
             </h3>
-            <p className="text-sm text-neutral-400">
+            
+            {/* 修改: 删除副标题 */}
+            {/* <p className="text-sm text-neutral-400">
               {testimonials[active].designation}
-            </p>
-            <motion.p className="text-lg text-neutral-200 leading-relaxed">
+            </p> */}
+            
+            {/* 修改: 统一正文字体 */}
+            <motion.p className="text-neutral-200 leading-relaxed text-base md:text-lg">
               {testimonials[active].quote}
             </motion.p>
           </motion.div>
@@ -904,7 +924,8 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                             </h2>
                         </div>
 
-                        <p className="text-[#868f97] text-sm md:text-[15px] leading-6">
+                        {/* 修改: 统一正文字体 */}
+                        <p className="text-[#868f97] leading-6 text-base md:text-lg">
                             {description}
                         </p>
                     </motion.div>
@@ -992,14 +1013,28 @@ const CtaWithGallerySection = () => {
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.3 }}
                 >
-                    <motion.h2 variants={itemVariants} className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    {/* 修改: 统一标题字体 */}
+                    <motion.h2 variants={itemVariants} className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         加入我们，共创未来
                     </motion.h2>
-                    <motion.p variants={itemVariants} className="text-neutral-300 max-w-2xl mx-auto mb-8">
+                    {/* 修改: 统一正文字体 */}
+                    <motion.p variants={itemVariants} className="text-neutral-300 max-w-2xl mx-auto mb-8 text-base md:text-lg">
                         探索我们的创新解决方案，了解我们如何帮助全球客户取得成功。立即开始，释放您的全部潜力。
                     </motion.p>
                     <motion.div variants={itemVariants}>
+                      {/* 修改: 使用 DialogTrigger 和 HalomotButton 替换原按钮，以统一大小和样式 */}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                           <HalomotButton 
+                             inscription="Start Scaling Today" 
+                             onClick={() => {}} 
+                             backgroundColor='#161616' 
+                             hoverTextColor='#fff' 
+                             gradient='linear-gradient(to right, #603dec, #a123f4)'
+                           />
+                        </DialogTrigger>
                         <FeatureTourDialog />
+                      </Dialog>
                     </motion.div>
                 </motion.div>
             </div>
@@ -1180,11 +1215,6 @@ const FeatureTourDialog = () => {
   };
 
   return (
-    <Dialog onOpenChange={(open) => !open && setStep(0)}>
-      <DialogTrigger asChild>
-        <Button className="bg-rose-500 hover:bg-rose-500/90 text-white">Start Scaling Today</Button>
-      </DialogTrigger>
-
       <DialogContent
         className={cn(
           "max-w-3xl p-0 overflow-hidden rounded-xl border-neutral-800 shadow-2xl",
@@ -1293,7 +1323,6 @@ const FeatureTourDialog = () => {
           </div>
         </div>
       </DialogContent>
-    </Dialog>
   );
 }
 FeatureTourDialog.displayName = "FeatureTourDialog";
@@ -1334,6 +1363,7 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
 MemoizedZap.displayName = 'ZapIcon';
 
 const features = [
+  // 修改: 统一标题和正文字体
   { icon: MemoizedCpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
   { icon: MemoizedShieldCheck, title: "安全可靠", description: "先进的保护措施，让您高枕无忧。" },
   { icon: MemoizedLayers, title: "模块化设计", description: "轻松与现有架构集成。" },
@@ -1345,7 +1375,8 @@ const timelineData = [
       title: "教育路径规划",
       content: (
         <div>
-          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
+          {/* 修改: 统一正文字体 */}
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
           <div>
             <Image 
               src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
@@ -1362,7 +1393,8 @@ const timelineData = [
       title: "学校申请支持",
       content: (
         <div>
-          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-8">我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。</p>
+          {/* 修改: 统一正文字体 */}
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。</p>
           <div>
             <Image 
               src="https://cdn.apex-elite-service.com/wangzhantupian/222.jpg" 
@@ -1379,7 +1411,8 @@ const timelineData = [
       title: "长期成长陪伴",
       content: (
         <div>
-          <p className="text-neutral-200 text-xs md:text-sm font-normal mb-4">今天在 Aceternity 上部署了5个新组件。</p>
+          {/* 修改: 统一正文字体 */}
+          <p className="text-neutral-200 mb-4 text-base md:text-lg">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
             <Image 
               src="https://cdn.apex-elite-service.com/wangzhantupian/333.jpg" 
@@ -1614,7 +1647,8 @@ function ScrollAdventure() {
                 <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.leftContent && (
                     <div className="text-center">
-                      <h2 className="text-2xl md:text-3xl font-bold uppercase mb-4 tracking-widest">
+                      {/* 修改: 统一标题字体 */}
+                      <h2 className="mb-4 tracking-widest text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         {page.leftContent.heading}
                       </h2>
                       <p className="text-base md:text-lg">
@@ -1636,7 +1670,8 @@ function ScrollAdventure() {
                 <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.rightContent && (
                      <div className="text-center">
-                      <h2 className="text-2xl md:text-3xl font-bold uppercase mb-4 tracking-widest">
+                      {/* 修改: 统一标题字体 */}
+                      <h2 className="mb-4 tracking-widest text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         {page.rightContent.heading}
                       </h2>
                        <div className="text-base md:text-lg">
@@ -1719,10 +1754,10 @@ const TextMarqueeSection = () => (
     <section className="py-24 md:py-32 w-full">
          <div className="space-y-1">
             <TextMarquee baseVelocity={-2} className='font-bold text-2xl text-blue-400'>
-               Apex · 
+               Framer Motion · 
             </TextMarquee>
             <TextMarquee baseVelocity={2} className='font-bold text-2xl text-purple-400'>
-               Apex · 
+               Tailwind CSS · 
             </TextMarquee>
         </div>
     </section>
@@ -1807,7 +1842,8 @@ const CustomFooter = () => {
                 className="w-full h-full object-contain rounded-lg"
               />
             </div>
-            <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300">
+            {/* 修改: 统一字体大小 */}
+            <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300 text-base md:text-lg">
               <Link href="#" className="hover:text-white">Apex</Link>
               <Link href="#" className="hover:text-white">留学</Link>
               <Link href="#" className="hover:text-white">医疗</Link>
@@ -1854,7 +1890,7 @@ const CustomFooter = () => {
                     required
                   />
                 </div>
-                <Button type="submit" variant="default" className="rounded-full" disabled={isSubmitting}>
+                <Button type="submit" variant="default" className="rounded-full text-base md:text-lg" disabled={isSubmitting}>
                   {isSubmitting ? '提交中...' : '提交'}
                 </Button>
               </form>
@@ -1931,7 +1967,8 @@ export default function HomePage() {
                   <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
                     为您而来，不止于此
                   </h1>
-                  <p className="text-lg text-neutral-300 max-w-2xl">
+                  {/* 修改: 统一正文字体 */}
+                  <p className="text-neutral-300 max-w-2xl text-base md:text-lg">
                     我们深知您当下的每一步在未来都至关重要。
                   </p>
                 </div>
@@ -1943,8 +1980,10 @@ export default function HomePage() {
                     className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
                   >
                     <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
-                    <h3 className="text-sm md:text-base font-medium text-white">{feature.title}</h3>
-                    <p className="text-xs md:text-sm text-neutral-400">{feature.description}</p>
+                    {/* 修改: 统一按钮/特性标题字体 */}
+                    <h3 className="text-base font-bold text-white">{feature.title}</h3>
+                    {/* 修改: 统一正文字体 */}
+                    <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
                   </div>
                 ))}
               </div>
