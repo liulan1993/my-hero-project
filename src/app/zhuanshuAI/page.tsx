@@ -45,7 +45,7 @@ const CheckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 
-// --- 新的背景动画组件 (来自 zhiyoudonghua.tsx) ---
+// --- 背景动画组件 (无修改) ---
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
@@ -144,15 +144,12 @@ const Scene = () => {
 };
 
 
-// --- 聊天窗口组件 (无修改) ---
-// 定义消息类型的接口
+// --- 聊天窗口组件 (已修改) ---
 interface Message {
     role: 'user' | 'assistant' | 'system';
     content: string;
 }
 
-// 代码块渲染组件
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CodeBlock = ({ inline, className, children, ...props }: any) => {
     const [copied, setCopied] = useState(false);
     const match = /language-(\w+)/.exec(className || '');
@@ -236,7 +233,8 @@ function ChatWindow() {
         setIsLoading(true);
 
         const newUserMessage: Message = { role: 'user', content: input };
-        setMessages(prev => [...prev, newUserMessage]);
+        const currentMessages = [...messages, newUserMessage];
+        setMessages(currentMessages);
 
         let fileContent = '';
         if (selectedFile) {
@@ -260,7 +258,7 @@ function ChatWindow() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [...messages, newUserMessage],
+                    messages: currentMessages, // 使用包含当前用户输入的消息列表
                     options: {
                         model: selectedModel,
                         enableWebSearch,
@@ -272,7 +270,11 @@ function ChatWindow() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
+                // 尝试解析错误信息的JSON体
+                const errorData = await response.json().catch(() => ({
+                    // 如果解析失败，提供一个备用错误信息
+                    error: `后端API请求失败，状态码: ${response.status}`
+                }));
                 throw new Error(errorData.error || '后端API请求失败');
             }
             
@@ -311,7 +313,7 @@ function ChatWindow() {
                                     <div className="prose dark:prose-invert max-w-none">
                                         <ReactMarkdown
                                             components={{
-                                                code: CodeBlock,
+                                                code: ({node, inline, className, children, ...props}) => <CodeBlock inline={inline} className={className} {...props}>{children}</CodeBlock>
                                             }}
                                         >
                                             {msg.content}
@@ -341,14 +343,16 @@ function ChatWindow() {
                 <div className="max-w-3xl mx-auto">
                     <div className="flex items-center flex-wrap gap-x-4 gap-y-2 mb-2">
                         <div className="flex items-center space-x-2">
-                            <label htmlFor="model-select" className="text-sm font-medium text-gray-700">模型:</label>
+                            {/* [修复] 根据图片要求，将标签文字颜色改为 text-black */}
+                            <label htmlFor="model-select" className="text-sm font-medium text-black">模型:</label>
                             <select id="model-select" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="p-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white/80">
                                 <option value="deepseek-chat">DeepSeek-V3</option>
                                 <option value="deepseek-reasoner">DeepSeek-R1</option>
                             </select>
                         </div>
                         <label htmlFor="deep-search-toggle" className="flex items-center cursor-pointer">
-                            <span className="mr-2 text-sm font-medium text-gray-700">深度搜索:</span>
+                             {/* [修复] 根据图片要求，将标签文字颜色改为 text-black */}
+                            <span className="mr-2 text-sm font-medium text-black">深度搜索:</span>
                             <div className="relative">
                                 <input id="deep-search-toggle" type="checkbox" className="sr-only peer" checked={enableDeepSearch} onChange={() => setEnableDeepSearch(!enableDeepSearch)} />
                                 <div className="block bg-gray-200/80 w-10 h-6 rounded-full peer-checked:bg-blue-500 transition"></div>
@@ -356,7 +360,8 @@ function ChatWindow() {
                             </div>
                         </label>
                         <label htmlFor="web-search-toggle" className="flex items-center cursor-pointer">
-                            <span className="mr-2 text-sm font-medium text-gray-700">联网搜索:</span>
+                             {/* [修复] 根据图片要求，将标签文字颜色改为 text-black */}
+                            <span className="mr-2 text-sm font-medium text-black">联网搜索:</span>
                             <div className="relative">
                                 <input id="web-search-toggle" type="checkbox" className="sr-only peer" checked={enableWebSearch} onChange={() => setEnableWebSearch(!enableWebSearch)} />
                                 <div className="block bg-gray-200/80 w-10 h-6 rounded-full peer-checked:bg-blue-500 transition"></div>
@@ -364,7 +369,8 @@ function ChatWindow() {
                             </div>
                         </label>
                         <label htmlFor="markdown-toggle" className="flex items-center cursor-pointer">
-                            <span className="mr-2 text-sm font-medium text-gray-700">Markdown输出:</span>
+                             {/* [修复] 根据图片要求，将标签文字颜色改为 text-black */}
+                            <span className="mr-2 text-sm font-medium text-black">Markdown输出:</span>
                             <div className="relative">
                                 <input id="markdown-toggle" type="checkbox" className="sr-only peer" checked={enableMarkdownOutput} onChange={() => setEnableMarkdownOutput(!enableMarkdownOutput)} />
                                 <div className="block bg-gray-200/80 w-10 h-6 rounded-full peer-checked:bg-blue-500 transition"></div>
@@ -395,7 +401,7 @@ function ChatWindow() {
 }
 
 
-// --- 主页面组件 (已修改) ---
+// --- 主页面组件 (无修改) ---
 export default function Home() {
     const title = "Apex—DeepSeek";
     const words = title.split(" ");
@@ -405,7 +411,6 @@ export default function Home() {
             className="relative w-screen h-screen overflow-hidden bg-[#000] text-white"
             style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}
         >
-            {/* 新的3D背景动画 */}
             <Scene />
 
             <div className="relative w-full h-full flex flex-col items-center justify-center z-10 p-4 overflow-y-auto">
@@ -420,7 +425,6 @@ export default function Home() {
                                             initial={{ y: 100, opacity: 0 }}
                                             animate={{ y: 0, opacity: 1 }}
                                             transition={{ delay: wordIndex * 0.1 + letterIndex * 0.03, type: "spring", stiffness: 150, damping: 25 }}
-                                            // 修改文字颜色以适应深色背景
                                             className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-400"
                                         >
                                             {letter}
@@ -433,7 +437,6 @@ export default function Home() {
                             initial={{ opacity: 0, y: 20 }} 
                             animate={{ opacity: 1, y: 0 }} 
                             transition={{ delay: 0.8, duration: 1.2 }} 
-                            // 修改文字颜色以适应深色背景
                             className="text-lg md:text-xl text-neutral-400 mt-4 max-w-2xl mx-auto"
                         >
                             Apex专属满血版DeepSeek，独立运营，不卡顿。
