@@ -962,6 +962,32 @@ InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 // ============================================================================
 
 const CtaWithGallerySection = () => {
+    // 修复: 将状态管理和对话框逻辑合并到此组件
+    const [step, setStep] = useState(0);
+
+    const steps = [
+      {
+        title: "Let's Get Started",
+        description: "Kick off your experience with a brief introduction to our toolkit.",
+      },
+      {
+        title: "Designed For Flexibility",
+        description: "Drag, drop, and build with fully customizable components.",
+      },
+      {
+        title: "Scalable Codebase",
+        description: "Every block is built to be reusable and scalable with your projects.",
+      },
+      {
+        title: "Join Our Community",
+        description: "Get help, share ideas, and grow with developers worldwide.",
+      },
+    ];
+  
+    const next = () => {
+      if (step < steps.length - 1) setStep(step + 1);
+    };
+
     const containerVariants: Variants = {
         hidden: {},
         visible: {
@@ -992,9 +1018,9 @@ const CtaWithGallerySection = () => {
                     <motion.p variants={itemVariants} className="text-neutral-300 max-w-2xl mx-auto mb-8 text-base md:text-lg">
                         探索我们的创新解决方案，了解我们如何帮助全球客户取得成功。立即开始，释放您的全部潜力。
                     </motion.p>
-                    {/* 修改: 添加 flex justify-center 来居中按钮 */}
                     <motion.div variants={itemVariants} className="flex justify-center">
-                      <Dialog>
+                      {/* 修复: 添加 onOpenChange 以便在关闭时重置步骤 */}
+                      <Dialog onOpenChange={(open) => !open && setStep(0)}>
                         <DialogTrigger asChild>
                            <HalomotButton 
                              inscription="Start Scaling Today" 
@@ -1004,7 +1030,113 @@ const CtaWithGallerySection = () => {
                              gradient='linear-gradient(to right, #603dec, #a123f4)'
                            />
                         </DialogTrigger>
-                        <FeatureTourDialog />
+                        <DialogContent
+                            className={cn(
+                            "max-w-3xl p-0 overflow-hidden rounded-xl border-neutral-800 shadow-2xl",
+                            "bg-black text-white",
+                            "data-[state=open]:animate-none data-[state=closed]:animate-none"
+                            )}
+                        >
+                            <div className="flex flex-col md:flex-row w-full h-full">
+                                <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
+                                    <div className="flex flex-col gap-3">
+                                    <Image
+                                        src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png"
+                                        alt="Logo"
+                                        width={48}
+                                        height={48}
+                                        className="w-12 h-12 rounded-full border-4 border-neutral-800"
+                                        unoptimized
+                                    />
+                                    <h2 className="text-lg font-medium">Origin UI Onboarding</h2>
+                                    <p className="text-sm text-neutral-400">
+                                        Explore our features step-by-step to get the best out of your experience.
+                                    </p>
+                                    <div className="flex flex-col gap-3 mt-6">
+                                        {steps.map((s, index) => (
+                                        <div
+                                            key={index}
+                                            className={cn(
+                                            "flex items-center gap-2 text-sm transition-opacity",
+                                            index === step
+                                                ? "font-semibold text-white"
+                                                : "opacity-60 hover:opacity-100"
+                                            )}
+                                        >
+                                            {index < step ? (
+                                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                            ) : (
+                                            <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
+                                            )}
+                                            <span className="font-normal">{s.title}</span>
+                                        </div>
+                                        ))}
+                                    </div>
+                                    </div>
+                                </div>
+
+                                <div className="w-full md:w-2/3 p-8 flex flex-col justify-between">
+                                    <div className="space-y-4">
+                                    <DialogHeader>
+                                        <AnimatePresence mode="wait">
+                                        <motion.h2
+                                            key={steps[step].title}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.25 }}
+                                            className="text-2xl font-medium"
+                                        >
+                                            {steps[step].title}
+                                        </motion.h2>
+                                        </AnimatePresence>
+
+                                        <div className="min-h-[60px]">
+                                        <AnimatePresence mode="wait">
+                                            <motion.p
+                                            key={steps[step].description}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.25 }}
+                                            className="text-neutral-400 text-base"
+                                            >
+                                            {steps[step].description}
+                                            </motion.p>
+                                        </AnimatePresence>
+                                        </div>
+                                    </DialogHeader>
+
+                                    <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
+                                        <Image
+                                        src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
+                                        alt="Step Visual"
+                                        width={200}
+                                        height={200}
+                                        className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    </div>
+
+                                    <div className="mt-6 flex justify-between items-center">
+                                    <DialogClose asChild>
+                                        <Button variant="outline">Skip</Button>
+                                    </DialogClose>
+
+                                    {step < steps.length - 1 ? (
+                                        <Button variant="outline" onClick={next}>
+                                        Continue
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    ) : (
+                                        <DialogClose asChild>
+                                        <Button variant="outline">Finish</Button>
+                                        </DialogClose>
+                                    )}
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogContent>
                       </Dialog>
                     </motion.div>
                 </motion.div>
@@ -1159,143 +1291,9 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
-const FeatureTourDialog = () => {
-  const [step, setStep] = useState(0);
+// 修复: 此组件的逻辑已合并到 CtaWithGallerySection 中，可以安全删除
+// const FeatureTourDialog = () => { ... }
 
-  const steps = [
-    {
-      title: "Let's Get Started",
-      description: "Kick off your experience with a brief introduction to our toolkit.",
-    },
-    {
-      title: "Designed For Flexibility",
-      description: "Drag, drop, and build with fully customizable components.",
-    },
-    {
-      title: "Scalable Codebase",
-      description: "Every block is built to be reusable and scalable with your projects.",
-    },
-    {
-      title: "Join Our Community",
-      description: "Get help, share ideas, and grow with developers worldwide.",
-    },
-  ];
-
-  const next = () => {
-    if (step < steps.length - 1) setStep(step + 1);
-  };
-
-  return (
-      <DialogContent
-        className={cn(
-          "max-w-3xl p-0 overflow-hidden rounded-xl border-neutral-800 shadow-2xl",
-          "bg-black text-white",
-          "data-[state=open]:animate-none data-[state=closed]:animate-none"
-        )}
-      >
-        <div className="flex flex-col md:flex-row w-full h-full">
-          <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
-            <div className="flex flex-col gap-3">
-              <Image
-                src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png"
-                alt="Logo"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full border-4 border-neutral-800"
-                unoptimized
-              />
-              <h2 className="text-lg font-medium">Origin UI Onboarding</h2>
-              <p className="text-sm text-neutral-400">
-                Explore our features step-by-step to get the best out of your experience.
-              </p>
-              <div className="flex flex-col gap-3 mt-6">
-                {steps.map((s, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "flex items-center gap-2 text-sm transition-opacity",
-                      index === step
-                        ? "font-semibold text-white"
-                        : "opacity-60 hover:opacity-100"
-                    )}
-                  >
-                    {index < step ? (
-                      <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
-                    )}
-                    <span className="font-normal">{s.title}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="w-full md:w-2/3 p-8 flex flex-col justify-between">
-            <div className="space-y-4">
-              <DialogHeader>
-                <AnimatePresence mode="wait">
-                  <motion.h2
-                    key={steps[step].title}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.25 }}
-                    className="text-2xl font-medium"
-                  >
-                    {steps[step].title}
-                  </motion.h2>
-                </AnimatePresence>
-
-                <div className="min-h-[60px]">
-                  <AnimatePresence mode="wait">
-                    <motion.p
-                      key={steps[step].description}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.25 }}
-                      className="text-neutral-400 text-base"
-                    >
-                      {steps[step].description}
-                    </motion.p>
-                  </AnimatePresence>
-                </div>
-              </DialogHeader>
-
-              <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
-                <Image
-                  src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
-                  alt="Step Visual"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-between items-center">
-              <DialogClose asChild>
-                <Button variant="outline">Skip</Button>
-              </DialogClose>
-
-              {step < steps.length - 1 ? (
-                <Button variant="outline" onClick={next}>
-                  Continue
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <DialogClose asChild>
-                  <Button variant="outline">Finish</Button>
-                </DialogClose>
-              )}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-  );
-}
-FeatureTourDialog.displayName = "FeatureTourDialog";
 
 // ============================================================================
 // 7. 页面级别的静态数据
