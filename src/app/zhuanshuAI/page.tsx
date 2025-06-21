@@ -1,4 +1,4 @@
-"use client"; // 声明为客户端组件，因为我们使用了 hooks
+"use client";
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -7,7 +7,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-
+import Link from 'next/link'; // [修复] 引入 Link 组件
 
 // --- 图标组件 (无修改) ---
 const PaperclipIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -150,7 +150,6 @@ interface Message {
     content: string;
 }
 
-// [修复1] 在下面这行代码前添加 eslint-disable-next-line 注释，以修复 no-explicit-any 错误
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CodeBlock = ({ inline, className, children, ...props }: any) => {
     const [copied, setCopied] = useState(false);
@@ -230,6 +229,7 @@ function ChatWindow() {
         }
     };
 
+    // [修复] 修改此函数以处理流式响应，解决504超时问题
     const handleSendMessage = async () => {
         if ((!input.trim() && !selectedFile) || isLoading) return;
         setIsLoading(true);
@@ -272,14 +272,36 @@ function ChatWindow() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({
-                    error: `后端API请求失败，状态码: ${response.status}`
-                }));
-                throw new Error(errorData.error || '后端API请求失败');
+                const errorText = await response.text();
+                throw new Error(errorText || `后端API请求失败，状态码: ${response.status}`);
+            }
+
+            if (!response.body) {
+                throw new Error("响应体为空，无法处理流。");
             }
             
-            const assistantMessage = await response.json();
-            setMessages(prev => [...prev, assistantMessage]);
+            // 1. 添加一个空的助手消息用于接收流内容
+            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+            // 2. 创建读取器和解码器
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            
+            // 3. 循环读取流数据
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break; // 流结束
+                }
+                const chunk = decoder.decode(value, { stream: true });
+                // 4. 将新的数据块追加到最后一条消息中
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastMessageIndex = newMessages.length - 1;
+                    newMessages[lastMessageIndex].content += chunk;
+                    return newMessages;
+                });
+            }
 
         } catch (error) {
             console.error("Error calling backend API:", error);
@@ -312,7 +334,6 @@ function ChatWindow() {
                                 {msg.role === 'assistant' && enableMarkdownOutput ? (
                                     <div className="prose dark:prose-invert max-w-none">
                                         <ReactMarkdown
-                                            // [修复2] 将 components 的值改回简洁形式，修复 no-unused-vars 错误
                                             components={{
                                                 code: CodeBlock,
                                             }}
@@ -345,7 +366,8 @@ function ChatWindow() {
                     <div className="flex items-center flex-wrap gap-x-4 gap-y-2 mb-2">
                         <div className="flex items-center space-x-2">
                             <label htmlFor="model-select" className="text-sm font-medium text-black">模型:</label>
-                            <select id="model-select" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="p-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white/80">
+                             {/* [修复] 添加 text-black 类来改变字体颜色 */}
+                            <select id="model-select" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="p-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white/80 text-black">
                                 <option value="deepseek-chat">DeepSeek-V3</option>
                                 <option value="deepseek-reasoner">DeepSeek-R1</option>
                             </select>
@@ -381,6 +403,10 @@ function ChatWindow() {
                         </button>
                         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
                         <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={handleKeyPress} placeholder="在此输入您的问题..." rows={1} className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white/80" disabled={isLoading}/>
+                        {/* [修复] 添加返回主页的按钮 */}
+                        <Link href="/" className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex-shrink-0">
+                            主页
+                        </Link>
                         <button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && !selectedFile)} className="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:bg-blue-300 disabled:cursor-not-allowed">
                             {isLoading ? '发送中...' : '发送'}
                         </button>

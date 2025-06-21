@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { OpenAIStream, StreamingTextResponse } from 'ai'; // [修复] 引入流处理工具
 
 // 定义从前端接收的消息和选项的类型
 interface Message {
@@ -15,7 +16,6 @@ interface RequestOptions {
 }
 
 // Tavily API 搜索函数
-// 已修正：现在失败时会抛出错误，而不是返回字符串
 async function tavilySearch(query: string): Promise<string> {
     const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
     if (!TAVILY_API_KEY) {
@@ -43,7 +43,6 @@ async function tavilySearch(query: string): Promise<string> {
 
 // 主 API 路由处理函数
 export async function POST(req: NextRequest) {
-    // 已修正：将整个逻辑包裹在try/catch中，确保任何错误都能被捕获并以JSON格式返回
     try {
         const body = await req.json();
         const { messages, options }: { messages: Message[], options: RequestOptions } = body;
@@ -52,7 +51,8 @@ export async function POST(req: NextRequest) {
 
         const DEEPSEEK_API_KEY = process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY;
         if (!DEEPSEEK_API_KEY) {
-            return NextResponse.json({ error: 'DeepSeek API key not configured' }, { status: 500 });
+            // [修复] 返回标准的 Response 对象以兼容流式错误处理
+            return new Response('DeepSeek API key not configured', { status: 500 });
         }
 
         const latestUserMessage = messages[messages.length - 1];
@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
             model: model,
             messages: messagesToSend,
             temperature: 1.0,
-            max_tokens: 8192, // 已修正: 将 max_tokens 的值调整为 API 允许的最大值
-            search: enableWebSearch, 
+            max_tokens: 8192,
+            stream: true, // [修复] 开启流模式，这是解决504超时的核心
         };
 
         if (enableDeepSearch) {
@@ -107,23 +107,19 @@ export async function POST(req: NextRequest) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'DeepSeek API request failed');
+            const errorText = await response.text();
+             // [修复] 返回标准的 Response 对象
+            return new Response(errorText, { status: response.status });
         }
         
-        const data = await response.json();
-        const assistantReply = data.choices[0].message;
-
-        const cleanAssistantMessage: Message = {
-            role: 'assistant',
-            content: assistantReply.content
-        };
-
-        return NextResponse.json(cleanAssistantMessage);
+        // [修复] 将原始响应流通过 AI SDK 转换为 StreamingTextResponse 并返回
+        const stream = OpenAIStream(response);
+        return new StreamingTextResponse(stream);
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         console.error('API Route Error:', errorMessage);
-        return NextResponse.json({ error: errorMessage }, { status: 500 });
+        // [修复] 返回标准的 Response 对象
+        return new Response(errorMessage, { status: 500 });
     }
 }
