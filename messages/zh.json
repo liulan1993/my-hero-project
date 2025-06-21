@@ -1,0 +1,13 @@
+{
+  "LocaleSwitcher": {
+    "label": "语言",
+    "locale": "{locale, select, en {English} zh {中文} ja {日本語} ko {한국어} ru {Русский} fr {Français} other {未知}}"
+  },
+  "NavigationBar": {
+    "home": "主页",
+    "support": "客户支持",
+    "empowerment": "AI赋能",
+    "submit": "提交",
+    "welcome": "欢迎您！"
+  }
+}
