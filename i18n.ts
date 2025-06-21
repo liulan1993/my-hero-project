@@ -21,7 +21,11 @@ export default getRequestConfig(async ({locale}) => {
     messages = {}; 
   }
 
+  // --- 这是本次的修复 ---
+  // 除了 messages，我们还需要将 locale 本身也返回，
+  // 这是 next-intl 的要求。
   return {
+    locale,
     messages
   };
 });
