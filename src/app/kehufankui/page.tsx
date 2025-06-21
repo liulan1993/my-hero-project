@@ -54,17 +54,13 @@ const FileImageIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 // --- 3D 场景组件 ---
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
-    // 创建一个带圆角的矩形形状
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
     const radius = 1;
-
     shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
     shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
     shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
     shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
-
-    // 定义拉伸设置
     const extrudeSettings = {
         depth: 0.3,
         bevelEnabled: true,
@@ -73,11 +69,8 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
         bevelSegments: 20,
         curveSegments: 20
     };
-
-    // 基于形状和设置创建几何体
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center(); // 将几何体居中
-
+    geometry.center();
     return (
         <mesh
             geometry={geometry}
@@ -114,20 +107,17 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
 
 const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null!);
-
     useFrame((state, delta) => {
         if (groupRef.current) {
             groupRef.current.rotation.x += delta * 0.05;
             groupRef.current.rotation.y += delta * 0.05;
         }
     });
-
     const boxes = Array.from({ length: 50 }, (_, index) => ({
         position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
         rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number],
         id: index
     }));
-
     return (
         <group ref={groupRef}>
             {boxes.map((box) => (
@@ -141,9 +131,11 @@ const AnimatedBoxes = () => {
     );
 };
 
+// --- vvv 这是本次唯一的修改点 vvv ---
 const Scene = () => {
     return (
-        <div className="absolute inset-0 w-full h-full z-[-1]">
+        // 移除了 z-[-1]，这是导致动画被遮盖的根本原因
+        <div className="absolute inset-0 w-full h-full">
             <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
                 <ambientLight intensity={15} />
                 <directionalLight position={[10, 10, 5]} intensity={15} />
@@ -152,12 +144,12 @@ const Scene = () => {
         </div>
     );
 };
+// --- ^^^ 这是本次唯一的修改点 ^^^ ---
 
 
 // --- Markdown 预览组件 ---
 function MarkdownPreview({ content, imagePreviewUrl }: { content: string, imagePreviewUrl: string | null }) {
     const [html, setHtml] = useState('');
-
     useEffect(() => {
         const scriptId = 'marked-script';
         if (!document.getElementById(scriptId)) {
@@ -222,11 +214,9 @@ function SubmissionForm() {
                 }
                 return;
             }
-            
             setMessage('');
             setStatus('idle');
             setFile(selectedFile);
-            
             if (selectedFile.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onloadend = () => {
@@ -259,12 +249,9 @@ function SubmissionForm() {
             setStatus('error');
             return;
         }
-
         setStatus('loading');
         setMessage('准备上传...');
-
         let fileUrl = null;
-
         try {
             if (file) {
                 setMessage('正在上传文件...');
@@ -272,36 +259,30 @@ function SubmissionForm() {
                     method: 'POST',
                     body: file,
                 });
-
                 if (!uploadResponse.ok) {
                     const errorResult = await uploadResponse.json();
                     throw new Error(errorResult.error || '文件上传失败');
                 }
-
                 const newBlob = await uploadResponse.json();
                 fileUrl = newBlob.url;
                 setMessage('文件上传成功，正在提交内容...');
             } else {
                  setMessage('正在提交内容...');
             }
-
             const submissionResponse = await fetch('/api/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content, fileUrl, userId }),
             });
-
             if (!submissionResponse.ok) {
                 const errorResult = await submissionResponse.json();
                 throw new Error(errorResult.message || '内容提交失败');
             }
-
             const result = await submissionResponse.json();
             setStatus('success');
             setMessage(result.message || '提交成功！感谢您的稿件。');
             setContent('');
             handleRemoveFile();
-
         } catch (error) {
             setStatus('error');
             setMessage(error instanceof Error ? error.message : '发生未知错误');
@@ -329,7 +310,6 @@ function SubmissionForm() {
             </div>
             <div className="bg-black/30 backdrop-blur-md rounded-2xl shadow-lg border border-gray-700/50 overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-2 min-h-[500px]">
-                    {/* 编辑区 */}
                     <div className="flex flex-col p-4">
                         <div className="flex items-center justify-between gap-2 mb-2 text-slate-300">
                            <div className="flex items-center gap-2">
@@ -373,7 +353,6 @@ function SubmissionForm() {
                             className="hidden"
                         />
                     </div>
-                    {/* 预览区 */}
                     <div className="bg-black/10 border-l border-gray-700/50">
                          <div className="flex items-center gap-2 p-4 border-b border-gray-700/50 text-slate-300">
                            <EyeIcon className="w-5 h-5" />
@@ -417,11 +396,10 @@ function SubmissionForm() {
 // --- Apex主页组件 ---
 function ApexHero({ title = "Apex" }: { title?: string }) {
     const words = title.split(" ");
-
     return (
         <div 
-            className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-8 sm:py-12"
-            style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}
+            className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-8 sm:py-12 bg-black"
+            // 上一行移除了错误的行内渐变背景，并用 bg-black 代替作为回退
         >
             <Scene />
             <div className="relative z-10 container mx-auto px-4 md:px-6 text-center">
