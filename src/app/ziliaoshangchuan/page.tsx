@@ -1,33 +1,44 @@
 'use client';
 
-// --- 原始 page.tsx 的导入 ---
+// --- Imports ---
 import React, { useState, useMemo, useEffect, ChangeEvent, Dispatch, SetStateAction, FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-
-// --- 从 zhiyoudonghua.tsx 添加的导入 ---
 import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-// --- Type Definitions (来自原始 page.tsx) ---
+// --- Type Definitions ---
 type Option = { value: string; label: string };
 type Column = { key: string; header: string };
 interface BaseFieldProps { id: string; label?: string; title?: string; }
-type Field = BaseFieldProps & { Component: React.ElementType; [key: string]: unknown };
+
+// ------------------- FINAL FIX START -------------------
+// 新的、更精确的Field类型定义，以解决编译器推断问题
+type Field = BaseFieldProps & {
+    Component: React.ElementType;
+    // 明确列出所有组件可能用到的属性，并设为可选
+    type?: string;
+    placeholder?: string;
+    name?: string;
+    options?: Option[];
+    columns?: Column[];
+    personType?: string;
+    fieldSet?: Field[];
+    max?: number;
+    value?: any;
+    onChange?: (...args: any[]) => void;
+};
+// -------------------- FINAL FIX END --------------------
 
 type TableRow = Record<string, string>;
 type PersonData = Record<string, string>;
 type FileData = { file?: File; error?: string };
-
 type FormData = Record<string, unknown>;
-
 type SubmissionStatus = 'idle' | 'loading' | 'success' | 'error';
-
 type Service = { id: string; title: string; fields: Field[] };
 
-
-// --- Utility Function (来自原始 page.tsx) ---
+// --- Utility Function ---
 function cn(...inputs: (string | undefined | null | boolean | { [key: string]: boolean })[]): string {
     const classSet = new Set<string>();
     inputs.forEach(input => {
@@ -42,7 +53,7 @@ function cn(...inputs: (string | undefined | null | boolean | { [key: string]: b
     return Array.from(classSet).join(' ');
 }
 
-// --- Form Component Definitions (来自原始 page.tsx) ---
+// --- Form Component Definitions ---
 const SectionHeader: FC<{ title: string }> = ({ title }) => (
     <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-6 mt-6 first:mt-0">{title}</h3>
 );
@@ -264,8 +275,7 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
                      {fieldSet.map(field => {
                         const {Component, id, ...props} = field;
                         const componentProps = { ...props, value: personData[id] || '', onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | {target: {name: string, value: string}}) => handleChange(index, id, e.target.value) };
-                        const AnyComponent = Component as any;
-                        return <AnyComponent key={id} {...componentProps} />
+                        return <Component key={id} {...componentProps} />
                      })}
                 </div>
             ))}
@@ -277,7 +287,7 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
 };
 
 
-// --- Service Module and Field Data Structures (来自原始 page.tsx) ---
+// --- Service Module and Field Data Structures ---
 const clientAgentFields: Field[] = [
     { id: 'fullName', label: '全名 (包括任何别名)', Component: FormField },
     { id: 'idNumber', label: '身份证/护照号码', Component: FormField },
@@ -540,7 +550,7 @@ const services: Service[] = [
 ].filter(s => s.id !== 'study' && s.id !== 'medical');
 
 
-// --- Combined Form Modal Component (来自原始 page.tsx) ---
+// --- Combined Form Modal Component ---
 type UploadModalProps = {
     isOpen: boolean;
     onClose: () => void;
@@ -842,7 +852,7 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
 };
 
 
-// --- 新的背景动画组件 (来自 zhiyoudonghua.tsx) ---
+// --- Background Animation Components ---
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
@@ -941,7 +951,7 @@ const Scene = () => {
 };
 
 
-// --- 主页面组件 (已修改) ---
+// --- Main Page Component ---
 export default function ApexPage() {
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [isModalOpen, setModalOpen] = useState(false);
@@ -964,7 +974,6 @@ export default function ApexPage() {
           className="relative min-h-screen w-full flex items-center justify-center overflow-hidden text-white py-20 px-4" 
           style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}
         >
-            {/* 新的背景动画 */}
             <Scene />
 
             <div className="relative z-10 container mx-auto px-2 md:px-6 flex flex-col items-center w-full">
@@ -983,7 +992,7 @@ export default function ApexPage() {
                                         initial={{ y: 100, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
                                         transition={{ delay: wordIndex * 0.1 + letterIndex * 0.03, type: "spring", stiffness: 150, damping: 25 }}
-                                        className="inline-block text-neutral-100" // 修改了文本颜色以适应深色背景
+                                        className="inline-block text-neutral-100"
                                     >
                                         {letter}
                                     </motion.span>
@@ -1010,7 +1019,7 @@ export default function ApexPage() {
                                         "p-4 rounded-lg text-center font-semibold transition-all duration-300 transform hover:scale-105 shadow-md border text-sm sm:text-base",
                                         isSelected
                                             ? "bg-blue-600 text-white border-blue-700 shadow-lg"
-                                            : "bg-neutral-800/60 backdrop-blur-sm text-neutral-100 border-neutral-700/50 hover:bg-neutral-700" // 修改了按钮样式以适应深色背景
+                                            : "bg-neutral-800/60 backdrop-blur-sm text-neutral-100 border-neutral-700/50 hover:bg-neutral-700"
                                     )}
                                 >
                                     {service.title}
