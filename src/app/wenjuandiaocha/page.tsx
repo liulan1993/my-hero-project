@@ -341,23 +341,19 @@ function ApexSurveyComponent({
     const words = title.split(" ");
 
     return (
-        // !! 结构修正：将背景层和内容层作为兄弟节点，通过z-index控制层级
-        <div className="relative w-full min-h-screen bg-black">
-            {/* 背景层 1: 渐变颜色 (最底层) */}
+        <div className="relative w-full min-h-screen">
+            {/* !! 结构修正：使用固定定位(fixed)来创建稳定的背景层 !! */}
             <div
-                className="absolute inset-0 -z-30"
+                className="fixed inset-0 -z-10"
                 style={{ background: 'linear-gradient(to bottom right, #000, #1A2428)' }}
-            ></div>
-
-            {/* 背景层 2: 3D动画 (中间层) */}
-            <div className="absolute inset-0 -z-20">
+            >
+                {/* 3D动画场景直接放在这个背景层里 */}
                 <BackgroundScene />
+                {/* 在动画上覆盖一层模糊效果，使其更像背景 */}
+                <div className="absolute inset-0 bg-transparent backdrop-blur-sm"></div>
             </div>
 
-            {/* 背景层 3: 毛玻璃模糊覆盖 (可选, 为了视觉效果保留) */}
-            <div className="absolute inset-0 -z-10 backdrop-blur-sm"></div>
-
-            {/* 内容层 (最顶层) */}
+            {/* 内容层：这个层是可滚动的，并且位于背景层之上 */}
             <div className="relative z-0 w-full h-screen overflow-y-auto flex flex-col items-center pt-12 sm:pt-16 md:pt-24">
                 <div className="container mx-auto px-4 md:px-6 text-center">
                     <motion.div
