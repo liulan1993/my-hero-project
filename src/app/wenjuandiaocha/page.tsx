@@ -1,23 +1,21 @@
 "use client"; // 必须添加此指令，因为页面包含客户端交互（useState, onClick等）
 
-import React, { useState, useRef } from 'react'; // 增加了 useRef
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-// --- 新增的3D动画库导入 ---
+// --- 3D动画库导入 ---
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 // -- 工具函数 (来自 utils.ts) --
-// 功能: 合并 Tailwind CSS 类名，处理样式冲突
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 // -- Button 组件 (来自 button.tsx) --
-// 功能: 定义可复用的按钮样式和变体
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
@@ -65,9 +63,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 
-// --- 新的背景动画组件 (来自 zhiyoudonghua.tsx) ---
+// --- 背景动画组件 (来自 zhiyoudonghua.tsx) ---
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
-    // 创建一个带圆角的矩形形状
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
     const radius = 1;
@@ -77,7 +74,6 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
     shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
     shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
 
-    // 定义拉伸设置
     const extrudeSettings = {
         depth: 0.3,
         bevelEnabled: true,
@@ -87,9 +83,8 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
         curveSegments: 20
     };
 
-    // 基于形状和设置创建几何体
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center(); // 将几何体居中
+    geometry.center();
 
     return (
         <mesh
@@ -97,7 +92,6 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
             position={position}
             rotation={rotation}
         >
-            {/* 定义物理材质，使其具有金属感和反射效果 */}
             <meshPhysicalMaterial 
                 color="#232323"
                 metalness={1}
@@ -126,20 +120,16 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
     );
 };
 
-// 动态盒子组件，包含一组旋转的Box
 const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null!);
 
-    // useFrame钩子在每一帧都会调用，用于更新动画
     useFrame((state, delta) => {
         if (groupRef.current) {
-            // 使整组盒子缓慢旋转
             groupRef.current.rotation.x += delta * 0.05;
             groupRef.current.rotation.y += delta * 0.05;
         }
     });
 
-    // 创建一组盒子用于渲染
     const boxes = Array.from({ length: 50 }, (_, index) => ({
         position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
         rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number],
@@ -159,7 +149,6 @@ const AnimatedBoxes = () => {
     );
 };
 
-// 3D场景组件
 const BackgroundScene = () => {
     return (
         <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
@@ -169,10 +158,9 @@ const BackgroundScene = () => {
         </Canvas>
     );
 };
-// --- 新背景动画组件结束 ---
+// --- 背景动画组件结束 ---
 
 
-// **修复**: 为问卷题目和表单数据定义清晰的 TypeScript 类型
 interface Question {
   id: string;
   text: string;
@@ -187,6 +175,7 @@ interface Question {
   };
 }
 
+// !! 语法修正处 !!
 type FormData = {
   [key: string]: string | string[];
 };
@@ -228,12 +217,10 @@ const surveyQuestions: Question[] = [
 
 
 // -- 问卷表单组件 --
-// 功能: 渲染整个问卷，并处理用户输入和提交逻辑
 function SurveyForm() {
     const [formData, setFormData] = useState<FormData>({});
     const [status, setStatus] = useState('idle'); // idle, submitting, success, error
 
-    // **最终修复**: 允许 handleChange 接收字符串或字符串数组，以处理所有类型的输入
     const handleChange = (qId: string, value: string | string[]) => {
         setFormData(prev => ({ ...prev, [qId]: value }));
     };
@@ -243,7 +230,6 @@ function SurveyForm() {
         const newOptions = isChecked 
             ? [...currentOptions, option]
             : currentOptions.filter((o: string) => o !== option);
-        // **最终修复**: 直接调用更新后的 handleChange，不再需要 `as any`
         handleChange(qId, newOptions);
     };
 
@@ -280,10 +266,15 @@ function SurveyForm() {
           return null;
       }
       
-      const questionCard = "bg-white/80 backdrop-blur-sm p-4 sm:p-6 rounded-lg shadow-md mb-6 border border-slate-200/50 text-left";
-      const questionText = "text-md sm:text-lg font-semibold text-slate-800 mb-4";
-      const descriptionText = "text-sm text-slate-600 mb-4";
-      const noteText = "text-xs text-slate-500 ml-2";
+      // !! 样式修正：问卷卡片使用深色毛玻璃效果，并调整边框
+      const questionCard = "bg-black/40 backdrop-blur-lg p-4 sm:p-6 rounded-lg shadow-xl mb-6 border border-white/10 text-left";
+      // !! 样式修正：调整文字颜色以适应深色背景
+      const questionText = "text-md sm:text-lg font-semibold text-slate-100 mb-4";
+      const descriptionText = "text-sm text-slate-300 mb-4";
+      const noteText = "text-xs text-slate-400 ml-2";
+      // !! 样式修正：调整输入框样式以适应深色背景
+      const inputStyle = "mt-2 w-full p-2 border border-slate-600 rounded-md bg-slate-900/70 text-white focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400";
+
 
       return (
         <div key={q.id} className={questionCard}>
@@ -291,8 +282,9 @@ function SurveyForm() {
           {q.description && <p className={descriptionText}>{q.description}</p>}
           
           { (q.type === 'radio' || q.type === 'radio_with_text') && q.options?.map((option: string) => (
-            <label key={option} className="flex items-center text-slate-700 mb-2 cursor-pointer p-1">
-              <input type="radio" name={q.id} value={option} onChange={(e) => handleChange(q.id, e.target.value)} className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"/>
+            // !! 样式修正：调整选项文字颜色
+            <label key={option} className="flex items-center text-slate-200 mb-2 cursor-pointer p-1 hover:bg-white/10 rounded-md">
+              <input type="radio" name={q.id} value={option} onChange={(e) => handleChange(q.id, e.target.value)} className="mr-3 h-4 w-4 text-blue-500 focus:ring-blue-400 bg-slate-700 border-slate-600"/>
               {option}
             </label>
           ))}
@@ -301,13 +293,14 @@ function SurveyForm() {
             <textarea
               placeholder={q.textPrompt}
               onChange={(e) => handleChange(`${q.id}_details`, e.target.value)}
-              className="mt-2 w-full p-2 border border-slate-300 rounded-md bg-white/50 focus:ring-2 focus:ring-blue-500 outline-none"
+              className={inputStyle}
             />
           )}
 
           { q.type === 'checkbox' && q.options?.map((option: string) => (
-            <label key={option} className="flex items-center text-slate-700 mb-2 cursor-pointer p-1">
-              <input type="checkbox" onChange={(e) => handleCheckboxChange(q.id, option, e.target.checked)} className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"/>
+            // !! 样式修正：调整选项文字颜色
+            <label key={option} className="flex items-center text-slate-200 mb-2 cursor-pointer p-1 hover:bg-white/10 rounded-md">
+              <input type="checkbox" onChange={(e) => handleCheckboxChange(q.id, option, e.target.checked)} className="mr-3 h-4 w-4 text-blue-500 focus:ring-blue-400 bg-slate-700 border-slate-600 rounded"/>
               {option}
             </label>
           ))}
@@ -316,7 +309,7 @@ function SurveyForm() {
             <input
               type="text"
               onChange={(e) => handleChange(q.id, e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-md bg-white/50 focus:ring-2 focus:ring-blue-500 outline-none"
+              className={inputStyle}
             />
           )}
 
@@ -324,7 +317,7 @@ function SurveyForm() {
             <textarea
               rows={4}
               onChange={(e) => handleChange(q.id, e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-md bg-white/50 focus:ring-2 focus:ring-blue-500 outline-none"
+              className={inputStyle}
             />
           )}
         </div>
@@ -334,12 +327,12 @@ function SurveyForm() {
     return (
         <form onSubmit={handleSubmit} className="w-full max-w-4xl mx-auto mt-8 sm:mt-12 px-2 sm:px-4">
             {surveyQuestions.map(renderQuestion)}
-            <div className="text-center mt-8 pb-16"> {/* 增加底部外边距 */}
+            <div className="text-center mt-8 pb-16">
               <Button type="submit" size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-bold" disabled={status === 'submitting'}>
                 {status === 'submitting' ? '提交中...' : '提交问卷'}
               </Button>
-              {status === 'success' && <p className="text-green-500 mt-4">感谢您的参与，问卷已成功提交！</p>}
-              {status === 'error' && <p className="text-red-500 mt-4">抱歉，提交失败，请稍后重试。</p>}
+              {status === 'success' && <p className="text-green-400 mt-4">感谢您的参与，问卷已成功提交！</p>}
+              {status === 'error' && <p className="text-red-400 mt-4">抱歉，提交失败，请稍后重试。</p>}
             </div>
         </form>
     );
@@ -355,11 +348,15 @@ function ApexSurveyComponent({
     const words = title.split(" ");
 
     return (
-        <div className="relative w-full min-h-screen">
-            {/* 背景层：已替换为新的3D动画 */}
-            <div className="fixed inset-0 -z-10 bg-white">
+        // 主题背景色在此处通过 style 注入
+        <div className="relative w-full min-h-screen" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
+            {/* 背景层：3D动画 */}
+            <div className="absolute inset-0 -z-10">
                 <BackgroundScene />
             </div>
+            {/* 增加一层毛玻璃覆盖，使背景不过于抢眼 */}
+            <div className="absolute inset-0 -z-[5] backdrop-blur-sm"></div>
+
 
             {/* 内容层：可滚动 */}
             <div className="relative z-0 w-full h-screen overflow-y-auto flex flex-col items-center pt-12 sm:pt-16 md:pt-24">
@@ -384,7 +381,8 @@ function ApexSurveyComponent({
                                                 stiffness: 150,
                                                 damping: 25,
                                             }}
-                                            className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neutral-900 to-neutral-700/80"
+                                            // !! 样式修正：调整标题文字渐变色以适应深色背景
+                                            className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neutral-200 to-neutral-400"
                                         >
                                             {letter}
                                         </motion.span>
@@ -402,7 +400,6 @@ function ApexSurveyComponent({
 }
 
 // -- 主应用组件 (默认导出) --
-// 功能: 作为页面的根组件，Next.js 会渲染这个组件
 export default function HomePage() {
   return <ApexSurveyComponent title="Apex 问卷调查" />;
 }
