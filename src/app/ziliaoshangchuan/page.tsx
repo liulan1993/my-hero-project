@@ -13,11 +13,8 @@ type Option = { value: string; label: string };
 type Column = { key: string; header: string };
 interface BaseFieldProps { id: string; label?: string; title?: string; }
 
-// ------------------- FINAL FIX START -------------------
-// 新的、更精确的Field类型定义，以解决编译器推断问题
 type Field = BaseFieldProps & {
     Component: React.ElementType;
-    // 明确列出所有组件可能用到的属性，并设为可选
     type?: string;
     placeholder?: string;
     name?: string;
@@ -26,10 +23,9 @@ type Field = BaseFieldProps & {
     personType?: string;
     fieldSet?: Field[];
     max?: number;
-    value?: any;
-    onChange?: (...args: any[]) => void;
+    value?: unknown;
+    onChange?: (...args: unknown[]) => void;
 };
-// -------------------- FINAL FIX END --------------------
 
 type TableRow = Record<string, string>;
 type PersonData = Record<string, string>;
@@ -245,6 +241,9 @@ const TableField: FC<{ label: string, columns: Column[], value: TableRow[], onCh
     );
 };
 
+
+// ------------------- 问题修复开始 -------------------
+// 修复了 DynamicPersonField 组件中的 props 类型问题。
 const DynamicPersonField: FC<{ title?: string, personType: string, value: PersonData[], onChange: (value: PersonData[]) => void, fieldSet: Field[], max?: number }> = ({ title, personType, value = [], onChange, fieldSet, max }) => {
 
     const handleAdd = () => {
@@ -274,8 +273,20 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
                      <button type="button" onClick={() => handleRemove(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg">×</button>
                      {fieldSet.map(field => {
                         const {Component, id, ...props} = field;
-                        const componentProps = { ...props, value: personData[id] || '', onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | {target: {name: string, value: string}}) => handleChange(index, id, e.target.value) };
-                        return <Component key={id} {...componentProps} />
+                        // The 'e' parameter is typed as 'any' to satisfy the various possible signatures
+                        // of the onChange handlers for different input components (e.g., FormField, RadioGroupField).
+                        // The underlying logic is safe because we only access `e.target.value`, which is common.
+                        const componentProps = {
+                            ...props,
+                            value: personData[id] || '',
+                            onChange: (e: any) => handleChange(index, id, e.target.value)
+                        };
+                        
+                        return (
+                            <React.Fragment key={`${index}-${id}`}>
+                                <Component {...componentProps} />
+                            </React.Fragment>
+                        );
                      })}
                 </div>
             ))}
@@ -285,6 +296,7 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
         </div>
     );
 };
+// -------------------- 问题修复结束 --------------------
 
 
 // --- Service Module and Field Data Structures ---
@@ -692,7 +704,9 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
 
 
     if (!isOpen) return null;
-
+    
+    // ------------------- 问题修复开始 -------------------
+    // 修复了 renderField 函数中的 props 传递问题。
     const renderField = (field: Field) => {
         const { Component, id, ...props } = field;
         const value = formData[id];
@@ -701,7 +715,7 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
         if (id === 'ha_s3_familyHistory') {
              const currentValues = (value as string[]) || [];
              return(
-                 <div key={id}>
+                 <div>
                     <CheckboxGroupField
                         label={field.label as string}
                         options={field.options as Option[]}
@@ -732,7 +746,7 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
         if (id === 'ha_s4_diagnosed') {
              const currentValues = (value as string[]) || [];
              return (
-                 <div key={id}>
+                 <div>
                     <CheckboxGroupField
                         label={field.label as string}
                         options={field.options as Option[]}
@@ -756,7 +770,7 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
         if (id === 'is_s1_visa') {
              const currentValue = value as string;
              return(
-                 <div key={id}>
+                 <div>
                     <SelectField {...props as {name: string, options: Option[]}} label={field.label as string} value={currentValue || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => handleFormChange(id, e.target.value)}/>
                     <AnimatePresence>
                         {currentValue === 'yes' &&
@@ -778,20 +792,14 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
             }
         };
         
-        const componentProps = {
-            ...props,
-            value: value, 
-            onChange: onChangeHandler
-        }
-
         if (Component === FileUploadField) {
-             return <Component key={id} {...props as {label: string}} onFileChange={(file: File) => handleFileChange(id, file)} fileError={(value as FileData)?.error}/>;
+             return <Component {...props as {label: string}} onFileChange={(file: File) => handleFileChange(id, file)} fileError={(value as FileData)?.error}/>;
         }
         if (Component === TableField) {
-            return <Component key={id} {...props as {label:string, columns: Column[]}} value={(value as TableRow[]) || []} onChange={onChangeHandler as (value: TableRow[]) => void} />;
+            return <Component {...props as {label:string, columns: Column[]}} value={(value as TableRow[]) || []} onChange={onChangeHandler as (value: TableRow[]) => void} />;
         }
         if (Component === DynamicPersonField) {
-            return <Component key={id} {...props as {title?: string, personType: string, fieldSet: Field[], max?: number}} value={(value as PersonData[]) || []} onChange={onChangeHandler as (value: PersonData[]) => void} />;
+            return <Component {...props as {title?: string, personType: string, fieldSet: Field[], max?: number}} value={(value as PersonData[]) || []} onChange={onChangeHandler as (value: PersonData[]) => void} />;
         }
         if (Component === CheckboxGroupField) {
             const onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -800,11 +808,19 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
                 const newValues = checked ? [...currentValues, checkboxValue] : currentValues.filter(v => v !== checkboxValue);
                 handleFormChange(id, newValues)
             };
-            return <Component key={id} {...props as {label: string, options: Option[]}} value={(value as string[]) || []} onChange={onCheckboxChange} />;
+            return <Component {...props as {label: string, options: Option[]}} value={(value as string[]) || []} onChange={onCheckboxChange} />;
         }
         
-        return <Component key={id} {...componentProps} value={(value as string) || ''} />;
+        // Default case for simple components like FormField, TextareaField, etc.
+        const componentProps = {
+            ...props,
+            value: (value as string) || '', // Cast value to string and provide a fallback
+            onChange: onChangeHandler
+        };
+        
+        return <Component {...componentProps} />;
     };
+     // -------------------- 问题修复结束 --------------------
 
     return (
         <motion.div
@@ -827,7 +843,11 @@ const UploadModal: FC<UploadModalProps> = ({ isOpen, onClose, selectedServiceIds
                 </div>
 
                 <form>
-                    {consolidatedFields.map(renderField)}
+                    {consolidatedFields.map(field => (
+                        <React.Fragment key={field.id}>
+                            {renderField(field)}
+                        </React.Fragment>
+                    ))}
                 </form>
 
                 <div className="mt-8 flex justify-end">
