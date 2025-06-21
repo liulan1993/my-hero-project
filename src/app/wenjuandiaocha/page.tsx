@@ -92,7 +92,7 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
             position={position}
             rotation={rotation}
         >
-            <meshPhysicalMaterial 
+            <meshPhysicalMaterial
                 color="#232323"
                 metalness={1}
                 roughness={0.3}
@@ -175,7 +175,6 @@ interface Question {
   };
 }
 
-// !! 语法修正处 !!
 type FormData = {
   [key: string]: string | string[];
 };
@@ -227,7 +226,7 @@ function SurveyForm() {
 
     const handleCheckboxChange = (qId: string, option: string, isChecked: boolean) => {
         const currentOptions = (formData[qId] as string[]) || [];
-        const newOptions = isChecked 
+        const newOptions = isChecked
             ? [...currentOptions, option]
             : currentOptions.filter((o: string) => o !== option);
         handleChange(qId, newOptions);
@@ -260,29 +259,24 @@ function SurveyForm() {
             setStatus('error');
         }
     };
-    
+
     const renderQuestion = (q: Question) => {
       if (q.dependsOn && formData[q.dependsOn.qId] !== q.dependsOn.value) {
           return null;
       }
-      
-      // !! 样式修正：问卷卡片使用深色毛玻璃效果，并调整边框
+
       const questionCard = "bg-black/40 backdrop-blur-lg p-4 sm:p-6 rounded-lg shadow-xl mb-6 border border-white/10 text-left";
-      // !! 样式修正：调整文字颜色以适应深色背景
       const questionText = "text-md sm:text-lg font-semibold text-slate-100 mb-4";
       const descriptionText = "text-sm text-slate-300 mb-4";
       const noteText = "text-xs text-slate-400 ml-2";
-      // !! 样式修正：调整输入框样式以适应深色背景
       const inputStyle = "mt-2 w-full p-2 border border-slate-600 rounded-md bg-slate-900/70 text-white focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400";
-
 
       return (
         <div key={q.id} className={questionCard}>
           <p className={questionText}>{q.text} {q.note && <span className={noteText}>({q.note})</span>}</p>
           {q.description && <p className={descriptionText}>{q.description}</p>}
-          
+
           { (q.type === 'radio' || q.type === 'radio_with_text') && q.options?.map((option: string) => (
-            // !! 样式修正：调整选项文字颜色
             <label key={option} className="flex items-center text-slate-200 mb-2 cursor-pointer p-1 hover:bg-white/10 rounded-md">
               <input type="radio" name={q.id} value={option} onChange={(e) => handleChange(q.id, e.target.value)} className="mr-3 h-4 w-4 text-blue-500 focus:ring-blue-400 bg-slate-700 border-slate-600"/>
               {option}
@@ -298,13 +292,12 @@ function SurveyForm() {
           )}
 
           { q.type === 'checkbox' && q.options?.map((option: string) => (
-            // !! 样式修正：调整选项文字颜色
             <label key={option} className="flex items-center text-slate-200 mb-2 cursor-pointer p-1 hover:bg-white/10 rounded-md">
               <input type="checkbox" onChange={(e) => handleCheckboxChange(q.id, option, e.target.checked)} className="mr-3 h-4 w-4 text-blue-500 focus:ring-blue-400 bg-slate-700 border-slate-600 rounded"/>
               {option}
             </label>
           ))}
-          
+
           { q.type === 'text' && (
             <input
               type="text"
@@ -348,17 +341,23 @@ function ApexSurveyComponent({
     const words = title.split(" ");
 
     return (
-        // 主题背景色在此处通过 style 注入
-        <div className="relative w-full min-h-screen" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
-            {/* 背景层：3D动画 */}
-            <div className="absolute inset-0 -z-10">
+        // !! 结构修正：将背景层和内容层作为兄弟节点，通过z-index控制层级
+        <div className="relative w-full min-h-screen bg-black">
+            {/* 背景层 1: 渐变颜色 (最底层) */}
+            <div
+                className="absolute inset-0 -z-30"
+                style={{ background: 'linear-gradient(to bottom right, #000, #1A2428)' }}
+            ></div>
+
+            {/* 背景层 2: 3D动画 (中间层) */}
+            <div className="absolute inset-0 -z-20">
                 <BackgroundScene />
             </div>
-            {/* 增加一层毛玻璃覆盖，使背景不过于抢眼 */}
-            <div className="absolute inset-0 -z-[5] backdrop-blur-sm"></div>
 
+            {/* 背景层 3: 毛玻璃模糊覆盖 (可选, 为了视觉效果保留) */}
+            <div className="absolute inset-0 -z-10 backdrop-blur-sm"></div>
 
-            {/* 内容层：可滚动 */}
+            {/* 内容层 (最顶层) */}
             <div className="relative z-0 w-full h-screen overflow-y-auto flex flex-col items-center pt-12 sm:pt-16 md:pt-24">
                 <div className="container mx-auto px-4 md:px-6 text-center">
                     <motion.div
@@ -381,7 +380,6 @@ function ApexSurveyComponent({
                                                 stiffness: 150,
                                                 damping: 25,
                                             }}
-                                            // !! 样式修正：调整标题文字渐变色以适应深色背景
                                             className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neutral-200 to-neutral-400"
                                         >
                                             {letter}
@@ -391,7 +389,7 @@ function ApexSurveyComponent({
                             ))}
                         </h1>
                     </motion.div>
-                    
+
                     <SurveyForm />
                 </div>
             </div>
