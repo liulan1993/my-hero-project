@@ -279,6 +279,7 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
                         const componentProps = {
                             ...props,
                             value: personData[id] || '',
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             onChange: (e: any) => handleChange(index, id, e.target.value)
                         };
                         
