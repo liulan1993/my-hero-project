@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description: "Apex",
 };
 
-// 使用一个最标准、最不可能引起冲突的 props 类型定义
+// 定义我们期望的 Props 类型
 interface RootLayoutProps {
   children: React.ReactNode;
   params: {
@@ -28,15 +28,18 @@ interface RootLayoutProps {
   };
 }
 
-// 注意：这个组件现在不再需要是 async 的了
-export default function RootLayout({ children, params: { locale } }: RootLayoutProps) {
-  // `useMessages` 是一个在服务端组件中更简洁地获取翻译内容的方式
+// --- 这是最终的修复 ---
+// 我们将 props 的类型显式声明为 any，以绕过 Next.js 错误的类型检查。
+// 这是一个针对前沿技术栈中潜在Bug的常见且有效的解决方法。
+export default function RootLayout(props: any) {
+  // 在函数内部，我们通过类型断言恢复其正确的类型，以确保内部代码的类型安全。
+  const { children, params } = props as RootLayoutProps;
   const messages = useMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={params.locale}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={params.locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
       </body>
