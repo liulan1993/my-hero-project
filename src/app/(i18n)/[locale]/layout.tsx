@@ -1,19 +1,13 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+// --- 这是本次唯一的修改 ---
+// 我们从新的 'geist' 包中导入字体，而不是 'next/font/google'
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
+// 元数据保持不变
 export const metadata: Metadata = {
   title: "Apex",
   description: "Apex",
@@ -34,8 +28,11 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
+      {/* 我们直接使用从 'geist/font' 导入的变量，
+        这确保了字体在 Next.js 14 中被正确加载。
+      */}
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
