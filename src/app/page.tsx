@@ -8,8 +8,7 @@ import React, {
     useState, 
     useMemo,
     useCallback,
-    forwardRef,
-    memo // 新增: 导入 memo
+    memo
 } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
