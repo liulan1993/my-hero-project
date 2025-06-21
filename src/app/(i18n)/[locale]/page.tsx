@@ -22,7 +22,7 @@ import {
 } from "framer-motion";
 
 // 修复：导入真实的 Server Actions
-import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
+import { saveContactToRedis, saveFooterEmailToRedis } from '../../../actions';
 
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
