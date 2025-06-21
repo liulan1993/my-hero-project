@@ -22,15 +22,15 @@ export const metadata: Metadata = {
 };
 
 // --- 这是本次唯一的修改 ---
-// 我们将 props 类型定义直接写在函数签名中，并用 Readonly 包裹，
-// 这能更好地满足 Next.js 的类型约束。
+// 我们移除了 Readonly<> 包装器，使用一个更简洁直接的类型定义，
+// 以解决之前遇到的类型约束问题。
 export default async function RootLayout({
   children,
   params: { locale },
-}: Readonly<{
+}: {
   children: React.ReactNode;
   params: { locale: string };
-}>) {
+}) {
   const messages = await getMessages();
 
   return (
