@@ -7,7 +7,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import Link from 'next/link'; // [修复] 引入 Link 组件
+import Link from 'next/link';
 
 // --- 图标组件 (无修改) ---
 const PaperclipIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -144,7 +144,7 @@ const Scene = () => {
 };
 
 
-// --- 聊天窗口组件 (已修改) ---
+// --- 聊天窗口组件 (无修改) ---
 interface Message {
     role: 'user' | 'assistant' | 'system';
     content: string;
@@ -229,7 +229,6 @@ function ChatWindow() {
         }
     };
 
-    // [修复] 修改此函数以处理流式响应，解决504超时问题
     const handleSendMessage = async () => {
         if ((!input.trim() && !selectedFile) || isLoading) return;
         setIsLoading(true);
@@ -280,21 +279,17 @@ function ChatWindow() {
                 throw new Error("响应体为空，无法处理流。");
             }
             
-            // 1. 添加一个空的助手消息用于接收流内容
             setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
-            // 2. 创建读取器和解码器
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             
-            // 3. 循环读取流数据
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) {
-                    break; // 流结束
+                    break;
                 }
                 const chunk = decoder.decode(value, { stream: true });
-                // 4. 将新的数据块追加到最后一条消息中
                 setMessages(prev => {
                     const newMessages = [...prev];
                     const lastMessageIndex = newMessages.length - 1;
@@ -366,7 +361,6 @@ function ChatWindow() {
                     <div className="flex items-center flex-wrap gap-x-4 gap-y-2 mb-2">
                         <div className="flex items-center space-x-2">
                             <label htmlFor="model-select" className="text-sm font-medium text-black">模型:</label>
-                             {/* [修复] 添加 text-black 类来改变字体颜色 */}
                             <select id="model-select" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="p-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white/80 text-black">
                                 <option value="deepseek-chat">DeepSeek-V3</option>
                                 <option value="deepseek-reasoner">DeepSeek-R1</option>
@@ -402,8 +396,8 @@ function ChatWindow() {
                             <PaperclipIcon className="w-5 h-5"/>
                         </button>
                         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                        <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={handleKeyPress} placeholder="在此输入您的问题..." rows={1} className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white/80" disabled={isLoading}/>
-                        {/* [修复] 添加返回主页的按钮 */}
+                        {/* [修复] 在下方 className 中添加 text-black */}
+                        <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={handleKeyPress} placeholder="在此输入您的问题..." rows={1} className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white/80 text-black" disabled={isLoading}/>
                         <Link href="/" className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex-shrink-0">
                             主页
                         </Link>
