@@ -18,12 +18,9 @@
         "name": "next"
       }
     ],
-    // --- 修改从这里开始 ---
-    "baseUrl": ".", // 添加这一行，指定项目的根目录
     "paths": {
-      "@/*": ["./src/*"] // 您已有的这行保持不变
+      "@/*": ["./src/*"]
     }
-    // --- 修改结束 ---
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
