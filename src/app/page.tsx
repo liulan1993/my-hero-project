@@ -380,8 +380,8 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                         欢迎您！
                     </Button>
                     <div className="border-r border-slate-700 hidden md:inline"></div>
-                    <Button variant="outline" onClick={onLoginClick} className="text-base md:text-lg">登录</Button>
-                    <Button variant='default' className="text-base md:text-lg">我的资料</Button>
+                    <Button variant="outline" onClick={onLoginClick} className="text-base md:text-lg">提交</Button>
+                    <Button variant='default' className="text-base md:text-lg">敬请期待</Button>
                 </div>
                 <div className="flex w-12 shrink lg:hidden items-end justify-end">
                     <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
