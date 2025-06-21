@@ -305,7 +305,7 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
         {
             title: "AI赋能", description: "AI驱动的智能，提升业务效率。",
             items: [
-                { title: "实时汇率", href: "#" },
+                { title: "实时汇率", href: "https://my-hero-project.vercel.app/shishihuilv" },
                 { title: "个税计算器", href: "https://my-hero-project.vercel.app/geshuijisuanqi" },
                 { title: "专属AI", href: "https://my-hero-project.vercel.app/zhuanshuAI" },
                 { title: "敬请期待", href: "#" },
