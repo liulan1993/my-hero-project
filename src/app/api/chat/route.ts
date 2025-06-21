@@ -1,9 +1,6 @@
 import { NextRequest } from 'next/server';
-// [修复] 将导入语句分为两行，以匹配 ai 库 v3 版本的模块结构
-import { StreamingTextResponse } from 'ai';
-import { OpenAIStream } from 'ai/openai';
 
-// 定义从前端接收的消息和选项的类型
+// 定义从前端接收的消息和选项的类型 (无修改)
 interface Message {
     role: 'user' | 'assistant' | 'system';
     content: string;
@@ -17,13 +14,12 @@ interface RequestOptions {
     fileContent: string;
 }
 
-// Tavily API 搜索函数
+// Tavily API 搜索函数 (无修改)
 async function tavilySearch(query: string): Promise<string> {
     const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
     if (!TAVILY_API_KEY) {
         throw new Error('Tavily API key is not configured on the server.');
     }
-    
     const response = await fetch('https://api.tavily.com/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,6 +38,45 @@ async function tavilySearch(query: string): Promise<string> {
     const data = await response.json();
     return data.results.map((r: { content: string }) => r.content).join('\n\n');
 }
+
+// [最终修复] 手动实现流式响应解析，不再依赖 'ai' 库的辅助函数
+function createDeepSeekStream(apiResponse: Response): ReadableStream {
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    return new ReadableStream({
+        async start(controller) {
+            const reader = apiResponse.body!.getReader();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    controller.close();
+                    break;
+                }
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const json = JSON.parse(line.substring(6));
+                            if (json.choices && json.choices[0].delta.content) {
+                                const content = json.choices[0].delta.content;
+                                controller.enqueue(encoder.encode(content));
+                            }
+                        } catch (e) {
+                            console.error('Error parsing stream JSON', e);
+                        }
+                    }
+                }
+            }
+        },
+    });
+}
+
 
 // 主 API 路由处理函数
 export async function POST(req: NextRequest) {
@@ -112,8 +147,13 @@ export async function POST(req: NextRequest) {
             return new Response(errorText, { status: response.status });
         }
         
-        const stream = OpenAIStream(response);
-        return new StreamingTextResponse(stream);
+        // [最终修复] 使用我们自己创建的解析器来处理流
+        const stream = createDeepSeekStream(response);
+        
+        // 直接返回一个标准的、可流式读取的 Response
+        return new Response(stream, {
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
