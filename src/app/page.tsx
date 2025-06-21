@@ -296,9 +296,9 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
         {
             title: "客户支持", description: "拥抱数字化转型，提升客户体验。",
             items: [
-                { title: "问卷调查", href: "#" },
-                { title: "资料上传", href: "#" },
-                { title: "客户反馈", href: "#" },
+                { title: "问卷调查", href: "https://my-hero-project.vercel.app/wenjuandiaocha" },
+                { title: "资料上传", href: "https://my-hero-project.vercel.app/ziliaoshangchuan" },
+                { title: "客户反馈", href: "https://my-hero-project.vercel.app/kehufankui" },
                 { title: "敬请期待", href: "#" },
             ],
         },
