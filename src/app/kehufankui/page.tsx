@@ -4,8 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import Link from 'next/link';
 
-// --- 图标组件 (保持不变) ---
+// --- 图标组件 ---
 const UploadIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -50,8 +51,10 @@ const FileImageIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-// --- 新增：从 zhiyoudonghua.tsx 移植的 3D 场景 ---
+
+// --- 3D 场景组件 ---
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
+    // 创建一个带圆角的矩形形状
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
     const radius = 1;
@@ -61,6 +64,7 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
     shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
     shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
 
+    // 定义拉伸设置
     const extrudeSettings = {
         depth: 0.3,
         bevelEnabled: true,
@@ -70,8 +74,9 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
         curveSegments: 20
     };
 
+    // 基于形状和设置创建几何体
     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center();
+    geometry.center(); // 将几何体居中
 
     return (
         <mesh
@@ -138,7 +143,6 @@ const AnimatedBoxes = () => {
 
 const Scene = () => {
     return (
-        // 使用 z-[-1] 确保它在最底层
         <div className="absolute inset-0 w-full h-full z-[-1]">
             <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
                 <ambientLight intensity={15} />
@@ -150,7 +154,7 @@ const Scene = () => {
 };
 
 
-// --- Markdown 实时预览组件 (已为暗黑主题适配) ---
+// --- Markdown 预览组件 ---
 function MarkdownPreview({ content, imagePreviewUrl }: { content: string, imagePreviewUrl: string | null }) {
     const [html, setHtml] = useState('');
 
@@ -173,9 +177,7 @@ function MarkdownPreview({ content, imagePreviewUrl }: { content: string, imageP
     }, [content]);
     
     return (
-        // 已修改: text-slate-800 -> text-slate-200
         <div className="p-4 h-full text-left text-slate-200">
-            {/* 已修改: 添加 prose-invert 以适应暗黑模式 */}
             <div className="prose prose-lg prose-invert max-w-none">
                  {imagePreviewUrl && (
                     <img src={imagePreviewUrl} alt="图片预览" className="max-w-full rounded-lg mb-4 shadow-md" />
@@ -187,7 +189,7 @@ function MarkdownPreview({ content, imagePreviewUrl }: { content: string, imageP
 }
 
 
-// --- 投稿表单组件 (已为暗黑主题适配) ---
+// --- 投稿表单组件 ---
 function SubmissionForm() {
     const [content, setContent] = useState('');
     const [file, setFile] = useState<File | null>(null);
@@ -321,17 +323,14 @@ function SubmissionForm() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
         >
-            {/* 已修改: 适配暗黑主题的文本颜色 */}
             <div className="text-center mb-6">
                  <h2 className="text-2xl font-semibold text-slate-100">致信Apex</h2>
                  <p className="text-md text-slate-400">分享您的见解、建议或稿件</p>
             </div>
-            {/* 已修改: 适配暗黑主题的背景、边框 */}
             <div className="bg-black/30 backdrop-blur-md rounded-2xl shadow-lg border border-gray-700/50 overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-2 min-h-[500px]">
                     {/* 编辑区 */}
                     <div className="flex flex-col p-4">
-                        {/* 已修改: 适配暗黑主题的文本颜色 */}
                         <div className="flex items-center justify-between gap-2 mb-2 text-slate-300">
                            <div className="flex items-center gap-2">
                                 <EditIcon className="w-5 h-5" />
@@ -341,7 +340,6 @@ function SubmissionForm() {
                                {content.length} / {charLimit}
                            </div>
                         </div>
-                        {/* 已修改: 适配暗黑主题的文本域样式 */}
                         <textarea
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
@@ -350,7 +348,6 @@ function SubmissionForm() {
                             className="w-full flex-grow p-3 bg-gray-900/30 border-gray-700 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-100 placeholder:text-slate-500"
                         />
                         {file ? (
-                            // 已修改: 适配暗黑主题的文件显示样式
                              <div className="mt-3 flex items-center justify-between gap-2 w-full bg-gray-800/50 text-slate-300 font-semibold py-2 px-4 rounded-lg">
                                 {getFileIcon(file.type)}
                                 <span className="truncate flex-1 text-left ml-2">{file.name}</span>
@@ -359,7 +356,6 @@ function SubmissionForm() {
                                 </button>
                             </div>
                         ) : (
-                            // 已修改: 适配暗黑主题的上传按钮样式
                             <button 
                                 type="button" 
                                 onClick={() => fileInputRef.current?.click()}
@@ -378,7 +374,6 @@ function SubmissionForm() {
                         />
                     </div>
                     {/* 预览区 */}
-                    {/* 已修改: 适配暗黑主题的边框和文本颜色 */}
                     <div className="bg-black/10 border-l border-gray-700/50">
                          <div className="flex items-center gap-2 p-4 border-b border-gray-700/50 text-slate-300">
                            <EyeIcon className="w-5 h-5" />
@@ -387,10 +382,8 @@ function SubmissionForm() {
                         <MarkdownPreview content={content} imagePreviewUrl={imagePreviewUrl} />
                     </div>
                 </div>
-                {/* 已修改: 适配暗黑主题的边框和提交按钮 */}
                 <div className="p-4 border-t border-gray-700/50 flex flex-col sm:flex-row items-center justify-between gap-4">
                      {status !== 'idle' && (
-                        // 已修改: 适配暗黑主题的提示信息文本颜色
                         <p className={`text-sm ${
                             status === 'success' ? 'text-green-500' : 
                             status === 'error' ? 'text-red-500' : 'text-slate-300'
@@ -399,14 +392,21 @@ function SubmissionForm() {
                         </p>
                     )}
                     <div className="flex-grow"></div>
-                    {/* 已修改: 适配暗黑主题的按钮样式，使其更突出 */}
-                    <button 
-                        onClick={handleSubmit}
-                        disabled={status === 'loading'}
-                        className="w-full sm:w-auto bg-slate-100 text-slate-900 font-bold py-2 px-6 rounded-lg hover:bg-slate-300 transition-colors disabled:bg-slate-600 disabled:text-slate-400"
-                    >
-                        {status === 'loading' ? '提交中...' : '提交'}
-                    </button>
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <Link
+                            href="/"
+                            className="w-full sm:w-auto text-center border border-slate-700 text-slate-300 font-semibold py-2 px-6 rounded-lg hover:bg-slate-800/50 transition-colors"
+                        >
+                            返回主页
+                        </Link>
+                        <button 
+                            onClick={handleSubmit}
+                            disabled={status === 'loading'}
+                            className="w-full sm:w-auto bg-slate-100 text-slate-900 font-bold py-2 px-6 rounded-lg hover:bg-slate-300 transition-colors disabled:bg-slate-600 disabled:text-slate-400"
+                        >
+                            {status === 'loading' ? '提交中...' : '提交'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </motion.div>
@@ -414,19 +414,16 @@ function SubmissionForm() {
 }
 
 
-// --- Apex主页组件 (已修改，替换背景) ---
+// --- Apex主页组件 ---
 function ApexHero({ title = "Apex" }: { title?: string }) {
     const words = title.split(" ");
 
     return (
-        // 已修改: 移除 bg-white，添加新的暗黑渐变背景
         <div 
             className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-8 sm:py-12"
             style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}
         >
-            {/* 已修改: 移除旧的 FloatingPaths, 添加新的 Scene */}
             <Scene />
-
             <div className="relative z-10 container mx-auto px-4 md:px-6 text-center">
                 <motion.div
                     initial={{ opacity: 0 }}
@@ -451,7 +448,6 @@ function ApexHero({ title = "Apex" }: { title?: string }) {
                                             stiffness: 150,
                                             damping: 25,
                                         }}
-                                        // 已修改: 适配暗黑主题的文字渐变色
                                         className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-500/80"
                                     >
                                         {letter}
@@ -460,7 +456,6 @@ function ApexHero({ title = "Apex" }: { title?: string }) {
                             </span>
                         ))}
                     </h1>
-                    {/* 投稿表单组件现在会自动适应暗黑主题 */}
                     <SubmissionForm />
                 </motion.div>
             </div>
@@ -468,7 +463,7 @@ function ApexHero({ title = "Apex" }: { title?: string }) {
     );
 }
 
-// --- 页面主入口 (保持不变) ---
+// --- 页面主入口 ---
 export default function Page() {
     return <ApexHero title="Apex" />;
 }
