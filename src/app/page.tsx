@@ -1817,7 +1817,7 @@ const TextRevealCard = ({
         >
           <p
             style={{ textShadow: "4px 4px 15px rgba(0,0,0,0.5)" }}
-            className="text-base sm:text-[3rem] py-10 font-bold text-white bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-300"
+            className="py-10 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px] text-white bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-300"
           >
             {revealText}
           </p>
@@ -1840,7 +1840,7 @@ const TextRevealCard = ({
           transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
           className="overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,white,transparent)] w-full"
         >
-          <p className="text-base sm:text-[3rem] py-10 font-bold bg-clip-text text-transparent bg-[#323238]">
+          <p className="py-10 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px] bg-clip-text text-transparent bg-[#323238]">
             {text}
           </p>
           <MemoizedStars />
@@ -2084,14 +2084,14 @@ export default function HomePage() {
         {/* 替换 TextMarqueeSection 的部分 */}
         <div className="py-12 md:py-20 flex items-center justify-center">
             <TextRevealCard
-                text="你知道生意"
-                revealText="我懂化学"
+                text="这里我们将字体大小从默认的为了和“探索我们的创新"
+                revealText="探索我们的创新，完成网站设计的旅程。"
                 className="w-full max-w-4xl"
             >
-                <TextRevealCardTitle>
+                <TextRevealCardTitle className="text-2xl font-bold">
                 有时候，眼见为实。
                 </TextRevealCardTitle>
-                <TextRevealCardDescription>
+                <TextRevealCardDescription className="text-base md:text-lg">
                 这是一个文本揭示卡片。将鼠标悬停在卡片上以显示隐藏的文本。在移动设备上，请触摸并滑动。
                 </TextRevealCardDescription>
             </TextRevealCard>
