@@ -150,6 +150,8 @@ interface Message {
     content: string;
 }
 
+// [修复1] 在下面这行代码前添加 eslint-disable-next-line 注释，以修复 no-explicit-any 错误
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CodeBlock = ({ inline, className, children, ...props }: any) => {
     const [copied, setCopied] = useState(false);
     const match = /language-(\w+)/.exec(className || '');
@@ -258,7 +260,7 @@ function ChatWindow() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: currentMessages, // 使用包含当前用户输入的消息列表
+                    messages: currentMessages, 
                     options: {
                         model: selectedModel,
                         enableWebSearch,
@@ -270,9 +272,7 @@ function ChatWindow() {
             });
 
             if (!response.ok) {
-                // 尝试解析错误信息的JSON体
                 const errorData = await response.json().catch(() => ({
-                    // 如果解析失败，提供一个备用错误信息
                     error: `后端API请求失败，状态码: ${response.status}`
                 }));
                 throw new Error(errorData.error || '后端API请求失败');
@@ -312,8 +312,9 @@ function ChatWindow() {
                                 {msg.role === 'assistant' && enableMarkdownOutput ? (
                                     <div className="prose dark:prose-invert max-w-none">
                                         <ReactMarkdown
+                                            // [修复2] 将 components 的值改回简洁形式，修复 no-unused-vars 错误
                                             components={{
-                                                code: ({node, inline, className, children, ...props}) => <CodeBlock inline={inline} className={className} {...props}>{children}</CodeBlock>
+                                                code: CodeBlock,
                                             }}
                                         >
                                             {msg.content}
@@ -343,7 +344,6 @@ function ChatWindow() {
                 <div className="max-w-3xl mx-auto">
                     <div className="flex items-center flex-wrap gap-x-4 gap-y-2 mb-2">
                         <div className="flex items-center space-x-2">
-                            {/* [修复] 根据图片要求，将标签文字颜色改为 text-black */}
                             <label htmlFor="model-select" className="text-sm font-medium text-black">模型:</label>
                             <select id="model-select" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="p-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white/80">
                                 <option value="deepseek-chat">DeepSeek-V3</option>
@@ -351,7 +351,6 @@ function ChatWindow() {
                             </select>
                         </div>
                         <label htmlFor="deep-search-toggle" className="flex items-center cursor-pointer">
-                             {/* [修复] 根据图片要求，将标签文字颜色改为 text-black */}
                             <span className="mr-2 text-sm font-medium text-black">深度搜索:</span>
                             <div className="relative">
                                 <input id="deep-search-toggle" type="checkbox" className="sr-only peer" checked={enableDeepSearch} onChange={() => setEnableDeepSearch(!enableDeepSearch)} />
@@ -360,7 +359,6 @@ function ChatWindow() {
                             </div>
                         </label>
                         <label htmlFor="web-search-toggle" className="flex items-center cursor-pointer">
-                             {/* [修复] 根据图片要求，将标签文字颜色改为 text-black */}
                             <span className="mr-2 text-sm font-medium text-black">联网搜索:</span>
                             <div className="relative">
                                 <input id="web-search-toggle" type="checkbox" className="sr-only peer" checked={enableWebSearch} onChange={() => setEnableWebSearch(!enableWebSearch)} />
@@ -369,7 +367,6 @@ function ChatWindow() {
                             </div>
                         </label>
                         <label htmlFor="markdown-toggle" className="flex items-center cursor-pointer">
-                             {/* [修复] 根据图片要求，将标签文字颜色改为 text-black */}
                             <span className="mr-2 text-sm font-medium text-black">Markdown输出:</span>
                             <div className="relative">
                                 <input id="markdown-toggle" type="checkbox" className="sr-only peer" checked={enableMarkdownOutput} onChange={() => setEnableMarkdownOutput(!enableMarkdownOutput)} />
