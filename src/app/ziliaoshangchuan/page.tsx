@@ -43,7 +43,6 @@ function cn(...inputs: (string | undefined | null | boolean | { [key: string]: b
 }
 
 // --- Form Component Definitions (来自原始 page.tsx) ---
-// ... (此处省略所有表单组件定义，保持原样)
 const SectionHeader: FC<{ title: string }> = ({ title }) => (
     <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-6 mt-6 first:mt-0">{title}</h3>
 );
@@ -263,12 +262,10 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
                      <h4 className="font-semibold text-gray-700 mb-4">{personType} {index + 1}</h4>
                      <button type="button" onClick={() => handleRemove(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg">×</button>
                      {fieldSet.map(field => {
-                        // ------------------- NEW FIX IS HERE -------------------
                         const {Component, id, ...props} = field;
                         const componentProps = { ...props, value: personData[id] || '', onChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | {target: {name: string, value: string}}) => handleChange(index, id, e.target.value) };
                         const AnyComponent = Component as any;
                         return <AnyComponent key={id} {...componentProps} />
-                        // -------------------------------------------------------
                      })}
                 </div>
             ))}
@@ -281,7 +278,6 @@ const DynamicPersonField: FC<{ title?: string, personType: string, value: Person
 
 
 // --- Service Module and Field Data Structures (来自原始 page.tsx) ---
-// ... (此处省略所有 services 定义，保持原样)
 const clientAgentFields: Field[] = [
     { id: 'fullName', label: '全名 (包括任何别名)', Component: FormField },
     { id: 'idNumber', label: '身份证/护照号码', Component: FormField },
@@ -545,7 +541,6 @@ const services: Service[] = [
 
 
 // --- Combined Form Modal Component (来自原始 page.tsx) ---
-// ... (此处省略 UploadModal 组件定义，保持原样)
 type UploadModalProps = {
     isOpen: boolean;
     onClose: () => void;
