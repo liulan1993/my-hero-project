@@ -920,14 +920,14 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               {testimonials[active].quote}
             </motion.p>
           </motion.div>
-          {/* 修改：替换为新的按钮组 */}
-          <div className="flex flex-wrap gap-4 pt-12 w-full">
+          {/* 修改：按钮组布局和样式 */}
+          <div className="flex flex-nowrap items-center gap-3 pt-12 w-full">
             {testimonials.map((testimonial, index) => (
               <HalomotButton
                 key={testimonial.name}
                 inscription={testimonial.name}
                 onClick={() => setActive(index)}
-                fixedWidth="140px"
+                padding="0.6rem 1.2rem" // 调整内边距使按钮变小
                 backgroundColor={active === index ? '#4a148c' : '#161616'} // 高亮当前选中的项目
                 hoverTextColor='#fff'
                 gradient='linear-gradient(to right, #603dec, #a123f4)'
@@ -937,7 +937,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               inscription="了解更多" 
               onClick={(e) => onProtectedLinkClick(e, testimonials[active].link || '#')} 
               href={testimonials[active].link || '#'}
-              fixedWidth="140px"
+              padding="0.6rem 1.2rem" // 调整内边距使按钮变小
               backgroundColor='#161616' 
               hoverTextColor='#fff' 
               gradient='linear-gradient(to right, #603dec, #a123f4)'
@@ -1443,10 +1443,11 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
 ));
 MemoizedZap.displayName = 'ZapIcon';
 
+// 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
   { icon: MemoizedCpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
   { icon: MemoizedShieldCheck, title: "安全可靠", description: "先进的保护措施，让您高枕无忧。" },
-  { icon: MemoizedLayers, title: "模块化设计", description: "链接中新两地顶尖医生资源，我们为您提供从行程安排到专家预约、双语陪诊在内的一站式跨境医疗服务。" },
+  { icon: MemoizedLayers, title: "模块化设计", description: "都始于一次深度的战略对话。" }, // 修改文本内容
   { icon: MemoizedZap, title: "闪电响应", description: "对每个命令都能做出即时响应。" },
 ];
 
@@ -2233,7 +2234,8 @@ export default function HomePage() {
                     >
                         <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
                         <h3 className="text-base font-bold text-white">{feature.title}</h3>
-                        <p className="text-neutral-400 text-sm">{feature.description}</p>
+                        {/* 修改：调整字体大小 */}
+                        <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
                     </div>
                     ))}
                 </div>
