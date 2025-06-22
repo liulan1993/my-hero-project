@@ -15,7 +15,7 @@ const articles = [
         id: 1,
         markdownContent: `
 # 我的第一篇文章
-![占位图片](https://placehold.co/600x400/1A2428/FFFFFF?text=文章封面)
+![占位图片](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
 
 这是文章的第一段。在这里，您可以详细阐述您的想法和观点。我们支持完整的 **Markdown** 语法。
 
@@ -45,7 +45,7 @@ console.log("Hello, World!");
         id: 2,
         markdownContent: `
 # 关于技术创新
-![技术图片](https://placehold.co/600x400/2A3438/FFFFFF?text=技术创新)
+![技术图片](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
 
 技术创新是推动社会进步的关键动力。在这篇文章中，我们将探讨最新的技术趋势及其对未来的影响。
 
@@ -63,7 +63,7 @@ console.log("Hello, World!");
         id: 3,
         markdownContent: `
 # 生活随笔
-![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
+![生活图片](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
 
 记录生活中的美好瞬间。
 
@@ -78,7 +78,7 @@ console.log("Hello, World!");
         id: 4,
         markdownContent: `
 # 项目回顾
-![项目图片](https://placehold.co/600x400/4A5458/FFFFFF?text=项目回顾)
+![项目图片](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
 
 这个项目始于一个简单的想法，经过团队的不懈努力，最终得以实现。
 
@@ -94,7 +94,7 @@ console.log("Hello, World!");
         id: 5,
         markdownContent: `
 # 新功能：支持视频播放！
-![视频封面](https://placehold.co/600x400/5A6468/FFFFFF?text=视频封面)
+![视频封面](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
 
 现在，您可以在文章中嵌入视频。我们通过检查链接的后缀（如 .mp4）来自动渲染视频播放器。只需使用标准的图片语法即可！
 
