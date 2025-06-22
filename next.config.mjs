@@ -11,7 +11,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'cdn.apex-elite-service.com',
+        hostname: 'zh.apex-elite-service.com',
       },
       {
         protocol: 'https',
