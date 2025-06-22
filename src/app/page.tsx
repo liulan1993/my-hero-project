@@ -829,6 +829,16 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
 
   return (
     <div className="w-full mx-auto font-[Helvetica] py-20 text-white">
+      {/* [新增] 客户案例标题 */}
+      <div className="mb-12 text-right">
+        <h2 className="mb-4 text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
+          客户案例&Case Studies
+        </h2>
+        <p className="text-neutral-300 ml-auto max-w-lg text-base md:text-lg">
+          我们为各行各业的客户提供卓越的服务，帮助他们实现业务目标并取得成功。
+        </p>
+      </div>
+      
       <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         <div className="w-full relative aspect-[1.37/1]">
           <AnimatePresence mode="sync">
@@ -1391,6 +1401,23 @@ const features = [
 ];
 
 const timelineData = [
+    {
+      title: "教育路径规划",
+      content: (
+        <div>
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
+          <div>
+            <Image 
+              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
+              alt="启动模板" 
+              width={500}
+              height={300}
+              className="rounded-lg object-cover w-full h-auto shadow-xl" 
+            />
+          </div>
+        </div>
+      ),
+    },
     {
       title: "教育路径规划",
       content: (
@@ -2076,10 +2103,10 @@ export default function HomePage() {
       // 如果不是首次访问，直接“进入”主页
       setIsEntered(true);
     } else {
-      // 如果是首次访问，设置标记
-      sessionStorage.setItem('hasVisitedHomePage', 'true');
+      // 如果是首次访问，设置标记，但动画仍然显示
+      // 点击动画后才会标记为“已访问”
     }
-    // 无论如何，客户端检查完成，结束加载状态
+    // 客户端检查完成，结束加载状态
     setIsLoading(false);
   }, []); // 空依赖数组，确保只在组件挂载时运行一次
   
@@ -2103,6 +2130,8 @@ export default function HomePage() {
   };
 
   const handleEnter = () => {
+      // [新增] 点击后，设置访问标记并触发进入动画
+      sessionStorage.setItem('hasVisitedHomePage', 'true');
       setIsEntered(true);
   };
 
