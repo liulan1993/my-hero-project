@@ -906,7 +906,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
                 backgroundColor={active === index ? '#4a148c' : '#161616'} // 高亮当前选中的项目
                 hoverTextColor='#fff'
                 gradient='linear-gradient(to right, #603dec, #a123f4)'
-                fixedWidth="160px" // <-- 添加这一行
+                fixedWidth="120px" // <-- 添加这一行
               />
             ))}
             <HalomotButton 
@@ -917,7 +917,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               backgroundColor='#161616' 
               hoverTextColor='#fff' 
               gradient='linear-gradient(to right, #603dec, #a123f4)'
-              fixedWidth="160px" // <-- 添加这一行
+              fixedWidth="120px" // <-- 添加这一行
             />
           </div>
         </div>
@@ -1206,7 +1206,7 @@ const CtaWithGallerySection = () => {
 
                                     <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
                                         <Image
-                                        src="hhttps://zh.apex-elite-service.com/wangzhantupian/xinjiapo.jpg"
+                                        src="https://zh.apex-elite-service.com/wangzhantupian/xinjiapo.jpg"
                                         alt="Step Visual"
                                         width={200}
                                         height={200}
@@ -1564,9 +1564,9 @@ MemoizedZap.displayName = 'ZapIcon';
 
 // 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
-  { icon: MemoizedCpu, title: "企业服务", description: "全方位企业运营解决方案，涵盖架构、准证、财税及人力" },
-  { icon: MemoizedShieldCheck, title: "健康管理", description: "跨境医疗全程无忧：从中新专家预约到双语陪诊，我们一站搞定" },
-  { icon: MemoizedLayers, title: "溯源式体检", description: "通深度分析健康数据，助您预判风险，实现主动健康管理" }, // 修改文本内容
+  { icon: MemoizedCpu, title: "企业服务", description: "企业全方位解决方案：从架构到人力" },
+  { icon: MemoizedShieldCheck, title: "健康管理", description: "您只管安心就医，其他我们一站搞定" },
+  { icon: MemoizedLayers, title: "溯源式体检", description: "预见健康风险，掌控未来生活" }, // 修改文本内容
   { icon: MemoizedZap, title: "留学教育", description: "精准匹配资源，为孩子定制最优成长路径" },
 ];
 
@@ -1578,7 +1578,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
           <div>
             <Image 
-              src="hhttps://zh.apex-elite-service.com/wangzhantupian/gongsi.jpg" 
+              src="https://zh.apex-elite-service.com/wangzhantupian/gongsi.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1678,13 +1678,13 @@ const infoSectionData1 = {
     ),
     description: (
         <>
-            我们相信，您的健康，是承载事业版图与人生品质的终极资产。
+            我们相信，您的健康，是承载事业版图与人生品质的终极资产
             <br />
-            Apex传承始于“生命管理”的独特基因，我们不提供诊疗；
+            Apex传承始于“生命管理”的独特基因，我们不提供诊疗
             <br />
-            而是作为您最值得信赖的健康战略家与医疗资源导航员，
+            而是作为您最值得信赖的健康战略家与医疗资源导航员
             <br />
-            致力于将您对健康的“未知”与“被动”，转化为“已知”与“主动”。
+            致力于将您对健康的“未知”与“被动”，转化为“已知”与“主动”
         </>
     ),
     primaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/jiankangguanli.jpg',
@@ -1701,13 +1701,13 @@ const infoSectionData2 = {
     ),
     description: (
         <>
-            每年的体检报告，不应只是一份被存档的文件。
+            每年的体检报告，不应只是一份被存档的文件
             <br />
-            我们相信，唯有将历年数据串联起来，才能发现您健康趋势的真正秘密。
+            我们相信，唯将历年数据串联起来，才能发现健康趋势的真正秘密
             <br />
-            Apex独特的溯源式体检服务，致力于为您解读这些“生命数据”，
+            Apex独特有溯源式体检服务，致力于为您解读这些“生命数据”
             <br />
-            将未来的不确定性，转化为尽在掌握的主动权。
+            将未来的不确定性，转化为尽在掌握的主动权
         </>
     ),
     primaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/tijian.jpg',
@@ -1740,7 +1740,7 @@ const faqData = [
 
 const scrollAnimationPages = [
   {
-    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/pexels-mikhail-nilov-7682132.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1750,7 +1750,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/pexels-brandaohh-3959482.jpg',
     leftContent: {
       heading: '安心保障',
       description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
@@ -1758,7 +1758,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/pexels-mart-production-7709301.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1768,7 +1768,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/pexels-pixabay-273886.jpg',
     leftContent: {
       heading: '即刻启程',
       description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
