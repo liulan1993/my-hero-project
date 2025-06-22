@@ -1227,7 +1227,7 @@ const CtaWithGallerySection = () => {
                                         </Button>
                                     ) : (
                                         <DialogClose asChild>
-                                        <Button variant="outline">Finish</Button>
+                                        <Button variant="outline">主页</Button>
                                         </DialogClose>
                                     )}
                                     </div>
