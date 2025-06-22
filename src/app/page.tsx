@@ -2203,9 +2203,12 @@ const CustomFooter = () => {
             </div>
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300 text-base md:text-lg">
               <Link href="#" className="hover:text-white">Apex</Link>
-              <Link href="#integration-section" className="hover:text-white">留学</Link>
-              <Link href="#" className="hover:text-white">医疗</Link>
-              <Link href="#" className="hover:text-white">企业出海</Link>
+              {/* 点击“留学”跳转到留学教育板块 */}
+              <Link href="#study-abroad" className="hover:text-white">留学</Link>
+               {/* 点击“医疗”跳转到健康管理板块 */}
+              <Link href="#health-management" className="hover:text-white">医疗</Link>
+              {/* 点击“企业服务”跳转到企业服务板块 */}
+              <Link href="#corporate-services" className="hover:text-white">企业服务</Link>
               <Link href="#" className="hover:text-white">敬请期待</Link>
             </nav>
             <div className="mb-8 flex space-x-4">
@@ -2510,16 +2513,20 @@ export default function HomePage() {
                 </div>
             </div>
             
-            <Timeline data={timelineData} />
+            <div id="corporate-services">
+              <Timeline data={timelineData} />
+            </div>
 
-            <div className="max-w-7xl mx-auto px-8">
+            <div id="study-abroad" className="max-w-7xl mx-auto px-8">
                 <ProjectShowcase 
                 testimonials={projectShowcaseData} 
                 onProtectedLinkClick={handleProtectedLinkClick}
                 />
             </div>
             
-            <InfoSectionWithMockup {...infoSectionData1} />
+            <div id="health-management">
+              <InfoSectionWithMockup {...infoSectionData1} />
+            </div>
             
             <div className="py-16 px-8 flex flex-col justify-center items-center">
                 <FaqSection items={faqData} className="w-full max-w-4xl"/>
