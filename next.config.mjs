@@ -14,6 +14,38 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'www.w3schools.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pbs.twimg.com', // Twitter / X
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com', // YouTube 缩略图
+      },
+      {
+        protocol: 'https',
+        hostname: 'github.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com', // Google 用户内容
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.pixabay.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'raw.githubusercontent.com',
       },
       {
