@@ -10,7 +10,6 @@ import React, {
     useCallback,
     memo
 } from 'react';
-// 1. 导入 Next.js 官方的 Image 组件
 import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -53,9 +52,6 @@ interface ContactFormData {
   state: string;
 }
 
-// 2. 移除了之前自定义的 Image 组件和 CustomImageProps 接口
-
-
 // 这是一个标准的 Link 组件，保持不变
 interface CustomLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
@@ -74,6 +70,100 @@ const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => 
 };
 Link.displayName = "Link";
 
+// ============================================================================
+// 新增: “开场动画/门” - SVG 自动扫描光效文字组件
+// ============================================================================
+const TextShineEffect = ({
+  text,
+  scanDuration = 4,
+  onClick
+}: {
+  text: string;
+  scanDuration?: number;
+  onClick?: () => void;
+}) => {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 400 150"
+      xmlns="http://www.w3.org/2000/svg"
+      className="select-none cursor-pointer" // 添加 cursor-pointer
+      onClick={onClick} // 添加点击事件
+    >
+      <defs>
+        <linearGradient id="textGradient">
+            <stop offset="0%" stopColor="#8b5cf6" />
+            <stop offset="25%" stopColor="#3b82f6" />
+            <stop offset="50%" stopColor="#06b6d4" />
+            <stop offset="75%" stopColor="#ef4444" />
+            <stop offset="100%" stopColor="#eab308" />
+        </linearGradient>
+        <motion.radialGradient
+          id="revealMask"
+          gradientUnits="userSpaceOnUse"
+          r="25%"
+          animate={{ cx: ["-25%", "125%"] }}
+          transition={{
+            duration: scanDuration,
+            ease: "linear",
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
+        >
+          <stop offset="0%" stopColor="white" />
+          <stop offset="100%" stopColor="black" />
+        </motion.radialGradient>
+        <mask id="textMask">
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="url(#revealMask)"
+          />
+        </mask>
+      </defs>
+      <text
+        x="50%"
+        y="50%"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        strokeWidth="0.5"
+        className="fill-transparent stroke-neutral-700 font-sans text-7xl font-bold"
+        style={{ opacity: 0.5 }}
+      >
+        {text}
+      </text>
+      <motion.text
+        x="50%"
+        y="50%"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        strokeWidth="0.5"
+        className="fill-transparent stroke-neutral-500 font-sans text-7xl font-bold"
+        initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
+        animate={{ strokeDashoffset: 0 }}
+        transition={{ duration: 3, ease: "easeInOut" }}
+      >
+        {text}
+      </motion.text>
+      <text
+        x="50%"
+        y="50%"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        stroke="url(#textGradient)"
+        strokeWidth="0.5"
+        mask="url(#textMask)"
+        className="fill-transparent font-sans text-7xl font-bold"
+      >
+        {text}
+      </text>
+    </svg>
+  );
+};
+TextShineEffect.displayName = "TextShineEffect";
 
 // ============================================================================
 // 1. 新的导航栏组件 (合并自用户提供的文件)
@@ -2080,3 +2170,4 @@ export default function HomePage() {
     </div>
   );
 }
+
