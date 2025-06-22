@@ -134,7 +134,8 @@ const TextShineEffect = ({
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.5"
-        className="fill-transparent stroke-neutral-700 font-[Helvetica] text-7xl font-bold"
+        // 修改：优化移动端字体大小
+        className="fill-transparent stroke-neutral-700 font-[Helvetica] text-6xl md:text-7xl font-bold"
         style={{ opacity: 0.5 }}
       >
         {text}
@@ -145,7 +146,8 @@ const TextShineEffect = ({
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.5"
-        className="fill-transparent stroke-neutral-500 font-[Helvetica] text-7xl font-bold"
+        // 修改：优化移动端字体大小
+        className="fill-transparent stroke-neutral-500 font-[Helvetica] text-6xl md:text-7xl font-bold"
         initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
         animate={{ strokeDashoffset: 0 }}
         transition={{ duration: 3, ease: "easeInOut" }}
@@ -160,7 +162,8 @@ const TextShineEffect = ({
         stroke="url(#textGradient)"
         strokeWidth="0.5"
         mask="url(#textMask)"
-        className="fill-transparent font-[Helvetica] text-7xl font-bold"
+        // 修改：优化移动端字体大小
+        className="fill-transparent font-[Helvetica] text-6xl md:text-7xl font-bold"
       >
         {text}
       </text>
@@ -174,7 +177,8 @@ const TextShineEffect = ({
             textAnchor="middle"
             dominantBaseline="middle"
             strokeWidth="0.5"
-            className="fill-transparent stroke-neutral-700 font-[Helvetica] text-2xl font-semibold" // 修改：较小的字号
+            // 修改：优化移动端字体大小
+            className="fill-transparent stroke-neutral-700 font-[Helvetica] text-xl md:text-2xl font-semibold"
             style={{ opacity: 0.5 }}
           >
             {subtitle}
@@ -185,7 +189,8 @@ const TextShineEffect = ({
             textAnchor="middle"
             dominantBaseline="middle"
             strokeWidth="0.5"
-            className="fill-transparent stroke-neutral-500 font-[Helvetica] text-2xl font-semibold" // 修改：较小的字号
+            // 修改：优化移动端字体大小
+            className="fill-transparent stroke-neutral-500 font-[Helvetica] text-xl md:text-2xl font-semibold"
             initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
             animate={{ strokeDashoffset: 0 }}
             transition={{ duration: 3, ease: "easeInOut", delay: 0.5 }} // 延迟出现
@@ -200,7 +205,8 @@ const TextShineEffect = ({
             stroke="url(#textGradient)"
             strokeWidth="0.5"
             mask="url(#textMask)"
-            className="fill-transparent font-[Helvetica] text-2xl font-semibold" // 修改：较小的字号
+            // 修改：优化移动端字体大小
+            className="fill-transparent font-[Helvetica] text-xl md:text-2xl font-semibold"
           >
             {subtitle}
           </text>
@@ -920,8 +926,8 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               {testimonials[active].quote}
             </motion.p>
           </motion.div>
-          {/* 修改：按钮组布局和样式 */}
-          <div className="flex flex-nowrap items-center gap-3 pt-12 w-full">
+          {/* 修改：按钮组布局和样式, 允许换行以适配移动端 */}
+          <div className="flex flex-wrap items-center gap-3 pt-12 w-full">
             {testimonials.map((testimonial, index) => (
               <HalomotButton
                 key={testimonial.name}
@@ -2388,19 +2394,13 @@ export default function HomePage() {
                 />
             </div>
             
-            <InfoSectionWithMockup {...infoSectionData1} />
-            
-            {/* -------------------- 新增的 FAQ 区块 -------------------- */}
+            {/* 修改：根据图片要求，将 FAQ 区域移动到此处，并移除了标题 */}
             <div className="py-24 px-8 flex flex-col justify-center items-center">
-                <div className="text-center mb-12">
-                    <h2 className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
-                        常见问题解答
-                    </h2>
-                </div>
                 <FaqSection items={faqData} className="w-full max-w-4xl"/>
             </div>
-            {/* -------------------- 新增的 FAQ 区块结束 -------------------- */}
 
+            <InfoSectionWithMockup {...infoSectionData1} />
+            
             <div id="integration-section">
                 <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
             </div>
