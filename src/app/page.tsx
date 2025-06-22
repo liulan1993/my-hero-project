@@ -25,7 +25,7 @@ import {
 // 修复：导入真实的 Server Actions
 import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
-import { Menu, MoveRight, X, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Menu, MoveRight, X, CheckCircle2, ArrowRight, Check } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
@@ -1415,6 +1415,150 @@ const DialogDescription = React.forwardRef<
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 // ============================================================================
+// 新增: 产品定价 (chanpin.tsx) 相关组件
+// ============================================================================
+
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      className
+    )}
+    {...props}
+  />
+));
+Card.displayName = "Card";
+
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+));
+CardHeader.displayName = "CardHeader";
+
+const CardTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h3
+    ref={ref}
+    className={cn(
+      "text-2xl font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+));
+CardTitle.displayName = "CardTitle";
+
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+));
+CardDescription.displayName = "CardDescription";
+
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+));
+CardContent.displayName = "CardContent";
+
+const PricingSection = () => {
+    const plans = [
+      {
+        name: "专业版 (Pro)",
+        description: "适合需要更强功能和自动化的成长型企业。",
+        features: [
+          "包含所有入门版功能",
+          "不限项目数量",
+          "高级分析",
+          "团队协作 (最多10个用户)",
+          "优先邮件支持",
+        ],
+      },
+      {
+        name: "企业版 (Enterprise)",
+        description: "为有特殊需求的大型组织提供定制解决方案。",
+        features: [
+          "包含所有专业版功能",
+          "不限用户数量",
+          "专属客户经理",
+          "单点登录 (SSO)",
+          "服务水平协议 (SLA)",
+          "私有化部署选项",
+        ],
+      },
+    ];
+
+    return (
+        <div className="w-full py-0 font-sans">
+            <div className="container mx-auto px-4 md:px-6">
+                <div className="flex flex-col items-center gap-6 text-center mt-10">
+                    <div className="flex flex-col gap-2">
+                        {/* 需求 2: 字体大小和格式与“学校申请支持”一致 */}
+                        <h2 className="text-3xl md:text-[40px] font-semibold text-white">
+                            满足各种需求的计划
+                        </h2>
+                        {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
+                        <p className="max-w-2xl text-base md:text-lg text-neutral-300">
+                            选择最适合您业务的计划。可随时更换。
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 items-start gap-8 lg:grid-cols-2">
+                    {plans.map((plan) => (
+                        <Card
+                            key={plan.name}
+                            className="flex h-full flex-col bg-transparent border-neutral-700"
+                        >
+                            <CardHeader className="p-6 pb-4">
+                                {/* 需求 3: 字体大小和格式与“有时候，眼见为实。”一致 */}
+                                <CardTitle className="text-2xl font-bold text-white">{plan.name}</CardTitle>
+                                {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
+                                <CardDescription className="text-base md:text-lg text-neutral-300 mt-2">{plan.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex flex-1 flex-col justify-between gap-6 p-6 pt-0">
+                                <div className="flex-grow">
+                                    <div className="flex flex-col gap-4 mt-4">
+                                        {plan.features.map((feature) => (
+                                            <div key={feature} className="flex flex-row items-start gap-3">
+                                                <Check className="h-5 w-5 flex-shrink-0 text-green-500 mt-1" />
+                                                {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
+                                                <p className="text-base md:text-lg text-neutral-300">{feature}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+PricingSection.displayName = "PricingSection";
+
+
+// ============================================================================
 // 7. 页面级别的静态数据
 // ============================================================================
 interface IconProps extends React.SVGProps<SVGSVGElement> {
@@ -2177,8 +2321,8 @@ const FaqItem = React.forwardRef<
       >
         <h3
           className={cn(
-            "text-base font-medium transition-colors duration-200 text-left",
-            "text-neutral-300", // 调整为更匹配的颜色
+            "text-base md:text-lg font-medium transition-colors duration-200 text-left",
+            "text-neutral-300", 
             isOpen && "text-white"
           )}
         >
@@ -2217,7 +2361,8 @@ const FaqItem = React.forwardRef<
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                className="text-sm text-neutral-400 leading-relaxed" // 使用页面已有的文本颜色
+                // 需求 5: 字体大小和格式与“我们深知...”一致
+                className="text-base md:text-lg text-neutral-400 leading-relaxed"
               >
                 {answer}
               </motion.p>
@@ -2400,7 +2545,6 @@ export default function HomePage() {
             
             <InfoSectionWithMockup {...infoSectionData1} />
             
-            {/* 【需求 2 & 3 修改】: 调整FAQ板块的上下高度, 并移动到此位置 */}
             <div className="py-16 px-8 flex flex-col justify-center items-center">
                 <FaqSection items={faqData} className="w-full max-w-4xl"/>
             </div>
@@ -2408,9 +2552,14 @@ export default function HomePage() {
             <div id="integration-section">
                 <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
             </div>
+
+            {/* 需求 1: 插入定价方案板块 */}
+            <div className="py-24 px-8 flex flex-col items-center">
+              <PricingSection />
+            </div>
+
             <CtaWithGallerySection />
             
-            {/* 新增：为 ScrollAdventure 组件添加标题和容器 */}
             <div className="py-24 px-8 flex flex-col justify-center items-center">
                 <div className="text-center mb-12">
                     <h2 className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
