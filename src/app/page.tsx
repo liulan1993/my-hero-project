@@ -849,7 +849,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
           留学教育(Study Abroad Education)
         </h2>
         <p className="text-neutral-300 ml-auto max-w-lg text-base md:text-lg">
-          我们为各行各业的客户提供卓越的服务，帮助他们实现业务目标并取得成功。
+          我们为客户提供卓越的服务，以实现教育目标并取得成功。
         </p>
       </div>
       
@@ -906,7 +906,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
                 backgroundColor={active === index ? '#4a148c' : '#161616'} // 高亮当前选中的项目
                 hoverTextColor='#fff'
                 gradient='linear-gradient(to right, #603dec, #a123f4)'
-                fixedWidth="180px" // <-- 添加这一行
+                fixedWidth="160px" // <-- 添加这一行
               />
             ))}
             <HalomotButton 
@@ -917,7 +917,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               backgroundColor='#161616' 
               hoverTextColor='#fff' 
               gradient='linear-gradient(to right, #603dec, #a123f4)'
-              fixedWidth="180px" // <-- 添加这一行
+              fixedWidth="160px" // <-- 添加这一行
             />
           </div>
         </div>
@@ -1138,7 +1138,7 @@ const CtaWithGallerySection = () => {
                                 <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
                                     <div className="flex flex-col gap-3">
                                     <Image
-                                        src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/ruixen_ui_logo_dark.png"
+                                        src="https://zh.apex-elite-service.com/wangzhantupian/logo.png"
                                         alt="Logo"
                                         width={48}
                                         height={48}
@@ -1206,7 +1206,7 @@ const CtaWithGallerySection = () => {
 
                                     <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
                                         <Image
-                                        src="https://raw.githubusercontent.com/ruixenui/RUIXEN_ASSESTS/refs/heads/main/component_assests/tour.png"
+                                        src="hhttps://zh.apex-elite-service.com/wangzhantupian/xinjiapo.jpg"
                                         alt="Step Visual"
                                         width={200}
                                         height={200}
@@ -1564,10 +1564,10 @@ MemoizedZap.displayName = 'ZapIcon';
 
 // 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
-  { icon: MemoizedCpu, title: "企业服务", description: "提供顶层架构设计、准证规划到年度财税与人力资源支持一站式企业运营解决方案" },
-  { icon: MemoizedShieldCheck, title: "健康管理", description: "中新两地顶尖医生资源，提供从行程安排到专家预约、双语陪诊一站式跨境医疗" },
-  { icon: MemoizedLayers, title: "溯源式体检", description: "通过深度解读您的历年健康数据，我们助您洞悉并主动管理未来的风险与趋势" }, // 修改文本内容
-  { icon: MemoizedZap, title: "留学教育", description: "我们为您的孩子匹配最适合其天赋成长的土壤与路径" },
+  { icon: MemoizedCpu, title: "企业服务", description: "全方位企业运营解决方案，涵盖架构、准证、财税及人力" },
+  { icon: MemoizedShieldCheck, title: "健康管理", description: "跨境医疗全程无忧：从中新专家预约到双语陪诊，我们一站搞定" },
+  { icon: MemoizedLayers, title: "溯源式体检", description: "通深度分析健康数据，助您预判风险，实现主动健康管理" }, // 修改文本内容
+  { icon: MemoizedZap, title: "留学教育", description: "精准匹配资源，为孩子定制最优成长路径" },
 ];
 
 const timelineData = [
@@ -1578,7 +1578,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
+              src="hhttps://zh.apex-elite-service.com/wangzhantupian/gongsi.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1595,7 +1595,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">为创始人、高管及家人量身定制整体准证方案（EP、DP等），通过深度评估与战略规划，极大化成功率，提供核心身份保障。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
+              src="https://zh.apex-elite-service.com/wangzhantupian/zhunzheng.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1612,7 +1612,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供专业的年度财税申报、财税合规与规划服务，我们不仅确保您的企业稳健合规，更助力您充分享受新加坡的政策优势。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/222.jpg" 
+              src="https://zh.apex-elite-service.com/wangzhantupian/caishui.jpg" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1629,7 +1629,7 @@ const timelineData = [
           <p className="text-neutral-200 mb-4 text-base md:text-lg">提供从核心人才招聘、名义雇主（EOR）到跨境薪酬合规的一站式人力资源解决方案，助您在新加坡高效、合规地组建并管理顶尖团队。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/333.jpg" 
+              src="https://zh.apex-elite-service.com/wangzhantupian/renliziyuan.jpg" 
               alt="新组件预览" 
               width={500}
               height={300}
@@ -1647,7 +1647,7 @@ const projectShowcaseData = [
     buttonLabel: "教育蓝图", // <-- 新增：按钮上显示的文字
     quote: '我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。',
     designation: "Next.js 项目",
-    src: "https://cdn.apex-elite-service.com/wangzhantupian/1.jpg",
+    src: "https://zh.apex-elite-service.com/wangzhantupian/jiaoyu.jpg",
     link: "https://plum-cave.netlify.app/",
   },
   {
@@ -1655,7 +1655,7 @@ const projectShowcaseData = [
     buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
     quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
-    src: "https://cdn.apex-elite-service.com/wangzhantupian/2.jpg",
+    src: "https://zh.apex-elite-service.com/wangzhantupian/mingxiao.jpg",
     link: "https://namer-ui.netlify.app/",
   },
   {
@@ -1663,7 +1663,7 @@ const projectShowcaseData = [
     buttonLabel: "全程护航", // <-- 新增：按钮上显示的文字
     quote: "我们提供超越申请的长期陪伴服务。作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
     designation: "Vue 项目",
-    src: "https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue",
+    src: "https://zh.apex-elite-service.com/wangzhantupian/pexels-naomi-shi-374023-1001914.jpg",
     link: "https://namer-ui-for-vue.netlify.app/",
   },
 ];
@@ -1687,8 +1687,8 @@ const infoSectionData1 = {
             致力于将您对健康的“未知”与“被动”，转化为“已知”与“主动”。
         </>
     ),
-    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png',
-    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-1_4x.9cc114e6.png',
+    primaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/jiankangguanli.jpg',
+    secondaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/jiankangguanli2.jpg',
 };
 
 const infoSectionData2 = {
@@ -1710,26 +1710,26 @@ const infoSectionData2 = {
             将未来的不确定性，转化为尽在掌握的主动权。
         </>
     ),
-    primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png',
-    secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png',
+    primaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/tijian.jpg',
+    secondaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/tijian2.jpg',
 };
 
 // 新增: FAQ 数据
 const faqData = [
     {
-        question: "中新跨境就医服务(China-Singapore Cross-Border Medical Service)",
+        question: "中新跨境就医服务",
         answer: "无论是您希望从新加坡回到中国寻求顶级诊疗，还是从中国来到新加坡链接全球领先的医疗资源，我们都能为您提供无缝的跨境支持，打破地域与信息壁垒。",
     },
     {
-        question: "一站式行程与陪诊(One-Stop Logistics & Medical Escort)",
+        question: "一站式行程与陪诊",
         answer: "我们为您处理从机票酒店预订、地面交通到专业双语陪诊的全程细节，让您可以完全专注于康复与治疗，心无旁骛。",
     },
     {
-        question: "顶尖专家预约(Top Specialist Booking)",
+        question: "顶尖专家预约",
         answer: "凭借我们深耕两地的稀缺名医资源网络，我们将协助您预约到通常需要漫长等待的顶尖专家，为您赢得最宝贵的健康时机。",
     },
     {
-        question: "全程住院与理赔支持(Inpatient & Claims Support)",
+        question: "全程住院与理赔支持",
         answer: "我们的服务将延伸至您诊疗结束之后，提供包括住院流程协助、多学科会诊推进以及关键的保险理赔流程支持等全面的后续保障。",
     },
 ];
@@ -1740,7 +1740,7 @@ const faqData = [
 
 const scrollAnimationPages = [
   {
-    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1750,7 +1750,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg',
     leftContent: {
       heading: '安心保障',
       description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
@@ -1758,7 +1758,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1768,7 +1768,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg',
     leftContent: {
       heading: '即刻启程',
       description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
@@ -2164,10 +2164,10 @@ const CustomFooter = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const socialIcons = [
-      { name: '小红书', icon: <XiaohongshuIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2' },
-      { name: '知乎', icon: <ZhihuIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
-      { name: '抖音', icon: <DouyinIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.douyin.com' },
-      { name: '哔哩哔哩', icon: <BilibiliIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.bilibili.com' },
+      { name: '小红书', icon: <XiaohongshuIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2' },
+      { name: '知乎', icon: <ZhihuIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
+      { name: '抖音', icon: <DouyinIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.douyin.com' },
+      { name: '哔哩哔哩', icon: <BilibiliIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.bilibili.com' },
     ];
 
     const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -2194,7 +2194,7 @@ const CustomFooter = () => {
             <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
             <div className="mb-8 w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center p-2">
               <Image
-                src="https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
+                src="https://zh.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
                 alt="官方公众号二维码"
                 width={280}
                 height={280}
@@ -2554,15 +2554,15 @@ export default function HomePage() {
 
             <div className="py-12 md:py-20 flex items-center justify-center">
                 <TextRevealCard
-                    text="这里我们将字体大小从默认的为了和“探索我们的创新"
-                    revealText="探索我们的创新，完成网站设计的旅程。"
+                    text="真正的价值，蕴藏于深度对话之中。"
+                    revealText="与我们同行，让您的卓越在新加坡从容绽放。"
                     className="w-full max-w-4xl"
                 >
                     <TextRevealCardTitle className="text-2xl font-bold">
-                    有时候，眼见为实。
+                    洞见未来，共谱新章
                     </TextRevealCardTitle>
                     <TextRevealCardDescription className="text-base md:text-lg">
-                    这是一个文本揭示卡片。将鼠标悬停在卡片上以显示隐藏的文本。在移动设备上，请触摸并滑动。
+                    我们深知，每一个伟大的决策，都需要前瞻性的洞察与值得信赖的伙伴。Apex将两者融为一体，陪伴您开启未来。
                     </TextRevealCardDescription>
                 </TextRevealCard>
             </div>
