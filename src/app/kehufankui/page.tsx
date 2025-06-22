@@ -42,8 +42,7 @@ const FileImageIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-// --- 3D 场景组件 (已修复类型错误) ---
-// 为 box 对象定义一个类型
+// --- 3D 场景组件 (未修改) ---
 interface BoxData {
     id: number;
     position: [number, number, number];
@@ -115,7 +114,7 @@ const Scene = React.memo(() => (
 ));
 Scene.displayName = 'Scene';
 
-// --- Markdown 预览组件 (已修改，支持多图片预览) ---
+// --- Markdown 预览组件 (未修改) ---
 function MarkdownPreview({ content, imagePreviewUrls }: { content: string, imagePreviewUrls: string[] }) {
     const [html, setHtml] = useState('');
     useEffect(() => {
@@ -156,8 +155,8 @@ function MarkdownPreview({ content, imagePreviewUrls }: { content: string, image
 // --- 投稿表单组件 (已修改，核心逻辑变更) ---
 function SubmissionForm() {
     const [content, setContent] = useState('');
-    const [files, setFiles] = useState<File[]>([]); // 状态现在是文件数组
-    const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]); // 预览URL也是数组
+    const [files, setFiles] = useState<File[]>([]); 
+    const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
     const [userId, setUserId] = useState<string | null>(null);
@@ -175,13 +174,11 @@ function SubmissionForm() {
         setUserId(currentUserId);
     }, []);
 
-    // 处理文件选择，支持多文件
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = event.target.files;
         if (selectedFiles) {
             const newFiles = Array.from(selectedFiles);
             const validFiles: File[] = [];
-            // const newPreviewUrls: string[] = [];  // <--- 移除此行
 
             let errorFound = false;
             for(const file of newFiles) {
@@ -200,7 +197,6 @@ function SubmissionForm() {
 
             setFiles(prev => [...prev, ...validFiles]);
 
-            // 为新选择的图片文件创建预览URL
             validFiles.forEach(file => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
@@ -213,18 +209,14 @@ function SubmissionForm() {
         }
     };
     
-    // 根据索引移除文件
     const handleRemoveFile = (indexToRemove: number) => {
         const fileToRemove = files[indexToRemove];
         setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
 
-        // 如果移除的是图片，也从预览中移除
         if(fileToRemove.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const urlToRemove = reader.result as string;
-                // 注意：这种基于 base64 字符串的查找方式在某些情况下可能不可靠，
-                // 更稳健的方式是为每个预览创建一个带唯一ID的对象。但对于当前场景，这已足够。
                 setImagePreviewUrls(prev => {
                     const idx = prev.indexOf(urlToRemove);
                     if(idx > -1) {
@@ -238,13 +230,11 @@ function SubmissionForm() {
             reader.readAsDataURL(fileToRemove);
         }
         
-        // 清理文件输入，以便可以再次选择相同的文件
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
     };
 
-    // 核心提交逻辑，支持多文件并行上传
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         if (!content.trim() && files.length === 0) {
@@ -280,7 +270,7 @@ function SubmissionForm() {
                 );
 
                 const results = await Promise.all(uploadPromises);
-                downloadUrls = results.map(blob => blob.downloadUrl); // 提取 downloadUrl
+                downloadUrls = results.map(blob => blob.downloadUrl);
                 
                 setMessage('文件上传成功，正在提交内容...');
             } else {
@@ -290,7 +280,7 @@ function SubmissionForm() {
             const submissionResponse = await fetch('/api/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content, fileUrls: downloadUrls, userId }), // 发送 fileUrls 数组
+                body: JSON.stringify({ content, fileUrls: downloadUrls, userId }),
             });
 
             if (!submissionResponse.ok) {
@@ -300,17 +290,17 @@ function SubmissionForm() {
 
             const result = await submissionResponse.json();
             setStatus('success');
-setMessage(result.message || '提交成功！感谢您的稿件。');
+            setMessage(result.message || '提交成功！感谢您的稿件。');
             setContent('');
-            setFiles([]); // 清空文件数组
-            setImagePreviewUrls([]); // 清空预览
+            setFiles([]); 
+            setImagePreviewUrls([]);
         } catch (error) {
             setStatus('error');
             setMessage(error instanceof Error ? error.message : '发生未知错误');
         }
     };
     
-    const allowedFileTypes = "image/*"; // 仅允许图片
+    const allowedFileTypes = "image/*";
     const charCountColor = content.length > charLimit ? 'text-red-500' : 'text-slate-400';
 
     return (
@@ -325,9 +315,15 @@ setMessage(result.message || '提交成功！感谢您的稿件。');
                  <p className="text-md text-slate-400">分享您的见解、建议或稿件</p>
             </div>
             <div className="bg-black/30 backdrop-blur-md rounded-2xl shadow-lg border border-gray-700/50 overflow-hidden">
+                {/* 手机端布局修改:
+                    - 使用 Tailwind 的 'order-*' 类在小屏幕上将预览区(order-1)置于编辑区(order-2)之上。
+                    - 在中等屏幕及以上(md)，恢复默认顺序：编辑区(md:order-1)在左，预览区(md:order-2)在右。
+                    - 这样可以解决手机上键盘弹出时遮挡预览区的问题。
+                    - 同时调整了边框(border)样式，使其在不同布局下都能正确显示分割线。
+                */}
                 <div className="grid grid-cols-1 md:grid-cols-2 min-h-[500px]">
-                    {/* 编辑区 */}
-                    <div className="flex flex-col p-4">
+                    {/* 编辑区: 在手机上移到下方 (order-2)，桌面端回到左侧 (md:order-1) */}
+                    <div className="flex flex-col p-4 order-2 md:order-1">
                         <div className="flex items-center justify-between gap-2 mb-2 text-slate-300">
                            <div className="flex items-center gap-2">
                                 <EditIcon className="w-5 h-5" />
@@ -344,7 +340,6 @@ setMessage(result.message || '提交成功！感谢您的稿件。');
                             placeholder="请在此输入内容，支持Markdown语法..."
                             className="w-full flex-grow p-3 bg-gray-900/30 border-gray-700 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-100 placeholder:text-slate-500"
                         />
-                        {/* 文件列表 */}
                         <div className="mt-3 space-y-2">
                             {files.map((file, index) => (
                                 <div key={index} className="flex items-center justify-between gap-2 w-full bg-gray-800/50 text-slate-300 font-semibold py-2 px-4 rounded-lg">
@@ -356,7 +351,6 @@ setMessage(result.message || '提交成功！感谢您的稿件。');
                                 </div>
                             ))}
                         </div>
-                        {/* 上传按钮 */}
                         <button 
                             type="button" 
                             onClick={() => fileInputRef.current?.click()}
@@ -368,14 +362,14 @@ setMessage(result.message || '提交成功！感谢您的稿件。');
                          <input
                             ref={fileInputRef}
                             type="file"
-                            multiple // 允许选择多个文件
+                            multiple
                             accept={allowedFileTypes}
                             onChange={handleFileChange}
                             className="hidden"
                         />
                     </div>
-                    {/* 预览区 */}
-                    <div className="bg-black/10 border-l border-gray-700/50">
+                    {/* 预览区: 在手机上移到上方 (order-1)，桌面端回到右侧 (md:order-2) */}
+                    <div className="bg-black/10 border-t md:border-t-0 md:border-l border-gray-700/50 order-1 md:order-2">
                          <div className="flex items-center gap-2 p-4 border-b border-gray-700/50 text-slate-300">
                            <EyeIcon className="w-5 h-5" />
                            <span className="font-semibold">实时预览</span>
