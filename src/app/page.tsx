@@ -1470,6 +1470,23 @@ const timelineData = [
       ),
     },
     {
+      title: "企业注册与咨询",
+      content: (
+        <div>
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">快点来企业注册啊。</p>
+          <div>
+            <Image 
+              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
+              alt="启动模板" 
+              width={500}
+              height={300}
+              className="rounded-lg object-cover w-full h-auto shadow-xl" 
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
       title: "学校申请支持",
       content: (
         <div>
@@ -1611,19 +1628,6 @@ const scrollAnimationPages = [
       description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
     },
     rightContent: null,
-  },
-  {
-    leftBgImage: 'https://images.unsplash.com/photo-1742626157052-f5a373a727ef?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyMnx8fGVufDB8fHx8fA%3D%3D',
-    rightBgImage: null,
-    leftContent: null,
-    rightContent: {
-      heading: '史诗般的结局！',
-      description: (
-        <>
-         :)
-        </>
-      ),
-    },
   },
 ];
 
@@ -2189,8 +2193,8 @@ export default function HomePage() {
             <div className="w-full max-w-2xl px-4">
               {/* 修改：传入副标题 */}
               <TextShineEffect 
-                text="Apex" 
-                subtitle="为您而来，不止于此"
+                text="点我点我" 
+                subtitle="点击进入主页"
                 scanDuration={4} 
                 onClick={handleEnter} 
               />
