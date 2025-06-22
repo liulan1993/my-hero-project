@@ -1588,6 +1588,22 @@ const infoSectionData2 = {
     secondaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-1_4x.2d24492a.png',
 };
 
+// 新增: FAQ 数据
+const faqData = [
+    {
+        question: "你们的平台有何独特之处？",
+        answer: "我们的平台凭借其直观的设计、强大的自动化功能和无缝的集成选项而脱颖而出。我们专注于创造一种将简洁性与高级功能相结合的用户体验。",
+    },
+    {
+        question: "定价结构是怎样的？",
+        answer: "我们提供灵活、透明的定价等级，旨在根据您的需求进行扩展。每个等级都包含一组核心功能，随着等级的提升，功能也会增加。所有计划都从14天的免费试用开始。",
+    },
+    {
+        question: "你们提供什么样的支持？",
+        answer: "我们通过多种渠道提供全面的支持。这包括24/7实时聊天、详细的文档、视频教程，以及为企业客户提供的专属客户经理。",
+    },
+];
+
 // ============================================================================
 // 8. 分屏滚动动画区域组件
 // ============================================================================
@@ -2119,9 +2135,126 @@ const CustomFooter = () => {
 }
 CustomFooter.displayName = "CustomFooter";
 
+// ============================================================================
+// 11. 常见问题 (FAQ) 组件 (新增)
+// ============================================================================
+const FaqItem = React.forwardRef<
+  HTMLDivElement,
+  {
+    question: string;
+    answer: string;
+    index: number;
+  }
+>(({ question, answer, index }, ref) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, delay: index * 0.1 }}
+      className={cn(
+        "group rounded-lg",
+        "transition-all duration-200 ease-in-out",
+        "border border-white/10" // 使用页面已有的边框颜色
+      )}
+    >
+      <Button
+        variant="ghost"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-6 py-4 h-auto justify-between hover:bg-transparent"
+      >
+        <h3
+          className={cn(
+            "text-base font-medium transition-colors duration-200 text-left",
+            "text-neutral-300", // 调整为更匹配的颜色
+            isOpen && "text-white"
+          )}
+        >
+          {question}
+        </h3>
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0, scale: isOpen ? 1.1 : 1 }}
+          transition={{ duration: 0.2 }}
+          className={cn(
+            "p-0.5 rounded-full flex-shrink-0",
+            "transition-colors duration-200",
+            isOpen ? "text-white" : "text-neutral-400"
+          )}
+        >
+          {/* 复用已导入的图标 */}
+          <ChevronDownIcon className="h-4 w-4" /> 
+        </motion.div>
+      </Button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{
+              height: "auto",
+              opacity: 1,
+              transition: { duration: 0.2, ease: "easeOut" },
+            }}
+            exit={{
+              height: 0,
+              opacity: 0,
+              transition: { duration: 0.2, ease: "easeIn" },
+            }}
+          >
+            <div className="px-6 pb-4 pt-2">
+              <motion.p
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                className="text-sm text-neutral-400 leading-relaxed" // 使用页面已有的文本颜色
+              >
+                {answer}
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+});
+FaqItem.displayName = "FaqItem";
+
+interface FaqSectionProps extends React.HTMLAttributes<HTMLElement> {
+  items: {
+    question: string;
+    answer: string;
+  }[];
+}
+
+const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
+  ({ className, items, ...props }, ref) => {
+    return (
+      <section
+        ref={ref}
+        className={cn("w-full", className)}
+        {...props}
+      >
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto space-y-2">
+            {items.map((item, index) => (
+              <FaqItem
+                key={index}
+                question={item.question}
+                answer={item.answer}
+                index={index}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+);
+FaqSection.displayName = "FaqSection";
 
 // ============================================================================
-// 11. 主页面组件
+// 12. 主页面组件
 // ============================================================================
 
 export default function HomePage() {
@@ -2256,6 +2389,21 @@ export default function HomePage() {
             </div>
             
             <InfoSectionWithMockup {...infoSectionData1} />
+            
+            {/* -------------------- 新增的 FAQ 区块 -------------------- */}
+            <div className="py-24 px-8 flex flex-col justify-center items-center bg-black/20">
+                <div className="text-center mb-12">
+                    <h2 className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
+                        常见问题解答
+                    </h2>
+                    <p className="text-neutral-300 max-w-2xl mx-auto text-base md:text-lg">
+                        在这里找到您最关心问题的答案。如果找不到您想要的答案，请随时与我们联系。
+                    </p>
+                </div>
+                <FaqSection items={faqData} className="w-full max-w-4xl"/>
+            </div>
+            {/* -------------------- 新增的 FAQ 区块结束 -------------------- */}
+
             <div id="integration-section">
                 <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
             </div>
