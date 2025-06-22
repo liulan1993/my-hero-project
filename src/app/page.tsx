@@ -75,10 +75,12 @@ Link.displayName = "Link";
 // ============================================================================
 const TextShineEffect = ({
   text,
+  subtitle, // 新增：副标题
   scanDuration = 4,
   onClick
 }: {
   text: string;
+  subtitle?: string; // 新增：副标题属性
   scanDuration?: number;
   onClick?: () => void;
 }) => {
@@ -86,7 +88,8 @@ const TextShineEffect = ({
     <svg
       width="100%"
       height="100%"
-      viewBox="0 0 400 150"
+      // 修改：调整 viewBox 以容纳副标题
+      viewBox="0 0 400 200" 
       xmlns="http://www.w3.org/2000/svg"
       className="select-none cursor-pointer"
       onClick={onClick}
@@ -124,9 +127,10 @@ const TextShineEffect = ({
           />
         </mask>
       </defs>
+      {/* 主标题 */}
       <text
         x="50%"
-        y="50%"
+        y="45%" // 修改：向上移动
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.5"
@@ -137,7 +141,7 @@ const TextShineEffect = ({
       </text>
       <motion.text
         x="50%"
-        y="50%"
+        y="45%" // 修改：向上移动
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.5"
@@ -150,7 +154,7 @@ const TextShineEffect = ({
       </motion.text>
       <text
         x="50%"
-        y="50%"
+        y="45%" // 修改：向上移动
         textAnchor="middle"
         dominantBaseline="middle"
         stroke="url(#textGradient)"
@@ -160,6 +164,48 @@ const TextShineEffect = ({
       >
         {text}
       </text>
+
+      {/* 副标题 (如果存在) */}
+      {subtitle && (
+        <>
+          <text
+            x="50%"
+            y="70%" // 新增：副标题位置
+            textAnchor="middle"
+            dominantBaseline="middle"
+            strokeWidth="0.5"
+            className="fill-transparent stroke-neutral-700 font-[Helvetica] text-2xl font-semibold" // 修改：较小的字号
+            style={{ opacity: 0.5 }}
+          >
+            {subtitle}
+          </text>
+          <motion.text
+            x="50%"
+            y="70%" // 新增：副标题位置
+            textAnchor="middle"
+            dominantBaseline="middle"
+            strokeWidth="0.5"
+            className="fill-transparent stroke-neutral-500 font-[Helvetica] text-2xl font-semibold" // 修改：较小的字号
+            initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
+            animate={{ strokeDashoffset: 0 }}
+            transition={{ duration: 3, ease: "easeInOut", delay: 0.5 }} // 延迟出现
+          >
+            {subtitle}
+          </motion.text>
+          <text
+            x="50%"
+            y="70%" // 新增：副标题位置
+            textAnchor="middle"
+            dominantBaseline="middle"
+            stroke="url(#textGradient)"
+            strokeWidth="0.5"
+            mask="url(#textMask)"
+            className="fill-transparent font-[Helvetica] text-2xl font-semibold" // 修改：较小的字号
+          >
+            {subtitle}
+          </text>
+        </>
+      )}
     </svg>
   );
 };
@@ -743,10 +789,12 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
-              <h3 className="hidden md:block md:pl-20 font-semibold text-white text-3xl md:text-[40px] leading-tight md:leading-[53px]">{item.title}</h3>
+              {/* 修改：调整标题字号 */}
+              <h3 className="hidden md:block md:pl-20 font-semibold text-white text-2xl md:text-3xl">{item.title}</h3>
             </div>
             <div className="relative pl-20 pr-4 md:pl-4 w-full">
-              <h3 className="md:hidden block mb-4 text-left font-semibold text-white text-3xl md:text-[40px] leading-tight md:leading-[53px]">{item.title}</h3>
+              {/* 修改：调整标题字号 */}
+              <h3 className="md:hidden block mb-4 text-left font-semibold text-white text-2xl md:text-3xl">{item.title}</h3>
               {item.content}
             </div>
           </div>
@@ -797,7 +845,7 @@ const HalomotButton: React.FC<HalomotButtonProps> = ({
 HalomotButton.displayName = "HalomotButton";
 
 type Testimonial = {
-  quote: string; name: string; designation: string; src: string; link?: string;
+  name: string; quote: string; designation: string; src: string; link?: string;
 };
 
 const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
@@ -816,20 +864,11 @@ ImageContainer.displayName = 'ImageContainer';
 
 const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => void; }) => {
   const [active, setActive] = useState(0);
-
-  const handleNext = useCallback(() => {
-    setActive((prev) => (prev + 1) % testimonials.length);
-  }, [testimonials.length]);
-
-  const handlePrev = useCallback(() => {
-    setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  }, [testimonials.length]);
   
-  const currentLink = testimonials[active].link || '#';
+  // 修改：移除 handleNext 和 handlePrev，因为现在直接点击按钮切换
 
   return (
     <div className="w-full mx-auto font-[Helvetica] py-20 text-white">
-      {/* [新增] 客户案例标题 */}
       <div className="mb-12 text-right">
         <h2 className="mb-4 text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
           客户案例&Case Studies
@@ -872,7 +911,8 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className='flex flex-col justify-center space-y-4'
           >
-            <h3 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
+            {/* 修改：调整标题字号 */}
+            <h3 className="text-white text-2xl md:text-3xl font-semibold">
               {testimonials[active].name}
             </h3>
             
@@ -880,14 +920,24 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               {testimonials[active].quote}
             </motion.p>
           </motion.div>
-          <div className="flex gap-4 pt-12 w-full">
-            <HalomotButton inscription="Previous" onClick={handlePrev} fixedWidth="172px" backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)' />
-            <HalomotButton inscription="Next" onClick={handleNext} fixedWidth="172px" backgroundColor='#161616' hoverTextColor='#fff' gradient='linear-gradient(to right, #603dec, #a123f4)'/>
+          {/* 修改：替换为新的按钮组 */}
+          <div className="flex flex-wrap gap-4 pt-12 w-full">
+            {testimonials.map((testimonial, index) => (
+              <HalomotButton
+                key={testimonial.name}
+                inscription={testimonial.name}
+                onClick={() => setActive(index)}
+                fixedWidth="140px"
+                backgroundColor={active === index ? '#4a148c' : '#161616'} // 高亮当前选中的项目
+                hoverTextColor='#fff'
+                gradient='linear-gradient(to right, #603dec, #a123f4)'
+              />
+            ))}
             <HalomotButton 
-              inscription="Open Web App" 
-              onClick={(e) => onProtectedLinkClick(e, currentLink)} 
-              fillWidth 
-              href={currentLink} 
+              inscription="了解更多" 
+              onClick={(e) => onProtectedLinkClick(e, testimonials[active].link || '#')} 
+              href={testimonials[active].link || '#'}
+              fixedWidth="140px"
               backgroundColor='#161616' 
               hoverTextColor='#fff' 
               gradient='linear-gradient(to right, #603dec, #a123f4)'
@@ -1419,23 +1469,6 @@ const timelineData = [
       ),
     },
     {
-      title: "教育路径规划",
-      content: (
-        <div>
-          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
-          <div>
-            <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
-              alt="启动模板" 
-              width={500}
-              height={300}
-              className="rounded-lg object-cover w-full h-auto shadow-xl" 
-            />
-          </div>
-        </div>
-      ),
-    },
-    {
       title: "学校申请支持",
       content: (
         <div>
@@ -1691,7 +1724,8 @@ function ScrollAdventure() {
                 <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.leftContent && (
                     <div className="text-center">
-                      <h2 className="mb-4 tracking-widest text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
+                      {/* 修改：调整标题字号 */}
+                      <h2 className="mb-4 tracking-widest text-2xl md:text-3xl font-semibold">
                         {page.leftContent.heading}
                       </h2>
                       <p className="text-base md:text-lg">
@@ -1713,7 +1747,8 @@ function ScrollAdventure() {
                 <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.rightContent && (
                      <div className="text-center">
-                      <h2 className="mb-4 tracking-widest text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
+                       {/* 修改：调整标题字号 */}
+                      <h2 className="mb-4 tracking-widest text-2xl md:text-3xl font-semibold">
                         {page.rightContent.heading}
                       </h2>
                        <div className="text-base md:text-lg">
@@ -2150,8 +2185,14 @@ export default function HomePage() {
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.8, ease: "easeInOut" } }}
           >
-            <div className="w-full max-w-2xl">
-              <TextShineEffect text="Apex" scanDuration={4} onClick={handleEnter} />
+            <div className="w-full max-w-2xl px-4">
+              {/* 修改：传入副标题 */}
+              <TextShineEffect 
+                text="Apex" 
+                subtitle="为您而来，不止于此"
+                scanDuration={4} 
+                onClick={handleEnter} 
+              />
             </div>
           </motion.div>
         )}
@@ -2192,7 +2233,7 @@ export default function HomePage() {
                     >
                         <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
                         <h3 className="text-base font-bold text-white">{feature.title}</h3>
-                        <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
+                        <p className="text-neutral-400 text-sm">{feature.description}</p>
                     </div>
                     ))}
                 </div>
@@ -2213,8 +2254,17 @@ export default function HomePage() {
                 <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
             </div>
             <CtaWithGallerySection />
-
-            <div className="py-24 px-8 flex justify-center items-center">
+            
+            {/* 新增：为 ScrollAdventure 组件添加标题和容器 */}
+            <div className="py-24 px-8 flex flex-col justify-center items-center">
+                <div className="text-center mb-12">
+                    <h2 className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
+                        我们的承诺与流程
+                    </h2>
+                    <p className="text-neutral-300 max-w-2xl mx-auto text-base md:text-lg">
+                        探索我们如何通过透明、高效的流程，为您在新加坡的旅程保驾护航。
+                    </p>
+                </div>
                 <ScrollAdventure />
             </div>
 
