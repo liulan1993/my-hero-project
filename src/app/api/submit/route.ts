@@ -3,12 +3,14 @@ import { NextResponse as SubmitNextResponse } from 'next/server';
 
 export async function POST(request: Request): Promise<SubmitNextResponse> {
     try {
-        const { content, fileUrl, userId } = await request.json();
+        // 修改：接收 fileUrls 数组而不是单个 fileUrl
+        const { content, fileUrls, userId } = await request.json();
 
         if (!userId) {
             return SubmitNextResponse.json({ message: '用户ID是必需的' }, { status: 400 });
         }
-        if (!content && !fileUrl) {
+        // 修改：检查文件数组是否为空
+        if (!content && (!fileUrls || fileUrls.length === 0)) {
             return SubmitNextResponse.json({ message: '内容和文件不能都为空' }, { status: 400 });
         }
         
@@ -16,7 +18,7 @@ export async function POST(request: Request): Promise<SubmitNextResponse> {
         
         const submissionData = {
             content,
-            fileUrl, // 可能是 null
+            fileUrls, // 修改：存储文件URL数组
             userId,
             createdAt: new Date().toISOString(),
         };

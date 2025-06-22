@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import Link from 'next/link';
 
-// --- 图标组件 ---
+// --- 图标组件 (未修改) ---
 const UploadIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -33,15 +33,6 @@ const XCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <line x1="9" y1="9" x2="15" y2="15" />
     </svg>
 );
-const FileTextIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" />
-        <line x1="10" y1="9" x2="8" y2="9" />
-    </svg>
-);
 const FileImageIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
@@ -51,59 +42,14 @@ const FileImageIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-
-// --- 3D 场景组件 ---
-const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
-    const shape = new THREE.Shape();
-    const angleStep = Math.PI * 0.5;
-    const radius = 1;
-    shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
-    shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
-    shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
-    shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
-    const extrudeSettings = {
-        depth: 0.3,
-        bevelEnabled: true,
-        bevelThickness: 0.05,
-        bevelSize: 0.05,
-        bevelSegments: 20,
-        curveSegments: 20
-    };
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center();
-    return (
-        <mesh
-            geometry={geometry}
-            position={position}
-            rotation={rotation}
-        >
-            <meshPhysicalMaterial 
-                color="#232323"
-                metalness={1}
-                roughness={0.3}
-                reflectivity={0.5}
-                ior={1.5}
-                emissive="#000000"
-                emissiveIntensity={0}
-                transparent={false}
-                opacity={1.0}
-                transmission={0.0}
-                thickness={0.5}
-                clearcoat={0.0}
-                clearcoatRoughness={0.0}
-                sheen={0}
-                sheenRoughness={1.0}
-                sheenColor="#ffffff"
-                specularIntensity={1.0}
-                specularColor="#ffffff"
-                iridescence={1}
-                iridescenceIOR={1.3}
-                iridescenceThicknessRange={[100, 400]}
-                flatShading={false}
-            />
-        </mesh>
-    );
-};
+// --- 3D 场景组件 (已修复类型错误) ---
+// 为 box 对象定义一个类型
+interface BoxData {
+    id: number;
+    position: [number, number, number];
+    rotation: [number, number, number];
+    geometry: THREE.ExtrudeGeometry;
+}
 
 const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null!);
@@ -113,66 +59,93 @@ const AnimatedBoxes = () => {
             groupRef.current.rotation.y += delta * 0.05;
         }
     });
-    const boxes = Array.from({ length: 50 }, (_, index) => ({
-        position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
-        rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number],
-        id: index
-    }));
+
+    const boxes: BoxData[] = useMemo(() => Array.from({ length: 50 }, (_, index) => {
+        const shape = new THREE.Shape();
+        const angleStep = Math.PI * 0.5;
+        const radius = 1;
+        shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
+        shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
+        shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
+        shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
+        const extrudeSettings = {
+            depth: 0.3,
+            bevelEnabled: true,
+            bevelThickness: 0.05,
+            bevelSize: 0.05,
+            bevelSegments: 20,
+            curveSegments: 20
+        };
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        geometry.center();
+
+        return {
+            id: index,
+            position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
+            rotation: [(index - 10) * 0.1, Math.PI / 2, 0] as [number, number, number],
+            geometry: geometry,
+        };
+    }), []);
+
     return (
         <group ref={groupRef}>
-            {boxes.map((box) => (
-                <Box
-                    key={box.id}
-                    position={box.position}
-                    rotation={box.rotation}
-                />
+            {boxes.map((box: BoxData) => (
+                <mesh key={box.id} geometry={box.geometry} position={box.position} rotation={box.rotation}>
+                    <meshPhysicalMaterial
+                        color="#232323"
+                        metalness={1}
+                        roughness={0.3}
+                        iridescence={1}
+                        iridescenceIOR={1.3}
+                        iridescenceThicknessRange={[100, 400]}
+                    />
+                </mesh>
             ))}
         </group>
     );
 };
+const Scene = React.memo(() => (
+    <div className="absolute inset-0 w-full h-full">
+        <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
+            <ambientLight intensity={15} />
+            <directionalLight position={[10, 10, 5]} intensity={15} />
+            <AnimatedBoxes />
+        </Canvas>
+    </div>
+));
+Scene.displayName = 'Scene';
 
-// --- vvv 这是本次唯一的修改点 vvv ---
-const Scene = () => {
-    return (
-        // 移除了 z-[-1]，这是导致动画被遮盖的根本原因
-        <div className="absolute inset-0 w-full h-full">
-            <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
-                <ambientLight intensity={15} />
-                <directionalLight position={[10, 10, 5]} intensity={15} />
-                <AnimatedBoxes />
-            </Canvas>
-        </div>
-    );
-};
-// --- ^^^ 这是本次唯一的修改点 ^^^ ---
-
-
-// --- Markdown 预览组件 ---
-function MarkdownPreview({ content, imagePreviewUrl }: { content: string, imagePreviewUrl: string | null }) {
+// --- Markdown 预览组件 (已修改，支持多图片预览) ---
+function MarkdownPreview({ content, imagePreviewUrls }: { content: string, imagePreviewUrls: string[] }) {
     const [html, setHtml] = useState('');
     useEffect(() => {
         const scriptId = 'marked-script';
+        const loadMarked = () => {
+            // @ts-expect-error: 'marked' is loaded dynamically
+            if (window.marked) { setHtml(window.marked.parse(content)); }
+        };
+
         if (!document.getElementById(scriptId)) {
             const script = document.createElement('script');
             script.id = scriptId;
             script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
             script.async = true;
-            script.onload = () => {
-                // @ts-expect-error: 'marked' is loaded dynamically
-                if (window.marked) { setHtml(window.marked.parse(content)); }
-            };
+            script.onload = loadMarked;
             document.body.appendChild(script);
         } else {
-            // @ts-expect-error: 'marked' is loaded dynamically
-            if (window.marked) { setHtml(window.marked.parse(content)); }
+            loadMarked();
         }
     }, [content]);
     
     return (
         <div className="p-4 h-full text-left text-slate-200">
             <div className="prose prose-lg prose-invert max-w-none">
-                 {imagePreviewUrl && (
-                    <img src={imagePreviewUrl} alt="图片预览" className="max-w-full rounded-lg mb-4 shadow-md" />
+                {imagePreviewUrls.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                        {imagePreviewUrls.map((url, index) => (
+                           <img key={index} src={url} alt={`图片预览 ${index + 1}`} className="w-full h-auto object-cover rounded-lg shadow-md" />
+                        ))}
+                    </div>
                 )}
                 <div dangerouslySetInnerHTML={{ __html: html }} />
             </div>
@@ -180,12 +153,11 @@ function MarkdownPreview({ content, imagePreviewUrl }: { content: string, imageP
     );
 }
 
-
-// --- 投稿表单组件 ---
+// --- 投稿表单组件 (已修改，核心逻辑变更) ---
 function SubmissionForm() {
     const [content, setContent] = useState('');
-    const [file, setFile] = useState<File | null>(null);
-    const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+    const [files, setFiles] = useState<File[]>([]); // 状态现在是文件数组
+    const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]); // 预览URL也是数组
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
     const [userId, setUserId] = useState<string | null>(null);
@@ -203,43 +175,79 @@ function SubmissionForm() {
         setUserId(currentUserId);
     }, []);
 
+    // 处理文件选择，支持多文件
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = event.target.files?.[0];
-        if (selectedFile) {
-            if (selectedFile.size > singleFileLimit) {
-                setMessage('单个文件大小不能超过 10MB。');
-                setStatus('error');
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
+        const selectedFiles = event.target.files;
+        if (selectedFiles) {
+            const newFiles = Array.from(selectedFiles);
+            const validFiles: File[] = [];
+            const newPreviewUrls: string[] = [];
+
+            let errorFound = false;
+            for(const file of newFiles) {
+                if (file.size > singleFileLimit) {
+                    setMessage(`文件 "${file.name}" 大小超过 10MB，已被忽略。`);
+                    setStatus('error');
+                    errorFound = true;
+                } else {
+                    validFiles.push(file);
                 }
-                return;
             }
-            setMessage('');
-            setStatus('idle');
-            setFile(selectedFile);
-            if (selectedFile.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setImagePreviewUrl(reader.result as string);
-                };
-                reader.readAsDataURL(selectedFile);
-            } else {
-                setImagePreviewUrl(null);
+            if(!errorFound) {
+                setMessage('');
+                setStatus('idle');
             }
+
+            setFiles(prev => [...prev, ...validFiles]);
+
+            // 为新选择的图片文件创建预览URL
+            validFiles.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setImagePreviewUrls(prev => [...prev, reader.result as string]);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         }
     };
+    
+    // 根据索引移除文件
+    const handleRemoveFile = (indexToRemove: number) => {
+        const fileToRemove = files[indexToRemove];
+        setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
 
-    const handleRemoveFile = () => {
-        setFile(null);
-        setImagePreviewUrl(null);
+        // 如果移除的是图片，也从预览中移除
+        if(fileToRemove.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const urlToRemove = reader.result as string;
+                // 注意：这种基于 base64 字符串的查找方式在某些情况下可能不可靠，
+                // 更稳健的方式是为每个预览创建一个带唯一ID的对象。但对于当前场景，这已足够。
+                setImagePreviewUrls(prev => {
+                    const idx = prev.indexOf(urlToRemove);
+                    if(idx > -1) {
+                       const next = [...prev];
+                       next.splice(idx, 1);
+                       return next;
+                    }
+                    return prev;
+                });
+            };
+            reader.readAsDataURL(fileToRemove);
+        }
+        
+        // 清理文件输入，以便可以再次选择相同的文件
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
     };
 
+    // 核心提交逻辑，支持多文件并行上传
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        if (!content.trim() && !file) {
+        if (!content.trim() && files.length === 0) {
             setMessage('内容和文件不能都为空！');
             setStatus('error');
             return;
@@ -251,50 +259,58 @@ function SubmissionForm() {
         }
         setStatus('loading');
         setMessage('准备上传...');
-        let fileUrl = null;
+        
         try {
-            if (file) {
-                setMessage('正在上传文件...');
-                const uploadResponse = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-                    method: 'POST',
-                    body: file,
-                });
-                if (!uploadResponse.ok) {
-                    const errorResult = await uploadResponse.json();
-                    throw new Error(errorResult.error || '文件上传失败');
-                }
-                const newBlob = await uploadResponse.json();
-                fileUrl = newBlob.url;
+            let downloadUrls: string[] = [];
+
+            if (files.length > 0) {
+                setMessage(`正在上传 ${files.length} 个文件...`);
+                
+                const uploadPromises = files.map(file =>
+                    fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+                        method: 'POST',
+                        body: file,
+                    }).then(async (response) => {
+                        if (!response.ok) {
+                            const errorResult = await response.json();
+                            throw new Error(`文件 ${file.name} 上传失败: ${errorResult.error}`);
+                        }
+                        return response.json();
+                    })
+                );
+
+                const results = await Promise.all(uploadPromises);
+                downloadUrls = results.map(blob => blob.downloadUrl); // 提取 downloadUrl
+                
                 setMessage('文件上传成功，正在提交内容...');
             } else {
                  setMessage('正在提交内容...');
             }
+
             const submissionResponse = await fetch('/api/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content, fileUrl, userId }),
+                body: JSON.stringify({ content, fileUrls: downloadUrls, userId }), // 发送 fileUrls 数组
             });
+
             if (!submissionResponse.ok) {
                 const errorResult = await submissionResponse.json();
                 throw new Error(errorResult.message || '内容提交失败');
             }
+
             const result = await submissionResponse.json();
             setStatus('success');
             setMessage(result.message || '提交成功！感谢您的稿件。');
             setContent('');
-            handleRemoveFile();
+            setFiles([]); // 清空文件数组
+            setImagePreviewUrls([]); // 清空预览
         } catch (error) {
             setStatus('error');
             setMessage(error instanceof Error ? error.message : '发生未知错误');
         }
     };
     
-    const getFileIcon = (fileType: string) => {
-        if (fileType.startsWith('image/')) return <FileImageIcon className="w-5 h-5 text-blue-400" />;
-        return <FileTextIcon className="w-5 h-5 text-gray-400" />;
-    };
-
-    const allowedFileTypes = "image/*,.txt,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx";
+    const allowedFileTypes = "image/*"; // 仅允许图片
     const charCountColor = content.length > charLimit ? 'text-red-500' : 'text-slate-400';
 
     return (
@@ -310,6 +326,7 @@ function SubmissionForm() {
             </div>
             <div className="bg-black/30 backdrop-blur-md rounded-2xl shadow-lg border border-gray-700/50 overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-2 min-h-[500px]">
+                    {/* 编辑区 */}
                     <div className="flex flex-col p-4">
                         <div className="flex items-center justify-between gap-2 mb-2 text-slate-300">
                            <div className="flex items-center gap-2">
@@ -327,40 +344,46 @@ function SubmissionForm() {
                             placeholder="请在此输入内容，支持Markdown语法..."
                             className="w-full flex-grow p-3 bg-gray-900/30 border-gray-700 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-100 placeholder:text-slate-500"
                         />
-                        {file ? (
-                             <div className="mt-3 flex items-center justify-between gap-2 w-full bg-gray-800/50 text-slate-300 font-semibold py-2 px-4 rounded-lg">
-                                {getFileIcon(file.type)}
-                                <span className="truncate flex-1 text-left ml-2">{file.name}</span>
-                                <button onClick={handleRemoveFile} className="text-red-500 hover:text-red-700 p-1 rounded-full transition-colors">
-                                    <XCircleIcon className="w-5 h-5"/>
-                                </button>
-                            </div>
-                        ) : (
-                            <button 
-                                type="button" 
-                                onClick={() => fileInputRef.current?.click()}
-                                className="mt-3 flex items-center justify-center gap-2 w-full bg-gray-800/50 hover:bg-gray-700/50 text-slate-300 font-semibold py-2 px-4 rounded-lg transition-colors"
-                            >
-                                <UploadIcon className="w-5 h-5"/>
-                                上传文件 (最大10MB)
-                            </button>
-                        )}
+                        {/* 文件列表 */}
+                        <div className="mt-3 space-y-2">
+                            {files.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between gap-2 w-full bg-gray-800/50 text-slate-300 font-semibold py-2 px-4 rounded-lg">
+                                    <FileImageIcon className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                                    <span className="truncate flex-1 text-left ml-2">{file.name}</span>
+                                    <button onClick={() => handleRemoveFile(index)} className="text-red-500 hover:text-red-700 p-1 rounded-full transition-colors flex-shrink-0">
+                                        <XCircleIcon className="w-5 h-5"/>
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        {/* 上传按钮 */}
+                        <button 
+                            type="button" 
+                            onClick={() => fileInputRef.current?.click()}
+                            className="mt-3 flex items-center justify-center gap-2 w-full bg-gray-800/50 hover:bg-gray-700/50 text-slate-300 font-semibold py-2 px-4 rounded-lg transition-colors"
+                        >
+                            <UploadIcon className="w-5 h-5"/>
+                            上传图片 (可多选, 最大10MB)
+                        </button>
                          <input
                             ref={fileInputRef}
                             type="file"
+                            multiple // 允许选择多个文件
                             accept={allowedFileTypes}
                             onChange={handleFileChange}
                             className="hidden"
                         />
                     </div>
+                    {/* 预览区 */}
                     <div className="bg-black/10 border-l border-gray-700/50">
                          <div className="flex items-center gap-2 p-4 border-b border-gray-700/50 text-slate-300">
                            <EyeIcon className="w-5 h-5" />
                            <span className="font-semibold">实时预览</span>
                         </div>
-                        <MarkdownPreview content={content} imagePreviewUrl={imagePreviewUrl} />
+                        <MarkdownPreview content={content} imagePreviewUrls={imagePreviewUrls} />
                     </div>
                 </div>
+                {/* 底部操作区 */}
                 <div className="p-4 border-t border-gray-700/50 flex flex-col sm:flex-row items-center justify-between gap-4">
                      {status !== 'idle' && (
                         <p className={`text-sm ${
@@ -373,10 +396,10 @@ function SubmissionForm() {
                     <div className="flex-grow"></div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <Link
-                            href="/"
+                            href="https://singapore.apex-elite-service.com/"
                             className="w-full sm:w-auto text-center border border-slate-700 text-slate-300 font-semibold py-2 px-6 rounded-lg hover:bg-slate-800/50 transition-colors"
                         >
-                            返回主页
+                            返回官网
                         </Link>
                         <button 
                             onClick={handleSubmit}
@@ -392,15 +415,11 @@ function SubmissionForm() {
     );
 }
 
-
-// --- Apex主页组件 ---
+// --- Apex主页组件 (未修改) ---
 function ApexHero({ title = "Apex" }: { title?: string }) {
     const words = title.split(" ");
     return (
-        <div 
-            className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-8 sm:py-12 bg-black"
-            // 上一行移除了错误的行内渐变背景，并用 bg-black 代替作为回退
-        >
+        <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-8 sm:py-12 bg-black">
             <Scene />
             <div className="relative z-10 container mx-auto px-4 md:px-6 text-center">
                 <motion.div
@@ -411,21 +430,13 @@ function ApexHero({ title = "Apex" }: { title?: string }) {
                 >
                     <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-4 tracking-tighter">
                         {words.map((word, wordIndex) => (
-                            <span
-                                key={wordIndex}
-                                className="inline-block mr-4 last:mr-0"
-                            >
+                            <span key={wordIndex} className="inline-block mr-4 last:mr-0">
                                 {word.split("").map((letter, letterIndex) => (
                                     <motion.span
                                         key={`${wordIndex}-${letterIndex}`}
                                         initial={{ y: 100, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
-                                        transition={{
-                                            delay: wordIndex * 0.1 + letterIndex * 0.03,
-                                            type: "spring",
-                                            stiffness: 150,
-                                            damping: 25,
-                                        }}
+                                        transition={{ delay: wordIndex * 0.1 + letterIndex * 0.03, type: "spring", stiffness: 150, damping: 25 }}
                                         className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-500/80"
                                     >
                                         {letter}
@@ -441,7 +452,7 @@ function ApexHero({ title = "Apex" }: { title?: string }) {
     );
 }
 
-// --- 页面主入口 ---
+// --- 页面主入口 (未修改) ---
 export default function Page() {
     return <ApexHero title="Apex" />;
 }
