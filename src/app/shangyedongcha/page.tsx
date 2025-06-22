@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useMemo, useEffect } from 'react';
+import Image from 'next/image'; // [优化] 导入 Next.js Image 组件
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import ReactMarkdown from 'react-markdown';
@@ -29,9 +30,9 @@ const articles = [
 \`\`\`javascript
 console.log("Hello, World!");
 \`\`\`
-![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
+
 甚至是表格：
-![演示视频](https://www.w3schools.com/html/mov_bbb.mp4)
+
 | 表头1 | 表头2 | 表头3 |
 |-------|-------|-------|
 | 内容1 | 内容2 | 内容3 |
@@ -47,10 +48,10 @@ console.log("Hello, World!");
 ![技术图片](https://placehold.co/600x400/2A3438/FFFFFF?text=技术创新)
 
 技术创新是推动社会进步的关键动力。在这篇文章中，我们将探讨最新的技术趋势及其对未来的影响。
-![演示视频](https://www.w3schools.com/html/mov_bbb.mp4)
+
 ## 人工智能
 人工智能正在改变各个行业，从医疗保健到金融服务。
-![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
+
 ## 区块链
 区块链技术以其去中心化和安全的特性，为数字交易提供了新的可能性。
 
@@ -65,7 +66,7 @@ console.log("Hello, World!");
 ![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
 
 记录生活中的美好瞬间。
-![演示视频](https://www.w3schools.com/html/mov_bbb.mp4)
+
 - 清晨的阳光
 - 一杯香浓的咖啡
 - 一本好书
@@ -80,11 +81,11 @@ console.log("Hello, World!");
 ![项目图片](https://placehold.co/600x400/4A5458/FFFFFF?text=项目回顾)
 
 这个项目始于一个简单的想法，经过团队的不懈努力，最终得以实现。
-![演示视频](https://www.w3schools.com/html/mov_bbb.mp4)
+
 ### 主要挑战
 1. **技术选型**: 我们在React和Vue之间进行了艰难的选择。
 2. **时间管理**: 项目周期紧张，需要高效的协作。
-![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
+
 ### 最终成果
 我们成功地交付了一个高性能、高可用的产品。
 `
@@ -98,11 +99,12 @@ console.log("Hello, World!");
 现在，您可以在文章中嵌入视频。我们通过检查链接的后缀（如 .mp4）来自动渲染视频播放器。只需使用标准的图片语法即可！
 
 ![演示视频](https://www.w3schools.com/html/mov_bbb.mp4)
-![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
+
 视频播放器支持基本的控制，如播放、暂停和全屏。这是一个非常强大的功能，可以让您的文章内容更加生动。
     `
     },
     // --- 在这里复制粘贴以上结构以添加更多文章 ---
+    // --- 备注: 如果使用外部图片链接，请确保已在 next.config.js 中配置相应的 image domains ---
 ];
 
 // --- 辅助函数：从Markdown中解析标题和图片 ---
@@ -220,7 +222,14 @@ const ArticleCard = ({ article, onClick }: { article: { id: number; markdownCont
             onClick={onClick}
         >
             {imageUrl ? (
-                <img src={imageUrl} alt={title} className="w-full h-48 object-cover" onError={(e) => (e.currentTarget.src = "https://placehold.co/600x400?text=Image+Not+Found")}/>
+                // [优化] 使用 Next.js Image 组件
+                <Image 
+                    src={imageUrl} 
+                    alt={title} 
+                    width={600} 
+                    height={400} 
+                    className="w-full h-48 object-cover"
+                />
             ) : (
                 <div className="w-full h-48 bg-gray-700 flex items-center justify-center">
                     <span className="text-gray-400">无封面图片</span>
@@ -269,7 +278,6 @@ const ArticleModal = ({ article, onClose }: { article: { id: number; markdownCon
                         remarkPlugins={[remarkGfm]}
                         components={{
                             // 自定义渲染器，用于智能识别图片和视频
-                            // [修复] 移除了未使用的 `node` 变量来解决ESLint错误
                             img: (props) => {
                                 // 检查props.src是否为字符串，避免类型错误
                                 if (typeof props.src === 'string' && (props.src.endsWith('.mp4') || props.src.endsWith('.webm') || props.src.endsWith('.ogg'))) {
@@ -287,8 +295,20 @@ const ArticleModal = ({ article, onClose }: { article: { id: number; markdownCon
                                     );
                                 }
                                 // 否则，渲染为普通图片
-                                // [修复] {...props} 会自动传递 alt 属性
-                                return <img {...props} />;
+                                // [优化] 使用 Next.js Image 组件
+                                if (typeof props.src === 'string') {
+                                    return (
+                                        <Image 
+                                            src={props.src} 
+                                            alt={props.alt || '文章中的图片'} 
+                                            width={800} 
+                                            height={600}
+                                            style={{ width: '100%', height: 'auto' }}
+                                            className="rounded-lg"
+                                        />
+                                    );
+                                }
+                                return null;
                             },
                         }}
                     >
