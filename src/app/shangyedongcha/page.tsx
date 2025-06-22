@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useMemo, useEffect } from 'react';
-import Image from 'next/image'; // [优化] 导入 Next.js Image 组件
+// import Image from 'next/image'; // 不再需要 Next.js Image 组件
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import ReactMarkdown from 'react-markdown';
@@ -15,7 +15,7 @@ const articles = [
         id: 1,
         markdownContent: `
 # 我的第一篇文章
-![占位图片](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
+![占位图片](https://placehold.co/600x400/1A2428/FFFFFF?text=文章封面)
 
 这是文章的第一段。在这里，您可以详细阐述您的想法和观点。我们支持完整的 **Markdown** 语法。
 
@@ -45,7 +45,7 @@ console.log("Hello, World!");
         id: 2,
         markdownContent: `
 # 关于技术创新
-![技术图片](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
+![技术图片](https://placehold.co/600x400/2A3438/FFFFFF?text=技术创新)
 
 技术创新是推动社会进步的关键动力。在这篇文章中，我们将探讨最新的技术趋势及其对未来的影响。
 
@@ -63,7 +63,7 @@ console.log("Hello, World!");
         id: 3,
         markdownContent: `
 # 生活随笔
-![生活图片](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
+![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
 
 记录生活中的美好瞬间。
 
@@ -78,7 +78,7 @@ console.log("Hello, World!");
         id: 4,
         markdownContent: `
 # 项目回顾
-![项目图片](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
+![项目图片](https://placehold.co/600x400/4A5458/FFFFFF?text=项目回顾)
 
 这个项目始于一个简单的想法，经过团队的不懈努力，最终得以实现。
 
@@ -94,7 +94,7 @@ console.log("Hello, World!");
         id: 5,
         markdownContent: `
 # 新功能：支持视频播放！
-![视频封面](https://zh.marinabaysands.com/content/dam/marinabaysands/guides/guides-landing/masthead.jpg)
+![视频封面](https://placehold.co/600x400/5A6468/FFFFFF?text=视频封面)
 
 现在，您可以在文章中嵌入视频。我们通过检查链接的后缀（如 .mp4）来自动渲染视频播放器。只需使用标准的图片语法即可！
 
@@ -104,7 +104,6 @@ console.log("Hello, World!");
     `
     },
     // --- 在这里复制粘贴以上结构以添加更多文章 ---
-    // --- 备注: 如果使用外部图片链接，请确保已在 next.config.js 中配置相应的 image domains ---
 ];
 
 // --- 辅助函数：从Markdown中解析标题和图片 ---
@@ -222,14 +221,8 @@ const ArticleCard = ({ article, onClick }: { article: { id: number; markdownCont
             onClick={onClick}
         >
             {imageUrl ? (
-                // [优化] 使用 Next.js Image 组件
-                <Image 
-                    src={imageUrl} 
-                    alt={title} 
-                    width={600} 
-                    height={400} 
-                    className="w-full h-48 object-cover"
-                />
+                // [还原] 使用原生 img 标签
+                <img src={imageUrl} alt={title} className="w-full h-48 object-cover" onError={(e) => (e.currentTarget.src = "https://placehold.co/600x400?text=Image+Not+Found")}/>
             ) : (
                 <div className="w-full h-48 bg-gray-700 flex items-center justify-center">
                     <span className="text-gray-400">无封面图片</span>
@@ -295,20 +288,8 @@ const ArticleModal = ({ article, onClose }: { article: { id: number; markdownCon
                                     );
                                 }
                                 // 否则，渲染为普通图片
-                                // [优化] 使用 Next.js Image 组件
-                                if (typeof props.src === 'string') {
-                                    return (
-                                        <Image 
-                                            src={props.src} 
-                                            alt={props.alt || '文章中的图片'} 
-                                            width={800} 
-                                            height={600}
-                                            style={{ width: '100%', height: 'auto' }}
-                                            className="rounded-lg"
-                                        />
-                                    );
-                                }
-                                return null;
+                                // [还原] 使用原生 img 标签
+                                return <img {...props} />;
                             },
                         }}
                     >
