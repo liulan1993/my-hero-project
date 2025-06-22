@@ -1696,7 +1696,7 @@ const infoSectionData2 = {
         <>
             溯源式体检
             <br />
-            Traceability-based Check-up
+            In-Depth Health
         </>
     ),
     description: (
