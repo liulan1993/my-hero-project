@@ -1398,7 +1398,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
+              src="https://zh.apex-elite-service.com/wangzhantupian/111.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1415,7 +1415,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/222.jpg" 
+              src="https://zh.apex-elite-service.com/wangzhantupian/222.jpg" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1432,7 +1432,7 @@ const timelineData = [
           <p className="text-neutral-200 mb-4 text-base md:text-lg">今天在 Aceternity 上部署了5个新组件。</p>
           <div>
             <Image 
-              src="https://cdn.apex-elite-service.com/wangzhantupian/333.jpg" 
+              src="https://zh.apex-elite-service.com/wangzhantupian/333.jpg" 
               alt="新组件预览" 
               width={500}
               height={300}
@@ -1449,14 +1449,14 @@ const projectShowcaseData = [
     name: "Plum Cave",
     quote: '一个云备份解决方案，它采用 "ChaCha20 + Serpent-256 CBC + HMAC-SHA3-512" 认证加密方案进行数据加密，并使用 ML-KEM-1024 进行抗量子密钥交换。',
     designation: "Next.js 项目",
-    src: "https://cdn.apex-elite-service.com/wangzhantupian/1.jpg",
+    src: "https://zh.apex-elite-service.com/wangzhantupian/1.png",
     link: "https://plum-cave.netlify.app/",
   },
   {
     name: "Namer UI",
     quote: "一个现代、美观且独特的可重用 TypeScript 组件的全面集合，专为 Next.js 打造。",
     designation: "Next.js 项目",
-    src: "https://cdn.apex-elite-service.com/wangzhantupian/2.jpg",
+    src: "https://zh.apex-elite-service.com/wangzhantupian/2.png",
     link: "https://namer-ui.netlify.app/",
   },
   {
@@ -1516,7 +1516,7 @@ const infoSectionData2 = {
 
 const scrollAnimationPages = [
   {
-    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/hezuohuoban.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1526,7 +1526,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/anxinbaozhang.jpg',
     leftContent: {
       heading: '安心保障',
       description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
@@ -1534,7 +1534,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/fuwuliucheng.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1544,7 +1544,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://cdn.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/jikeqicheng.jpg',
     leftContent: {
       heading: '即刻启程',
       description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
@@ -1951,10 +1951,10 @@ const CustomFooter = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const socialIcons = [
-      { name: '小红书', icon: <XiaohongshuIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2' },
-      { name: '知乎', icon: <ZhihuIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
-      { name: '抖音', icon: <DouyinIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.douyin.com' },
-      { name: '哔哩哔哩', icon: <BilibiliIcon className="h-5 w-5" />, qrcode: 'https://cdn.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.bilibili.com' },
+      { name: '小红书', icon: <XiaohongshuIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2' },
+      { name: '知乎', icon: <ZhihuIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
+      { name: '抖音', icon: <DouyinIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.douyin.com' },
+      { name: '哔哩哔哩', icon: <BilibiliIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.bilibili.com' },
     ];
 
     const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -1981,7 +1981,7 @@ const CustomFooter = () => {
             <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
             <div className="mb-8 w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center p-2">
               <Image
-                src="https://cdn.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
+                src="https://zh.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
                 alt="官方公众号二维码"
                 width={280}
                 height={280}
