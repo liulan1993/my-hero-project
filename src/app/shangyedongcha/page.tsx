@@ -69,6 +69,8 @@ console.log("Hello, World!");
 ## 人工智能
 人工智能正在改变各个行业，从医疗保健到金融服务。
 
+![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
+
 ## 区块链
 区块链技术以其去中心化和安全的特性，为数字交易提供了新的可能性。
 
@@ -86,6 +88,7 @@ console.log("Hello, World!");
 
 - 清晨的阳光
 - 一杯香浓的咖啡
+![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
 - 一本好书
 
 生活的美好在于发现。
