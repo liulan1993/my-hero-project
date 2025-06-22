@@ -965,6 +965,7 @@ interface InfoSectionProps {
     primaryImageSrc: string;
     secondaryImageSrc: string;
     reverseLayout?: boolean;
+    className?: string; // 新增: 允许传入自定义样式
 }
 
 const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
@@ -973,6 +974,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
     primaryImageSrc,
     secondaryImageSrc,
     reverseLayout = false,
+    className, // 新增: 获取自定义样式
 }) => {
     const containerVariants: Variants = {
         hidden: {},
@@ -997,7 +999,8 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 
 
     return (
-        <section className="relative py-24 md:py-32 bg-transparent overflow-hidden">
+        // 修改: 使用 cn 函数合并默认样式和传入的自定义样式
+        <section className={cn("relative py-24 md:py-32 bg-transparent overflow-hidden", className)}>
             <div className="container max-w-[1220px] w-full px-6 md:px-10 relative z-10 mx-auto">
                 <motion.div
                      className={`grid grid-cols-1 gap-16 md:gap-8 w-full items-center ${layoutClasses}`}
@@ -2550,11 +2553,15 @@ export default function HomePage() {
             </div>
 
             <div id="integration-section">
-                <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
+                <InfoSectionWithMockup
+                    {...infoSectionData2}
+                    reverseLayout={true}
+                    className="pt-24 md:pt-32 pb-0" // 保留顶部padding，移除底部padding
+                />
             </div>
 
             {/* 需求 1: 插入定价方案板块 */}
-            <div className="py-24 px-8 flex flex-col items-center">
+            <div className="pt-0 px-8 flex flex-col items-center">
               <PricingSection />
             </div>
 
