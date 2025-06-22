@@ -754,7 +754,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   return (
     <div className="w-full bg-transparent font-[Helvetica] md:px-10" ref={containerRef}>
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">企业服务(Corporate Services)</h2>
+        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">企业服务 Corporate Services</h2>
         <p className="text-neutral-300 max-w-sm text-base md:text-lg">我们深知，在新加坡设立公司，是您全球战略的关键一步，而非一次简单的流程代办。Apex提供的，是从顶层视角出发，为您的商业大厦搭建最稳固、合规且具前瞻性的战略基石，并为后续的持续运营保驾护航。</p>
       </div>
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
@@ -846,7 +846,9 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
     <div className="w-full mx-auto font-[Helvetica] py-20 text-white">
       <div className="mb-12 text-right">
         <h2 className="mb-4 text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
-          留学教育(Study Abroad Education)
+          留学教育
+          <br />
+          Study Abroad Education
         </h2>
         <p className="text-neutral-300 ml-auto max-w-lg text-base md:text-lg">
           我们为客户提供卓越的服务，以实现教育目标并取得成功。
@@ -1483,7 +1485,9 @@ const PricingSection = () => {
                     <div className="flex flex-col gap-2">
                         {/* 需求 2: 字体大小和格式与“学校申请支持”一致 */}
                         <h3 className="text-2xl md:text-3xl font-semibold text-white">
-                            核心服务详情(Core Service Details)
+                            核心服务详情
+                            <br />
+                            Core Service Details
                         </h3>
                         {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                         <p className="max-w-2xl text-base md:text-lg text-neutral-300">
@@ -1678,13 +1682,13 @@ const infoSectionData1 = {
     ),
     description: (
         <>
-            我们相信，您的健康，是承载事业版图与人生品质的终极资产
+            我们相信，健康是承载事业版图与人生品质的终极资产
             <br />
             Apex传承始于“生命管理”的独特基因，我们不提供诊疗
             <br />
             而是作为您最值得信赖的健康战略家与医疗资源导航员
             <br />
-            致力于将您对健康的“未知”与“被动”，转化为“已知”与“主动”
+            致力于助您主动掌控健康，预见未来
         </>
     ),
     primaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/jiankangguanli.jpg',
@@ -1703,9 +1707,9 @@ const infoSectionData2 = {
         <>
             每年的体检报告，不应只是一份被存档的文件
             <br />
-            我们相信，唯将历年数据串联起来，才能发现健康趋势的真正秘密
+            唯将历年数据串联起来，才能发现健康趋势的真正秘密
             <br />
-            Apex独特有溯源式体检服务，致力于为您解读这些“生命数据”
+            Apex独特有溯源式体检服务，为您解读这些“生命数据”
             <br />
             将未来的不确定性，转化为尽在掌握的主动权
         </>
