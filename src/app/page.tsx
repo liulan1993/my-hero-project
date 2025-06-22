@@ -1396,7 +1396,7 @@ MemoizedZap.displayName = 'ZapIcon';
 const features = [
   { icon: MemoizedCpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
   { icon: MemoizedShieldCheck, title: "安全可靠", description: "先进的保护措施，让您高枕无忧。" },
-  { icon: MemoizedLayers, title: "模块化设计", description: "轻松与现有架构集成。" },
+  { icon: MemoizedLayers, title: "模块化设计", description: "链接中新两地顶尖医生资源，我们为您提供从行程安排到专家预约、双语陪诊在内的一站式跨境医疗服务。" },
   { icon: MemoizedZap, title: "闪电响应", description: "对每个命令都能做出即时响应。" },
 ];
 
