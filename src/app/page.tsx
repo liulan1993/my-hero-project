@@ -1217,12 +1217,12 @@ const CtaWithGallerySection = () => {
 
                                     <div className="mt-6 flex justify-between items-center">
                                     <DialogClose asChild>
-                                        <Button variant="outline">Skip</Button>
+                                        <Button variant="outline">返回</Button>
                                     </DialogClose>
 
                                     {step < steps.length - 1 ? (
                                         <Button variant="outline" onClick={next}>
-                                        Continue
+                                        继续
                                         <ArrowRight className="ml-2 h-4 w-4" />
                                         </Button>
                                     ) : (
