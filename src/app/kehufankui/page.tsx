@@ -181,7 +181,7 @@ function SubmissionForm() {
         if (selectedFiles) {
             const newFiles = Array.from(selectedFiles);
             const validFiles: File[] = [];
-            const newPreviewUrls: string[] = [];
+            // const newPreviewUrls: string[] = [];  // <--- 移除此行
 
             let errorFound = false;
             for(const file of newFiles) {
@@ -300,7 +300,7 @@ function SubmissionForm() {
 
             const result = await submissionResponse.json();
             setStatus('success');
-            setMessage(result.message || '提交成功！感谢您的稿件。');
+setMessage(result.message || '提交成功！感谢您的稿件。');
             setContent('');
             setFiles([]); // 清空文件数组
             setImagePreviewUrls([]); // 清空预览
