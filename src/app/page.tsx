@@ -71,16 +71,16 @@ const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => 
 Link.displayName = "Link";
 
 // ============================================================================
-// “开场动画/门” - SVG 自动扫描光效文字组件
+// “开场动画/门” - SVG 自动扫描光效文字组件 (已修改为实体样式)
 // ============================================================================
 const TextShineEffect = ({
   text,
-  subtitle, // 新增：副标题
+  subtitle,
   scanDuration = 4,
   onClick
 }: {
   text: string;
-  subtitle?: string; // 新增：副标题属性
+  subtitle?: string;
   scanDuration?: number;
   onClick?: () => void;
 }) => {
@@ -88,13 +88,13 @@ const TextShineEffect = ({
     <svg
       width="100%"
       height="100%"
-      // 修改：调整 viewBox 以容纳副标题
-      viewBox="0 0 400 200" 
+      viewBox="0 0 400 200"
       xmlns="http://www.w3.org/2000/svg"
       className="select-none cursor-pointer"
       onClick={onClick}
     >
       <defs>
+        {/* 这部分是定义颜色和光效，保持不变 */}
         <linearGradient id="textGradient">
             <stop offset="0%" stopColor="#8b5cf6" />
             <stop offset="25%" stopColor="#3b82f6" />
@@ -127,86 +127,55 @@ const TextShineEffect = ({
           />
         </mask>
       </defs>
-      {/* 主标题 */}
+
+      {/* 主标题 (例如 "Apex") */}
+      {/* 第一层: 白色实体字作为底色 */}
       <text
         x="50%"
-        y="45%" // 修改：向上移动
+        y="45%"
         textAnchor="middle"
         dominantBaseline="middle"
-        strokeWidth="0.5"
-        // 【需求 1 修改】: 优化移动端字体大小
-        className="fill-transparent stroke-neutral-700 font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
-        style={{ opacity: 0.5 }}
+        fill="white"
+        className="font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
       >
         {text}
       </text>
-      <motion.text
-        x="50%"
-        y="45%" // 修改：向上移动
-        textAnchor="middle"
-        dominantBaseline="middle"
-        strokeWidth="0.5"
-        // 【需求 1 修改】: 优化移动端字体大小
-        className="fill-transparent stroke-neutral-500 font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
-        initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
-        animate={{ strokeDashoffset: 0 }}
-        transition={{ duration: 3, ease: "easeInOut" }}
-      >
-        {text}
-      </motion.text>
+      {/* 第二层: 带闪光效果的彩色字，叠在上面 */}
       <text
         x="50%"
-        y="45%" // 修改：向上移动
+        y="45%"
         textAnchor="middle"
         dominantBaseline="middle"
-        stroke="url(#textGradient)"
-        strokeWidth="0.5"
+        fill="url(#textGradient)"
         mask="url(#textMask)"
-        // 【需求 1 修改】: 优化移动端字体大小
-        className="fill-transparent font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
+        className="font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
       >
         {text}
       </text>
 
-      {/* 副标题 (如果存在) */}
+      {/* 副标题 (例如 "轻触，开启非凡。") */}
       {subtitle && (
         <>
+          {/* 第一层: 白色实体字作为底色 */}
           <text
             x="50%"
-            y="70%" // 新增：副标题位置
+            y="70%"
             textAnchor="middle"
             dominantBaseline="middle"
-            strokeWidth="0.5"
-            // 【需求 1 修改】: 优化移动端字体大小
-            className="fill-transparent stroke-neutral-700 font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
-            style={{ opacity: 0.5 }}
+            fill="white"
+            className="font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
           >
             {subtitle}
           </text>
-          <motion.text
-            x="50%"
-            y="70%" // 新增：副标题位置
-            textAnchor="middle"
-            dominantBaseline="middle"
-            strokeWidth="0.5"
-            // 【需求 1 修改】: 优化移动端字体大小
-            className="fill-transparent stroke-neutral-500 font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
-            initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
-            animate={{ strokeDashoffset: 0 }}
-            transition={{ duration: 3, ease: "easeInOut", delay: 0.5 }} // 延迟出现
-          >
-            {subtitle}
-          </motion.text>
+          {/* 第二层: 带闪光效果的彩色字，叠在上面 */}
           <text
             x="50%"
-            y="70%" // 新增：副标题位置
+            y="70%"
             textAnchor="middle"
             dominantBaseline="middle"
-            stroke="url(#textGradient)"
-            strokeWidth="0.5"
+            fill="url(#textGradient)"
             mask="url(#textMask)"
-            // 【需求 1 修改】: 优化移动端字体大小
-            className="fill-transparent font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
+            className="font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
           >
             {subtitle}
           </text>
@@ -785,8 +754,8 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   return (
     <div className="w-full bg-transparent font-[Helvetica] md:px-10" ref={containerRef}>
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">留学教育&Study Abroad Education</h2>
-        <p className="text-neutral-300 max-w-sm text-base md:text-lg">植根新加坡，兼具中国基因。中新团队双语服务，沟通无碍，执行高效。</p>
+        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">企业服务(Corporate Services)</h2>
+        <p className="text-neutral-300 max-w-sm text-base md:text-lg">我们深知，在新加坡设立公司，是您全球战略的关键一步，而非一次简单的流程代办。Apex提供的，是从顶层视角出发，为您的商业大厦搭建最稳固、合规且具前瞻性的战略基石，并为后续的持续运营保驾护航。</p>
       </div>
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
         {data.map((item, index) => (
@@ -851,7 +820,7 @@ const HalomotButton: React.FC<HalomotButtonProps> = ({
 HalomotButton.displayName = "HalomotButton";
 
 type Testimonial = {
-  name: string; quote: string; designation: string; src: string; link?: string;
+  name: string; buttonLabel: string; quote: string; designation: string; src: string; link?: string;
 };
 
 const ImageContainer = ({ src, alt }: { src: string; alt: string; }) => (
@@ -877,7 +846,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
     <div className="w-full mx-auto font-[Helvetica] py-20 text-white">
       <div className="mb-12 text-right">
         <h2 className="mb-4 text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
-          客户案例&Case Studies
+          留学教育(Study Abroad Education)
         </h2>
         <p className="text-neutral-300 ml-auto max-w-lg text-base md:text-lg">
           我们为各行各业的客户提供卓越的服务，帮助他们实现业务目标并取得成功。
@@ -931,12 +900,13 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
             {testimonials.map((testimonial, index) => (
               <HalomotButton
                 key={testimonial.name}
-                inscription={testimonial.name}
+                inscription={testimonial.buttonLabel} // <-- 修改这里
                 onClick={() => setActive(index)}
                 padding="0.6rem 1.2rem" // 调整内边距使按钮变小
                 backgroundColor={active === index ? '#4a148c' : '#161616'} // 高亮当前选中的项目
                 hoverTextColor='#fff'
                 gradient='linear-gradient(to right, #603dec, #a123f4)'
+                fixedWidth="180px" // <-- 添加这一行
               />
             ))}
             <HalomotButton 
@@ -947,6 +917,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               backgroundColor='#161616' 
               hoverTextColor='#fff' 
               gradient='linear-gradient(to right, #603dec, #a123f4)'
+              fixedWidth="180px" // <-- 添加这一行
             />
           </div>
         </div>
@@ -1093,20 +1064,20 @@ const CtaWithGallerySection = () => {
 
     const steps = [
       {
-        title: "Let's Get Started",
-        description: "Kick off your experience with a brief introduction to our toolkit.",
+        title: "我们从深度对话开始",
+        description: "在Apex，任何伟大的合作都始于一次不设时限的深度对话。我们坚持先聆听您的故事与蓝图，而非直接提供方案。因为我们坚信，真正的解决方案，源自对您独特需求的深刻理解。",
       },
       {
-        title: "Designed For Flexibility",
-        description: "Drag, drop, and build with fully customizable components.",
+        title: "您的专属战略路径图",
+        description: "我们不提供标准化的“产品套餐”。无论是您的商业架构、子女的教育路径，还是家庭的健康规划，我们都将为您量身定制一套清晰、可行、且完全符合您长远目标的战略路径图。",
       },
       {
-        title: "Scalable Codebase",
-        description: "Every block is built to be reusable and scalable with your projects.",
+        title: "从0到1，从1到无限",
+        description: "我们不仅陪伴您完成从0到1的落地，更致力于在您从1走向无限的征途中，持续提供战略支持。我们的服务体系具有高度的延展性，能伴随您事业与家族的成长，不断演进。",
       },
       {
-        title: "Join Our Community",
-        description: "Get help, share ideas, and grow with developers worldwide.",
+        title: "J欢迎加入一个值得信赖的生态圈",
+        description: "选择Apex，意味着您不仅选择了一家服务机构，更是加入了一个由顶尖企业家、行业专家和稀缺资源构成的生态网络。欢迎与我们联系，开启您在新加坡的全新可能。",
       },
     ];
   
@@ -1139,17 +1110,17 @@ const CtaWithGallerySection = () => {
                     viewport={{ once: true, amount: 0.3 }}
                 >
                     <motion.h2 variants={itemVariants} className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
-                        加入我们，共创未来
+                        开启您在新加坡的全新篇章
                     </motion.h2>
                     <motion.p variants={itemVariants} className="text-neutral-300 max-w-2xl mx-auto mb-8 text-base md:text-lg">
-                        探索我们的创新解决方案，了解我们如何帮助全球客户取得成功。立即开始，释放您的全部潜力。
+                        一切伟大的事业，都始于一次深度的战略对话。欢迎预约与我们进行一对一沟通，共同擘画您在新加坡的商业与家族蓝图。
                     </motion.p>
                     <motion.div variants={itemVariants} className="flex justify-center">
                       {/* 修复: 添加 onOpenChange 以便在关闭时重置步骤 */}
                       <Dialog onOpenChange={(open) => !open && setStep(0)}>
                         <DialogTrigger asChild>
                            <HalomotButton 
-                             inscription="Start Scaling Today" 
+                             inscription="远见之上，从容有道" 
                              onClick={() => {}} 
                              backgroundColor='#161616' 
                              hoverTextColor='#fff' 
@@ -1174,9 +1145,9 @@ const CtaWithGallerySection = () => {
                                         className="w-12 h-12 rounded-full border-4 border-neutral-800"
                                         unoptimized
                                     />
-                                    <h2 className="text-lg font-medium">Origin UI Onboarding</h2>
+                                    <h2 className="text-lg font-medium">我们如何与您同行</h2>
                                     <p className="text-sm text-neutral-400">
-                                        Explore our features step-by-step to get the best out of your experience.
+                                        我们提供的，是一种超越传统服务的、专为顶尖人士设计的全新解决方案。
                                     </p>
                                     <div className="flex flex-col gap-3 mt-6">
                                         {steps.map((s, index) => (
@@ -1486,26 +1457,21 @@ CardContent.displayName = "CardContent";
 const PricingSection = () => {
     const plans = [
       {
-        name: "专业版 (Pro)",
-        description: "适合需要更强功能和自动化的成长型企业。",
+        name: "健康数据纵向分析",
+        description: "为您解读历年体检报告中隐藏的“趋势密码”，将孤立的数据点整合成清晰的动态趋势图，赋能您与医生进行更高质量的沟通。",
         features: [
-          "包含所有入门版功能",
-          "不限项目数量",
-          "高级分析",
-          "团队协作 (最多10个用户)",
-          "优先邮件支持",
+          "历年体检报告数据整合",
+          "关键健康指标趋势分析",
+          "深度洞察报告解读",
         ],
       },
       {
-        name: "企业版 (Enterprise)",
-        description: "为有特殊需求的大型组织提供定制解决方案。",
+        name: "溯源式体检规划",
+        description: "我们不仅是定制，更是溯源。通过追溯您健康趋势、家族史与生活方式的源头，我们为您设计真正针对“根本问题”的年度体检方案，让筛查更具前瞻性与目的性。",
         features: [
-          "包含所有专业版功能",
-          "不限用户数量",
-          "专属客户经理",
-          "单点登录 (SSO)",
-          "服务水平协议 (SLA)",
-          "私有化部署选项",
+          "溯源式年度方案设计",
+          "高风险项深度筛查建议",
+          "顶尖体检机构预约协助",
         ],
       },
     ];
@@ -1517,11 +1483,11 @@ const PricingSection = () => {
                     <div className="flex flex-col gap-2">
                         {/* 需求 2: 字体大小和格式与“学校申请支持”一致 */}
                         <h3 className="text-2xl md:text-3xl font-semibold text-white">
-                            满足各种需求的计划
+                            核心服务详情(Core Service Details)
                         </h3>
                         {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                         <p className="max-w-2xl text-base md:text-lg text-neutral-300">
-                            选择最适合您业务的计划。可随时更换。
+                            您可以清晰地看到我们提供的不同服务计划，帮助您选择最适合您的需求的方案。
                         </p>
                     </div>
                 </div>
@@ -1598,18 +1564,18 @@ MemoizedZap.displayName = 'ZapIcon';
 
 // 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
-  { icon: MemoizedCpu, title: "性能卓越", description: "在任何情况下都能实现超快速的数据处理。" },
-  { icon: MemoizedShieldCheck, title: "安全可靠", description: "先进的保护措施，让您高枕无忧。" },
-  { icon: MemoizedLayers, title: "模块化设计", description: "都始于一次深度的战略对话。" }, // 修改文本内容
-  { icon: MemoizedZap, title: "闪电响应", description: "对每个命令都能做出即时响应。" },
+  { icon: MemoizedCpu, title: "企业服务", description: "提供顶层架构设计、准证规划到年度财税与人力资源支持一站式企业运营解决方案" },
+  { icon: MemoizedShieldCheck, title: "健康管理", description: "中新两地顶尖医生资源，提供从行程安排到专家预约、双语陪诊一站式跨境医疗" },
+  { icon: MemoizedLayers, title: "溯源式体检", description: "通过深度解读您的历年健康数据，我们助您洞悉并主动管理未来的风险与趋势" }, // 修改文本内容
+  { icon: MemoizedZap, title: "留学教育", description: "我们为您的孩子匹配最适合其天赋成长的土壤与路径" },
 ];
 
 const timelineData = [
     {
-      title: "教育路径规划",
+      title: "公司注册",
       content: (
         <div>
-          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。</p>
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
           <div>
             <Image 
               src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
@@ -1623,10 +1589,10 @@ const timelineData = [
       ),
     },
     {
-      title: "企业注册与咨询",
+      title: "准证申请",
       content: (
         <div>
-          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">快点来企业注册啊。</p>
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">为创始人、高管及家人量身定制整体准证方案（EP、DP等），通过深度评估与战略规划，极大化成功率，提供核心身份保障。</p>
           <div>
             <Image 
               src="https://cdn.apex-elite-service.com/wangzhantupian/111.jpg" 
@@ -1640,10 +1606,10 @@ const timelineData = [
       ),
     },
     {
-      title: "学校申请支持",
+      title: "财务税务合规",
       content: (
         <div>
-          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。</p>
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供专业的年度财税申报、财税合规与规划服务，我们不仅确保您的企业稳健合规，更助力您充分享受新加坡的政策优势。</p>
           <div>
             <Image 
               src="https://cdn.apex-elite-service.com/wangzhantupian/222.jpg" 
@@ -1657,10 +1623,10 @@ const timelineData = [
       ),
     },
     {
-      title: "长期成长陪伴",
+      title: "人力资源支持",
       content: (
         <div>
-          <p className="text-neutral-200 mb-4 text-base md:text-lg">今天在 Aceternity 上部署了5个新组件。</p>
+          <p className="text-neutral-200 mb-4 text-base md:text-lg">提供从核心人才招聘、名义雇主（EOR）到跨境薪酬合规的一站式人力资源解决方案，助您在新加坡高效、合规地组建并管理顶尖团队。</p>
           <div>
             <Image 
               src="https://cdn.apex-elite-service.com/wangzhantupian/333.jpg" 
@@ -1677,22 +1643,25 @@ const timelineData = [
 
 const projectShowcaseData = [
   {
-    name: "Plum Cave",
-    quote: '一个云备份解决方案，它采用 "ChaCha20 + Serpent-256 CBC + HMAC-SHA3-512" 认证加密方案进行数据加密，并使用 ML-KEM-1024 进行抗量子密钥交换。',
+    name: "教育路径规划",
+    buttonLabel: "教育蓝图", // <-- 新增：按钮上显示的文字
+    quote: '我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。',
     designation: "Next.js 项目",
     src: "https://cdn.apex-elite-service.com/wangzhantupian/1.jpg",
     link: "https://plum-cave.netlify.app/",
   },
   {
-    name: "Namer UI",
-    quote: "一个现代、美观且独特的可重用 TypeScript 组件的全面集合，专为 Next.js 打造。",
+    name: "学校申请支持",
+    buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
+    quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
     src: "https://cdn.apex-elite-service.com/wangzhantupian/2.jpg",
     link: "https://namer-ui.netlify.app/",
   },
   {
-    name: "Namer UI For Vue",
-    quote: "一个为 Vue 3 打造的可定制、可重用的 TypeScript 和原生 CSS 组件集合。",
+    name: "长期成长陪伴",
+    buttonLabel: "全程护航", // <-- 新增：按钮上显示的文字
+    quote: "我们提供超越申请的长期陪伴服务。作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
     designation: "Vue 项目",
     src: "https://placehold.co/1200x900/161616/ffffff?text=Namer+UI+For+Vue",
     link: "https://namer-ui-for-vue.netlify.app/",
@@ -1702,18 +1671,20 @@ const projectShowcaseData = [
 const infoSectionData1 = {
     title: (
         <>
-            智慧洞察,
+            健康管理
             <br />
-            为您呈现
+            Health Management
         </>
     ),
     description: (
         <>
-            每周一早晨，您的虚拟个人分析师会将精心制作的简报
+            我们相信，您的健康，是承载事业版图与人生品质的终极资产。
             <br />
-            直接发送到您的收件箱，重点介绍未来一周
+            Apex传承始于“生命管理”的独特基因，我们不提供诊疗；
             <br />
-            值得关注的重要事件和财报。
+            而是作为您最值得信赖的健康战略家与医疗资源导航员，
+            <br />
+            致力于将您对健康的“未知”与“被动”，转化为“已知”与“主动”。
         </>
     ),
     primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/newsletter-desktop-2_4x.e594b737.png',
@@ -1723,18 +1694,20 @@ const infoSectionData1 = {
 const infoSectionData2 = {
     title: (
         <>
-            无缝集成,
+            溯源式体检
             <br />
-            强大扩展
+            Traceability-based Check-up
         </>
     ),
     description: (
         <>
-            我们的平台设计灵活，可以轻松与您现有的
+            每年的体检报告，不应只是一份被存档的文件。
             <br />
-            工作流程和工具集成。无论您的团队规模如何，
+            我们相信，唯有将历年数据串联起来，才能发现您健康趋势的真正秘密。
             <br />
-            都能够无缝扩展，满足您的业务需求。
+            Apex独特的溯源式体检服务，致力于为您解读这些“生命数据”，
+            <br />
+            将未来的不确定性，转化为尽在掌握的主动权。
         </>
     ),
     primaryImageSrc: 'https://www.fey.com/marketing/_next/static/media/integrations-desktop-2_4x.0354ddce.png',
@@ -1744,20 +1717,20 @@ const infoSectionData2 = {
 // 新增: FAQ 数据
 const faqData = [
     {
-        question: "你们的平台有何独特之处？",
-        answer: "我们的平台凭借其直观的设计、强大的自动化功能和无缝的集成选项而脱颖而出。我们专注于创造一种将简洁性与高级功能相结合的用户体验。",
+        question: "中新跨境就医服务(China-Singapore Cross-Border Medical Service)",
+        answer: "无论是您希望从新加坡回到中国寻求顶级诊疗，还是从中国来到新加坡链接全球领先的医疗资源，我们都能为您提供无缝的跨境支持，打破地域与信息壁垒。",
     },
     {
-        question: "我也不知道有什么独特之处",
-        answer: "我们平台的独特之处在于其灵活性和可扩展性。它可以根据您的具体需求进行定制，并且能够随着您的业务增长而扩展。",
+        question: "一站式行程与陪诊(One-Stop Logistics & Medical Escort)",
+        answer: "我们为您处理从机票酒店预订、地面交通到专业双语陪诊的全程细节，让您可以完全专注于康复与治疗，心无旁骛。",
     },
     {
-        question: "定价结构是怎样的？",
-        answer: "我们提供灵活、透明的定价等级，旨在根据您的需求进行扩展。每个等级都包含一组核心功能，随着等级的提升，功能也会增加。所有计划都从14天的免费试用开始。",
+        question: "顶尖专家预约(Top Specialist Booking)",
+        answer: "凭借我们深耕两地的稀缺名医资源网络，我们将协助您预约到通常需要漫长等待的顶尖专家，为您赢得最宝贵的健康时机。",
     },
     {
-        question: "你们提供什么样的支持？",
-        answer: "我们通过多种渠道提供全面的支持。这包括24/7实时聊天、详细的文档、视频教程，以及为企业客户提供的专属客户经理。",
+        question: "全程住院与理赔支持(Inpatient & Claims Support)",
+        answer: "我们的服务将延伸至您诊疗结束之后，提供包括住院流程协助、多学科会诊推进以及关键的保险理赔流程支持等全面的后续保障。",
     },
 ];
 
@@ -2517,7 +2490,7 @@ export default function HomePage() {
                         为您而来，不止于此
                     </h1>
                     <p className="text-neutral-300 max-w-2xl text-base md:text-lg">
-                        我们深知您当下的每一步在未来都至关重要。
+                        Apex是一家总部位于新加坡的综合性专业服务机构。我们深刻理解全球高净值人士与出海企业所面临的机遇与挑战，矢志成为您在新加坡的首席合作伙伴，提供从商业顶层设计、子女教育规划到主动式健康管理的无缝衔接解决方案。
                     </p>
                     </div>
                 </div>
