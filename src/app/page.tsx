@@ -1498,7 +1498,7 @@ const PricingSection = () => {
                             key={plan.name}
                             className="flex h-full flex-col bg-transparent border-neutral-700"
                         >
-                            <CardHeader className="p-6 pb-4">
+                            <CardHeader className="p-6 pb-4 text-center">
                                 {/* 需求 3: 字体大小和格式与“有时候，眼见为实。”一致 */}
                                 <CardTitle className="text-2xl font-bold text-white">{plan.name}</CardTitle>
                                 {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
@@ -1506,7 +1506,7 @@ const PricingSection = () => {
                             </CardHeader>
                             <CardContent className="flex flex-1 flex-col justify-between gap-6 p-6 pt-0">
                                 <div className="flex-grow">
-                                    <div className="flex flex-col gap-4 mt-4">
+                                    <div className="flex flex-col gap-4 mt-4 items-center">
                                         {plan.features.map((feature) => (
                                             <div key={feature} className="flex flex-row items-start gap-3">
                                                 <Check className="h-5 w-5 flex-shrink-0 text-green-500 mt-1" />
