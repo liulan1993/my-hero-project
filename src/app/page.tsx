@@ -135,7 +135,7 @@ const TextShineEffect = ({
         dominantBaseline="middle"
         strokeWidth="0.5"
         // 【需求 1 修改】: 优化移动端字体大小
-        className="fill-transparent stroke-neutral-700 font-[Helvetica] text-5xl sm:text-6xl md:text-7xl font-bold"
+        className="fill-transparent stroke-neutral-700 font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
         style={{ opacity: 0.5 }}
       >
         {text}
@@ -147,7 +147,7 @@ const TextShineEffect = ({
         dominantBaseline="middle"
         strokeWidth="0.5"
         // 【需求 1 修改】: 优化移动端字体大小
-        className="fill-transparent stroke-neutral-500 font-[Helvetica] text-5xl sm:text-6xl md:text-7xl font-bold"
+        className="fill-transparent stroke-neutral-500 font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
         initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
         animate={{ strokeDashoffset: 0 }}
         transition={{ duration: 3, ease: "easeInOut" }}
@@ -163,7 +163,7 @@ const TextShineEffect = ({
         strokeWidth="0.5"
         mask="url(#textMask)"
         // 【需求 1 修改】: 优化移动端字体大小
-        className="fill-transparent font-[Helvetica] text-5xl sm:text-6xl md:text-7xl font-bold"
+        className="fill-transparent font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
       >
         {text}
       </text>
@@ -178,7 +178,7 @@ const TextShineEffect = ({
             dominantBaseline="middle"
             strokeWidth="0.5"
             // 【需求 1 修改】: 优化移动端字体大小
-            className="fill-transparent stroke-neutral-700 font-[Helvetica] text-lg sm:text-xl md:text-2xl font-semibold"
+            className="fill-transparent stroke-neutral-700 font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
             style={{ opacity: 0.5 }}
           >
             {subtitle}
@@ -190,7 +190,7 @@ const TextShineEffect = ({
             dominantBaseline="middle"
             strokeWidth="0.5"
             // 【需求 1 修改】: 优化移动端字体大小
-            className="fill-transparent stroke-neutral-500 font-[Helvetica] text-lg sm:text-xl md:text-2xl font-semibold"
+            className="fill-transparent stroke-neutral-500 font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
             initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
             animate={{ strokeDashoffset: 0 }}
             transition={{ duration: 3, ease: "easeInOut", delay: 0.5 }} // 延迟出现
@@ -206,7 +206,7 @@ const TextShineEffect = ({
             strokeWidth="0.5"
             mask="url(#textMask)"
             // 【需求 1 修改】: 优化移动端字体大小
-            className="fill-transparent font-[Helvetica] text-lg sm:text-xl md:text-2xl font-semibold"
+            className="fill-transparent font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
           >
             {subtitle}
           </text>
@@ -1516,9 +1516,9 @@ const PricingSection = () => {
                 <div className="flex flex-col items-center gap-6 text-center mt-10">
                     <div className="flex flex-col gap-2">
                         {/* 需求 2: 字体大小和格式与“学校申请支持”一致 */}
-                        <h2 className="text-2xl md:text-3xl font-semibold text-white">
+                        <h3 className="text-2xl md:text-3xl font-semibold text-white">
                             满足各种需求的计划
-                        </h2>
+                        </h3>
                         {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                         <p className="max-w-2xl text-base md:text-lg text-neutral-300">
                             选择最适合您业务的计划。可随时更换。
@@ -2484,8 +2484,8 @@ export default function HomePage() {
             <div className="w-full max-w-2xl px-4">
               {/* 修改：传入副标题 */}
               <TextShineEffect 
-                text="点我点我" 
-                subtitle="点击进入主页"
+                text="Apex" 
+                subtitle="轻触，开启非凡。"
                 scanDuration={4} 
                 onClick={handleEnter} 
               />
