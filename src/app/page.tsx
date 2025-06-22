@@ -2391,14 +2391,11 @@ export default function HomePage() {
             <InfoSectionWithMockup {...infoSectionData1} />
             
             {/* -------------------- 新增的 FAQ 区块 -------------------- */}
-            <div className="py-24 px-8 flex flex-col justify-center items-center bg-black/20">
+            <div className="py-24 px-8 flex flex-col justify-center items-center">
                 <div className="text-center mb-12">
                     <h2 className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         常见问题解答
                     </h2>
-                    <p className="text-neutral-300 max-w-2xl mx-auto text-base md:text-lg">
-                        在这里找到您最关心问题的答案。如果找不到您想要的答案，请随时与我们联系。
-                    </p>
                 </div>
                 <FaqSection items={faqData} className="w-full max-w-4xl"/>
             </div>
