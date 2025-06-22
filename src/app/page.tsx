@@ -134,8 +134,8 @@ const TextShineEffect = ({
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.5"
-        // 修改：优化移动端字体大小
-        className="fill-transparent stroke-neutral-700 font-[Helvetica] text-6xl md:text-7xl font-bold"
+        // 【需求 1 修改】: 优化移动端字体大小
+        className="fill-transparent stroke-neutral-700 font-[Helvetica] text-5xl sm:text-6xl md:text-7xl font-bold"
         style={{ opacity: 0.5 }}
       >
         {text}
@@ -146,8 +146,8 @@ const TextShineEffect = ({
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.5"
-        // 修改：优化移动端字体大小
-        className="fill-transparent stroke-neutral-500 font-[Helvetica] text-6xl md:text-7xl font-bold"
+        // 【需求 1 修改】: 优化移动端字体大小
+        className="fill-transparent stroke-neutral-500 font-[Helvetica] text-5xl sm:text-6xl md:text-7xl font-bold"
         initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
         animate={{ strokeDashoffset: 0 }}
         transition={{ duration: 3, ease: "easeInOut" }}
@@ -162,8 +162,8 @@ const TextShineEffect = ({
         stroke="url(#textGradient)"
         strokeWidth="0.5"
         mask="url(#textMask)"
-        // 修改：优化移动端字体大小
-        className="fill-transparent font-[Helvetica] text-6xl md:text-7xl font-bold"
+        // 【需求 1 修改】: 优化移动端字体大小
+        className="fill-transparent font-[Helvetica] text-5xl sm:text-6xl md:text-7xl font-bold"
       >
         {text}
       </text>
@@ -177,8 +177,8 @@ const TextShineEffect = ({
             textAnchor="middle"
             dominantBaseline="middle"
             strokeWidth="0.5"
-            // 修改：优化移动端字体大小
-            className="fill-transparent stroke-neutral-700 font-[Helvetica] text-xl md:text-2xl font-semibold"
+            // 【需求 1 修改】: 优化移动端字体大小
+            className="fill-transparent stroke-neutral-700 font-[Helvetica] text-lg sm:text-xl md:text-2xl font-semibold"
             style={{ opacity: 0.5 }}
           >
             {subtitle}
@@ -189,8 +189,8 @@ const TextShineEffect = ({
             textAnchor="middle"
             dominantBaseline="middle"
             strokeWidth="0.5"
-            // 修改：优化移动端字体大小
-            className="fill-transparent stroke-neutral-500 font-[Helvetica] text-xl md:text-2xl font-semibold"
+            // 【需求 1 修改】: 优化移动端字体大小
+            className="fill-transparent stroke-neutral-500 font-[Helvetica] text-lg sm:text-xl md:text-2xl font-semibold"
             initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
             animate={{ strokeDashoffset: 0 }}
             transition={{ duration: 3, ease: "easeInOut", delay: 0.5 }} // 延迟出现
@@ -205,8 +205,8 @@ const TextShineEffect = ({
             stroke="url(#textGradient)"
             strokeWidth="0.5"
             mask="url(#textMask)"
-            // 修改：优化移动端字体大小
-            className="fill-transparent font-[Helvetica] text-xl md:text-2xl font-semibold"
+            // 【需求 1 修改】: 优化移动端字体大小
+            className="fill-transparent font-[Helvetica] text-lg sm:text-xl md:text-2xl font-semibold"
           >
             {subtitle}
           </text>
@@ -2398,13 +2398,13 @@ export default function HomePage() {
                 />
             </div>
             
-            {/* 修改：根据图片要求，将 FAQ 区域移动到此处，并移除了标题 */}
-            <div className="py-24 px-8 flex flex-col justify-center items-center">
+            <InfoSectionWithMockup {...infoSectionData1} />
+            
+            {/* 【需求 2 & 3 修改】: 调整FAQ板块的上下高度, 并移动到此位置 */}
+            <div className="py-16 px-8 flex flex-col justify-center items-center">
                 <FaqSection items={faqData} className="w-full max-w-4xl"/>
             </div>
 
-            <InfoSectionWithMockup {...infoSectionData1} />
-            
             <div id="integration-section">
                 <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
             </div>
