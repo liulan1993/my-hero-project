@@ -2298,7 +2298,7 @@ const FaqItem = React.forwardRef<
         <h3
           className={cn(
             "text-base md:text-lg font-medium transition-colors duration-200 text-left",
-            "text-neutral-300", 
+            "text-white", // <-- 修改这里
             isOpen && "text-white"
           )}
         >
