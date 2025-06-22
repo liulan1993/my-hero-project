@@ -305,9 +305,11 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                                 {item.description}
                                                             </p>
                                                         </div>
-                                                        <Button size="sm" className="mt-10 text-base md:text-lg" variant="outline">
-                                                            商业洞察
-                                                        </Button>
+                                                        <Link href="https://singapore.apex-elite-service.com/shangyedongcha">
+                                                            <Button size="sm" className="mt-10 text-base md:text-lg" variant="outline">
+                                                                商业洞察
+                                                            </Button>
+                                                        </Link>
                                                     </div>
                                                     <div className="flex flex-col text-base md:text-lg h-full justify-end">
                                                         {item.items?.map((subItem) => (
