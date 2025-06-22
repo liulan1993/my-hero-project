@@ -114,7 +114,7 @@ const parseMarkdownPreview = (content: string) => {
 
     // 匹配所有 Markdown 图片/视频语法 (e.g., ![alt](src))
     const allMatches = [...content.matchAll(/!\[.*?\]\((.*?)\)/g)];
-    
+
     // 寻找第一个非视频的链接作为封面图
     const firstImage = allMatches.find(match => {
         const url = match[1];
@@ -149,7 +149,7 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
     geometry.center();
     return (
         <mesh geometry={geometry} position={position} rotation={rotation}>
-            <meshPhysicalMaterial 
+            <meshPhysicalMaterial
                 color="#232323"
                 metalness={1}
                 roughness={0.3}
@@ -213,21 +213,19 @@ const Scene = () => {
 
 // --- 文章卡片组件 ---
 const ArticleCard = ({ article, onClick }: { article: { id: number; markdownContent: string }, onClick: () => void }) => {
-    const { title, imageUrl } = useMemo(() => parseMarkdownPreview(article.markdownContent), [article.markdownContent]);
+    const { title } = useMemo(() => parseMarkdownPreview(article.markdownContent), [article.markdownContent]);
 
     return (
-        <div 
-            className="bg-gray-800/50 backdrop-blur-md rounded-xl overflow-hidden cursor-pointer transform hover:scale-105 transition-transform duration-300 border border-gray-700/50"
+        <div
+            className="bg-gray-800/50 backdrop-blur-md rounded-xl overflow-hidden cursor-pointer transform hover:scale-105 transition-transform duration-300 border border-gray-700/50 flex flex-col"
             onClick={onClick}
         >
-            {imageUrl ? (
-                // [还原] 使用原生 img 标签
-                <img src={imageUrl} alt={title} className="w-full h-48 object-cover" onError={(e) => (e.currentTarget.src = "https://placehold.co/600x400?text=Image+Not+Found")}/>
-            ) : (
-                <div className="w-full h-48 bg-gray-700 flex items-center justify-center">
-                    <span className="text-gray-400">无封面图片</span>
+            {/* [修改] 替换图片为带问号的占位符 */}
+            <div className="w-full h-48 bg-transparent flex items-center justify-center">
+                <div className="border-4 border-white py-4 px-6">
+                     <span className="text-5xl font-black text-white tracking-[0.2em]">[????]</span>
                 </div>
-            )}
+            </div>
             <div className="p-4">
                 <h3 className="text-xl font-bold text-white">{title}</h3>
             </div>
@@ -251,15 +249,15 @@ const ArticleModal = ({ article, onClose }: { article: { id: number; markdownCon
     }, [onClose]);
 
     return (
-        <div 
+        <div
             className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-50 p-4"
             onClick={onClose} // 点击背景关闭
         >
-            <div 
+            <div
                 className="bg-[#1C2529] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-8 border border-gray-700/80 relative animate-fade-in"
                 onClick={(e) => e.stopPropagation()} // 防止点击内容区域关闭模态框
             >
-                <button 
+                <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors text-2xl z-10"
                     aria-label="关闭文章"
@@ -267,7 +265,7 @@ const ArticleModal = ({ article, onClose }: { article: { id: number; markdownCon
                     &times;
                 </button>
                 <article className="prose prose-invert prose-lg max-w-none prose-img:rounded-lg prose-headings:text-white">
-                    <ReactMarkdown 
+                    <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
                             // 自定义渲染器，用于智能识别图片和视频
@@ -304,7 +302,7 @@ const ArticleModal = ({ article, onClose }: { article: { id: number; markdownCon
 // --- 主要的页面组件 ---
 export default function Page() {
     const [selectedArticle, setSelectedArticle] = useState<typeof articles[0] | null>(null);
-    
+
     // 当模态框打开时，禁止背景滚动
     useEffect(() => {
         if (selectedArticle) {
@@ -320,31 +318,42 @@ export default function Page() {
     return (
         <div className="relative min-h-screen w-full bg-[#000] text-white" style={{ background: 'linear-gradient(to bottom right, #000, #1A2428)' }}>
             <Scene />
-            
+
             <main className="relative z-10 p-8 md:p-16">
                 <header className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold text-white">我的文章</h1>
                     <p className="text-gray-400 mt-2">点击卡片阅读全文</p>
+                    {/* [新增] 根据图片要求添加返回主页的按钮 */}
+                    <div className="mt-4">
+                        <a
+                            href="https://store.apex-elite-service.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block bg-sky-500/80 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-600/80 transition-colors duration-300"
+                        >
+                            返回主页
+                        </a>
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                     {articles.map(article => (
-                        <ArticleCard 
-                            key={article.id} 
-                            article={article} 
-                            onClick={() => setSelectedArticle(article)} 
+                        <ArticleCard
+                            key={article.id}
+                            article={article}
+                            onClick={() => setSelectedArticle(article)}
                         />
                     ))}
                 </div>
             </main>
 
             {selectedArticle && (
-                <ArticleModal 
-                    article={selectedArticle} 
-                    onClose={() => setSelectedArticle(null)} 
+                <ArticleModal
+                    article={selectedArticle}
+                    onClose={() => setSelectedArticle(null)}
                 />
             )}
-            
+
             {/* 添加一些CSS动画样式 */}
             <style jsx global>{`
                 .prose {
