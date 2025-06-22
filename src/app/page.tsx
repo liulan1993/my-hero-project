@@ -88,8 +88,8 @@ const TextShineEffect = ({
       height="100%"
       viewBox="0 0 400 150"
       xmlns="http://www.w3.org/2000/svg"
-      className="select-none cursor-pointer" // 添加 cursor-pointer
-      onClick={onClick} // 添加点击事件
+      className="select-none cursor-pointer"
+      onClick={onClick}
     >
       <defs>
         <linearGradient id="textGradient">
@@ -164,6 +164,7 @@ const TextShineEffect = ({
   );
 };
 TextShineEffect.displayName = "TextShineEffect";
+
 
 // ============================================================================
 // 1. 新的导航栏组件 (合并自用户提供的文件)
@@ -2059,6 +2060,7 @@ CustomFooter.displayName = "CustomFooter";
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isEntered, setIsEntered] = useState(false);
 
   useEffect(() => {
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
@@ -2086,88 +2088,112 @@ export default function HomePage() {
     }
   };
 
+  const handleEnter = () => {
+      setIsEntered(true);
+  };
+
   return (
     <div className="relative isolate bg-black text-white">
-      <AppNavigationBar 
-        onLoginClick={() => setIsModalOpen(true)}
-        onProtectedLinkClick={handleProtectedLinkClick}
-      />
-      <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
-      <Scene />
-
-      <main className="relative z-10 pt-20">
-        <div className="min-h-screen w-full flex flex-col items-center justify-center py-24">
-            <div className="w-full max-w-6xl px-8 space-y-16 flex flex-col items-center justify-center">
-              <div className="flex flex-col items-center text-center space-y-8">
-                <div className="space-y-6 flex items-center justify-center flex-col">
-                  <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
-                    为您而来，不止于此
-                  </h1>
-                  <p className="text-neutral-300 max-w-2xl text-base md:text-lg">
-                    我们深知您当下的每一步在未来都至关重要。
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
-                {features.map((feature, idx) => (
-                  <div
-                    key={idx}
-                    className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
-                  >
-                    <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
-                    <h3 className="text-base font-bold text-white">{feature.title}</h3>
-                    <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
-                  </div>
-                ))}
-              </div>
+      
+      <AnimatePresence>
+        {!isEntered && (
+          <motion.div
+            key="splash-screen"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.8, ease: "easeInOut" } }}
+          >
+            <div className="w-full max-w-2xl">
+              <TextShineEffect text="Apex" scanDuration={4} onClick={handleEnter} />
             </div>
-        </div>
-        
-        <Timeline data={timelineData} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <div className="max-w-7xl mx-auto px-8">
-            <ProjectShowcase 
-              testimonials={projectShowcaseData} 
-              onProtectedLinkClick={handleProtectedLinkClick}
-            />
-        </div>
-        
-        <InfoSectionWithMockup {...infoSectionData1} />
-        <div id="integration-section">
-            <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
-        </div>
-        <CtaWithGallerySection />
+      <motion.div
+        key="main-content"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isEntered ? 1 : 0 }}
+        transition={{ duration: 0.5, delay: isEntered ? 0.5 : 0 }}
+        className={cn(!isEntered && "pointer-events-none")}
+      >
+        <AppNavigationBar 
+            onLoginClick={() => setIsModalOpen(true)}
+            onProtectedLinkClick={handleProtectedLinkClick}
+        />
+        <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,#1A2428,#000_70%)]"></div>
+        <Scene />
 
-        <div className="py-24 px-8 flex justify-center items-center">
-            <ScrollAdventure />
-        </div>
+        <main className="relative z-10 pt-20">
+            <div className="min-h-screen w-full flex flex-col items-center justify-center py-24">
+                <div className="w-full max-w-6xl px-8 space-y-16 flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center text-center space-y-8">
+                    <div className="space-y-6 flex items-center justify-center flex-col">
+                    <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
+                        为您而来，不止于此
+                    </h1>
+                    <p className="text-neutral-300 max-w-2xl text-base md:text-lg">
+                        我们深知您当下的每一步在未来都至关重要。
+                    </p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+                    {features.map((feature, idx) => (
+                    <div
+                        key={idx}
+                        className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
+                    >
+                        <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
+                        <h3 className="text-base font-bold text-white">{feature.title}</h3>
+                        <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
+                    </div>
+                    ))}
+                </div>
+                </div>
+            </div>
+            
+            <Timeline data={timelineData} />
 
-        {/* 替换 TextMarqueeSection 的部分 */}
-        <div className="py-12 md:py-20 flex items-center justify-center">
-            <TextRevealCard
-                text="这里我们将字体大小从默认的为了和“探索我们的创新"
-                revealText="探索我们的创新，完成网站设计的旅程。"
-                className="w-full max-w-4xl"
-            >
-                <TextRevealCardTitle className="text-2xl font-bold">
-                有时候，眼见为实。
-                </TextRevealCardTitle>
-                <TextRevealCardDescription className="text-base md:text-lg">
-                这是一个文本揭示卡片。将鼠标悬停在卡片上以显示隐藏的文本。在移动设备上，请触摸并滑动。
-                </TextRevealCardDescription>
-            </TextRevealCard>
-        </div>
+            <div className="max-w-7xl mx-auto px-8">
+                <ProjectShowcase 
+                testimonials={projectShowcaseData} 
+                onProtectedLinkClick={handleProtectedLinkClick}
+                />
+            </div>
+            
+            <InfoSectionWithMockup {...infoSectionData1} />
+            <div id="integration-section">
+                <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
+            </div>
+            <CtaWithGallerySection />
 
-        <CustomFooter />
-      </main>
+            <div className="py-24 px-8 flex justify-center items-center">
+                <ScrollAdventure />
+            </div>
 
-      {/* 资料提交弹窗 */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-            <SubmissionCard onSuccess={handleSuccess} />
-        </DialogContent>
-      </Dialog>
+            <div className="py-12 md:py-20 flex items-center justify-center">
+                <TextRevealCard
+                    text="这里我们将字体大小从默认的为了和“探索我们的创新"
+                    revealText="探索我们的创新，完成网站设计的旅程。"
+                    className="w-full max-w-4xl"
+                >
+                    <TextRevealCardTitle className="text-2xl font-bold">
+                    有时候，眼见为实。
+                    </TextRevealCardTitle>
+                    <TextRevealCardDescription className="text-base md:text-lg">
+                    这是一个文本揭示卡片。将鼠标悬停在卡片上以显示隐藏的文本。在移动设备上，请触摸并滑动。
+                    </TextRevealCardDescription>
+                </TextRevealCard>
+            </div>
+
+            <CustomFooter />
+        </main>
+
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogContent>
+                <SubmissionCard onSuccess={handleSuccess} />
+            </DialogContent>
+        </Dialog>
+      </motion.div>
     </div>
   );
 }
-
