@@ -61,6 +61,24 @@ console.log("Hello, World!");
     {
         id: 3,
         markdownContent: `
+# 关于技术创新
+![技术图片](https://placehold.co/600x400/2A3438/FFFFFF?text=技术创新)
+
+技术创新是推动社会进步的关键动力。在这篇文章中，我们将探讨最新的技术趋势及其对未来的影响。
+
+## 人工智能
+人工智能正在改变各个行业，从医疗保健到金融服务。
+
+## 区块链
+区块链技术以其去中心化和安全的特性，为数字交易提供了新的可能性。
+
+> “求知若饥，虚心若愚。” - 史蒂夫·乔布斯
+
+`
+    },
+    {
+        id: 4,
+        markdownContent: `
 # 生活随笔
 ![生活图片](https://placehold.co/600x400/3A4448/FFFFFF?text=生活点滴)
 
@@ -74,7 +92,7 @@ console.log("Hello, World!");
 `
     },
     {
-        id: 4,
+        id: 5,
         markdownContent: `
 # 项目回顾
 ![项目图片](https://placehold.co/600x400/4A5458/FFFFFF?text=项目回顾)
@@ -275,7 +293,7 @@ export default function Page() {
             
             <main className="relative z-10 p-8 md:p-16">
                 <header className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-bold text-white">我的文章</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold text-white">Apex商业洞察</h1>
                     <p className="text-gray-400 mt-2">点击卡片阅读全文</p>
                 </header>
 
