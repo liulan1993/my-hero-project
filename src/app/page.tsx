@@ -1516,7 +1516,7 @@ const PricingSection = () => {
                 <div className="flex flex-col items-center gap-6 text-center mt-10">
                     <div className="flex flex-col gap-2">
                         {/* 需求 2: 字体大小和格式与“学校申请支持”一致 */}
-                        <h2 className="text-3xl md:text-[40px] font-semibold text-white">
+                        <h2 className="text-2xl md:text-3xl font-semibold text-white">
                             满足各种需求的计划
                         </h2>
                         {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
