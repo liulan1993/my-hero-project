@@ -1899,7 +1899,7 @@ const CustomFooter = () => {
             </div>
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300 text-base md:text-lg">
               <Link href="#" className="hover:text-white">Apex</Link>
-              <Link href="#" className="hover:text-white">留学</Link>
+              <Link href="#integration-section" className="hover:text-white">留学</Link>
               <Link href="#" className="hover:text-white">医疗</Link>
               <Link href="#" className="hover:text-white">企业出海</Link>
               <Link href="#" className="hover:text-white">敬请期待</Link>
@@ -2043,8 +2043,9 @@ export default function HomePage() {
         </div>
         
         <InfoSectionWithMockup {...infoSectionData1} />
-        <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
-
+        <div id="integration-section">
+            <InfoSectionWithMockup {...infoSectionData2} reverseLayout={true} />
+        </div>
         <CtaWithGallerySection />
 
         <div className="py-24 px-8 flex justify-center items-center">
