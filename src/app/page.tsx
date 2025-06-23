@@ -11,10 +11,10 @@ import React, {
     memo
 } from 'react';
 import Image from 'next/image';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+// [错误修复] 引入 dynamic 来实现组件的动态加载
+import dynamic from 'next/dynamic';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import {
   motion,
   useScroll,
@@ -2263,109 +2263,10 @@ FaqSection.displayName = "FaqSection";
 // [最终方案] 开场动画
 // ============================================================================
 
-const FONT_URL = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/fonts/helvetiker_regular.typeface.json";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const TextParticles = ({ text, position, size, animateOut, font }: { text: string; position: [number, number, number]; size: number; animateOut: boolean; font: any; }) => {
-  const pointsRef = useRef<THREE.Points>(null!);
-  const materialRef = useRef<THREE.PointsMaterial>(null!);
-  
-  const particles = useMemo(() => {
-    if (!font) return null;
-    
-    const textGeometry = new TextGeometry(text, {
-      font: font,
-      size: size,
-      depth: 0.2,
-      curveSegments: 12,
-      bevelEnabled: false,
-    });
-    
-    textGeometry.center();
-    
-    // [修复字体显示不全] 增加粒子数量以填充字体
-    // 之前只用了顶点，现在我们用更多的粒子来填充表面
-    const count = textGeometry.attributes.position.count * 3;
-    const posArray = new Float32Array(count * 3);
-    const targetPosArray = new Float32Array(count * 3);
-
-    const originalPositions = textGeometry.attributes.position.array;
-    for (let i = 0; i < count; i++) {
-        // 通过在原始顶点之间插值来创建更密集的粒子
-        const p1Index = Math.floor(Math.random() * (originalPositions.length / 3)) * 3;
-        const p2Index = Math.floor(Math.random() * (originalPositions.length / 3)) * 3;
-        const ratio = Math.random();
-
-        posArray[i * 3 + 0] = THREE.MathUtils.lerp(originalPositions[p1Index], originalPositions[p2Index], ratio);
-        posArray[i * 3 + 1] = THREE.MathUtils.lerp(originalPositions[p1Index + 1], originalPositions[p2Index + 1], ratio);
-        posArray[i * 3 + 2] = THREE.MathUtils.lerp(originalPositions[p1Index + 2], originalPositions[p2Index + 2], ratio);
-
-        const radius = 7 + Math.random() * 7;
-        const phi = Math.random() * Math.PI * 2;
-        const theta = Math.random() * Math.PI;
-        targetPosArray[i * 3 + 0] = radius * Math.sin(theta) * Math.cos(phi);
-        targetPosArray[i * 3 + 1] = radius * Math.sin(theta) * Math.sin(phi);
-        targetPosArray[i * 3 + 2] = radius * Math.cos(theta);
-    }
-
-    const bufferGeometry = new THREE.BufferGeometry();
-    bufferGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    bufferGeometry.setAttribute('targetPosition', new THREE.BufferAttribute(targetPosArray, 3));
-    return { geometry: bufferGeometry };
-  }, [font, text, size]);
-
-  useFrame((state, delta) => {
-    if (!particles || !pointsRef.current || !animateOut) return;
-    
-    materialRef.current.opacity -= delta * 0.7; // 加快消失速度
-    const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
-    const targets = pointsRef.current.geometry.attributes.targetPosition as THREE.BufferAttribute;
-
-    for (let i = 0; i < positions.count; i++) {
-        const x = positions.getX(i);
-        const y = positions.getY(i);
-        const z = positions.getZ(i);
-        const tx = targets.getX(i);
-        const ty = targets.getY(i);
-        const tz = targets.getZ(i);
-        positions.setX(i, x + (tx - x) * 0.08); // 加快扩散速度
-        positions.setY(i, y + (ty - y) * 0.08);
-        positions.setZ(i, z + (tz - z) * 0.08);
-    }
-    positions.needsUpdate = true;
-  });
-
-  if (!particles) return null;
-
-  return (
-    <points ref={pointsRef} position={position} geometry={particles.geometry}>
-       {/* [修复闪光效果] 使用 ShaderMaterial 创建闪光和渐变效果 */}
-      <shaderMaterial
-        ref={materialRef}
-        depthWrite={false}
-        transparent={true}
-        vertexShader={`
-          attribute float size;
-          void main() {
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = 4.0;
-          }
-        `}
-        fragmentShader={`
-          void main() {
-            float strength = distance(gl_PointCoord, vec2(0.5));
-            strength = 1.0 - step(0.5, strength);
-            gl_FragColor = vec4(1.0, 1.0, 1.0, strength);
-          }
-        `}
-      />
-    </points>
-  );
-};
-TextParticles.displayName = "TextParticles";
-
 const Starfield = ({ animate, progress }: { animate: boolean; progress: React.MutableRefObject<number> }) => {
   const pointsRef = useRef<THREE.Points>(null!);
+  const materialRef = useRef<THREE.PointsMaterial>(null!);
+
   const stars = useMemo(() => {
     const count = 5000;
     const positions = new Float32Array(count * 3);
@@ -2380,10 +2281,14 @@ const Starfield = ({ animate, progress }: { animate: boolean; progress: React.Mu
   }, []);
 
   useFrame((state, delta) => {
-    if (!pointsRef.current || !animate) return;
-    const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
+    if (!pointsRef.current || !materialRef.current) return;
     
-    // [修复穿梭效果] 根据 progress 控制穿梭速度，实现缓入缓出
+    // 控制星星的出现
+    materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, animate ? 1.0 : 0.0, 0.1);
+
+    if (!animate) return;
+
+    const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
     const speed = 20 + (progress.current * 80);
 
     for (let i = 0; i < positions.count; i++) {
@@ -2398,76 +2303,60 @@ const Starfield = ({ animate, progress }: { animate: boolean; progress: React.Mu
 
   return (
     <points ref={pointsRef} geometry={stars}>
-      <pointsMaterial color="#ffffff" size={0.03} sizeAttenuation={true} />
+      <pointsMaterial ref={materialRef} color="#ffffff" size={0.03} sizeAttenuation={true} transparent={true} opacity={0} />
     </points>
   );
 };
 Starfield.displayName = "Starfield";
 
 const IntroAnimation = ({ onEnter, setIntroProgress }: { onEnter: () => void; setIntroProgress: (p: number) => void; }) => {
-  const [stage, setStage] = useState<'idle' | 'disintegrating' | 'warping' | 'finished'>('idle');
+  const [stage, setStage] = useState<'idle' | 'warping' | 'finished'>('idle');
   const [isClicked, setIsClicked] = useState(false);
   const progress = useRef(0);
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const font: any = useLoader(FontLoader, FONT_URL);
-
   const handleClick = () => {
     if (stage === 'idle' && !isClicked) {
       setIsClicked(true);
-      setStage('disintegrating');
 
-      // [修复卡顿] 优化时间线，让动画无缝衔接
-      setTimeout(() => {
-        setStage('warping');
-      }, 800); 
+      // 直接进入穿梭阶段
+      setStage('warping');
 
+      // 3.5秒后结束
       setTimeout(() => {
         setStage('finished');
         onEnter();
-      }, 3500); // 缩短总时长
+      }, 3500);
     }
   };
 
-  // [修复穿梭效果] 使用 useFrame 驱动平滑的进度条，而不是依赖 setTimeout
   useFrame((state, delta) => {
       if (stage === 'warping') {
-          progress.current = Math.min(progress.current + delta * 0.5, 1);
+          progress.current = Math.min(progress.current + delta * 0.4, 1);
           setIntroProgress(progress.current);
       }
   });
 
   return (
     <div className="w-full h-full cursor-pointer relative" onClick={handleClick}>
-      <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
-        <ambientLight intensity={2} />
-        <pointLight position={[0,0,10]} intensity={10} />
-        <React.Suspense fallback={null}>
-          {(stage === 'idle' || stage === 'disintegrating') && font && (
-              <TextParticles
-                font={font}
-                text="Apex"
-                position={[0, 0, 0]}
-                size={2.5}
-                animateOut={stage === 'disintegrating'}
-              />
-          )}
-          {(stage === 'warping') && <Starfield animate={true} progress={progress}/>}
-        </React.Suspense>
-      </Canvas>
-      
-      <AnimatePresence>
+       <AnimatePresence>
         {!isClicked && (
           <motion.div 
-            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-            exit={{ opacity: 0, y: 20, transition: { duration: 0.5 } }}
+            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.8 } }}
           >
-            <p className="text-white font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold mt-48">
+            <h1 className="text-white font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold">Apex</h1>
+            <p className="text-white font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold mt-4">
               轻触，开启非凡。
             </p>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
+        <React.Suspense fallback={null}>
+            <Starfield animate={stage === 'warping'} progress={progress}/>
+        </React.Suspense>
+      </Canvas>
       
       {!isClicked && (
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 animate-pulse text-sm">
@@ -2479,6 +2368,11 @@ const IntroAnimation = ({ onEnter, setIntroProgress }: { onEnter: () => void; se
 };
 IntroAnimation.displayName = "IntroAnimation";
 
+const DynamicIntroAnimation = dynamic(() => Promise.resolve(IntroAnimation), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-black" />,
+});
+
 
 // ============================================================================
 // 主页面组件
@@ -2488,7 +2382,6 @@ export default function HomePage() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isEntered, setIsEntered] = useState(false);
-  // [修复穿梭效果] 新增 state 用于同步动画进度
   const [introProgress, setIntroProgress] = useState(0);
 
   useEffect(() => {
@@ -2532,21 +2425,17 @@ export default function HomePage() {
     <div className="relative isolate bg-black text-white">
       <AnimatePresence>
         {!isEntered && (
-           // [修复穿梭效果] 使用 introProgress 控制开场动画的淡出
           <motion.div
             key="splash-screen"
             className="fixed inset-0 z-[100] bg-black"
             animate={{ opacity: 1 - introProgress }}
             transition={{ duration: 1, ease: "easeOut" }}
           >
-            <React.Suspense fallback={<div className="w-full h-full bg-black" />}>
-              <IntroAnimation onEnter={handleEnter} setIntroProgress={setIntroProgress}/>
-            </React.Suspense>
+            <DynamicIntroAnimation onEnter={handleEnter} setIntroProgress={setIntroProgress}/>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* [修复穿梭效果] 使用 introProgress 控制主页的淡入，实现同步 */}
       <motion.div
         key="main-content"
         initial={{ opacity: 0 }}
