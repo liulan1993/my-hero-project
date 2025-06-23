@@ -1862,24 +1862,41 @@ function ScrollAdventure() {
   }, [handleScroll]);
 
   return (
-    <div ref={componentRef} className="relative overflow-hidden w-full max-w-6xl h-[80vh] lg:h-[75vh] bg-black font-[Helvetica] rounded-2xl border border-neutral-700 shadow-2xl flex flex-col lg:flex-row">
+    // [要求 1 & 2 已修改] 
+    // 1. 响应式比例：移除了固定的视口高度(h-[80vh])，改用 aspect-ratio 确保面板在不同屏幕尺寸下始终为正方形。
+    //    - `aspect-[1/2]` 用于移动端竖向布局（一个宽度，两个高度单位），确保每个 h-1/2 的面板是正方形。
+    //    - `lg:aspect-[2/1]` 用于桌面端横向布局（两个宽度，一个高度单位），确保每个 w-1/2 的面板是正方形。
+    // 2. 透明背景：将 `bg-black` 改为 `bg-transparent`，让父组件的动画背景可以透视。
+    // 3. 居中：添加 `mx-auto` 以便在超宽屏幕上居中显示。
+    <div 
+      ref={componentRef} 
+      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl border border-neutral-700 shadow-2xl aspect-[1/2] lg:aspect-[2/1]"
+    >
       {scrollAnimationPages.map((page, i) => {
         const idx = i + 1;
         const isActive = currentPage === idx;
         
         return (
           <div key={idx} className="absolute inset-0 flex flex-col lg:flex-row">
+            {/* Left Panel */}
             <div
-              className={cn("w-full h-1/2 lg:w-1/2 lg:h-full transition-transform duration-[1000ms] ease-in-out", isActive ? 'translate-x-0' : '-translate-x-full')}
+              className={cn(
+                "w-full h-1/2 lg:w-1/2 lg:h-full", // 关键尺寸定义，确保在不同布局下占据正确空间形成正方形
+                "transition-transform duration-[1000ms] ease-in-out",
+                isActive ? 'translate-x-0' : '-translate-x-full'
+              )}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: page.leftBgImage ? `url(${page.leftBgImage})` : 'none', backgroundColor: '#111' }}
+                // [要求 2 已修改] 将背景色从 #111 改为 transparent
+                style={{ 
+                  backgroundImage: page.leftBgImage ? `url(${page.leftBgImage})` : 'none', 
+                  backgroundColor: 'transparent' 
+                }}
               >
                 <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.leftContent && (
                     <div className="text-center">
-                      {/* 修改：调整标题字号 */}
                       <h2 className="mb-4 tracking-widest text-2xl md:text-3xl font-semibold">
                         {page.leftContent.heading}
                       </h2>
@@ -1892,17 +1909,25 @@ function ScrollAdventure() {
               </div>
             </div>
 
+            {/* Right Panel */}
             <div
-              className={cn("w-full h-1/2 lg:w-1/2 lg:h-full transition-transform duration-[1000ms] ease-in-out", isActive ? 'translate-x-0' : 'translate-x-full')}
+              className={cn(
+                "w-full h-1/2 lg:w-1/2 lg:h-full", // 关键尺寸定义
+                "transition-transform duration-[1000ms] ease-in-out",
+                isActive ? 'translate-x-0' : 'translate-x-full'
+              )}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: page.rightBgImage ? `url(${page.rightBgImage})` : 'none', backgroundColor: '#111' }}
+                // [要求 2 已修改] 将背景色从 #111 改为 transparent
+                style={{ 
+                  backgroundImage: page.rightBgImage ? `url(${page.rightBgImage})` : 'none', 
+                  backgroundColor: 'transparent' 
+                }}
               >
                 <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.rightContent && (
                      <div className="text-center">
-                       {/* 修改：调整标题字号 */}
                       <h2 className="mb-4 tracking-widest text-2xl md:text-3xl font-semibold">
                         {page.rightContent.heading}
                       </h2>
