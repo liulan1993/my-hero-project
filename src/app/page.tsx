@@ -244,7 +244,7 @@ const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
         type={type}
         className={cn(
           'flex h-10 w-full rounded-md border border-slate-700 bg-black px-3 py-2 text-white placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-50',
-          "text-base", // 优化: 统一基础字体大小
+          "text-base md:text-lg",
           className
         )}
         ref={ref}
@@ -259,7 +259,7 @@ const Label = React.forwardRef<
   React.ElementRef<'label'>,
   React.ComponentPropsWithoutRef<'label'>
 >(({ className, ...props }, ref) => (
-  <label ref={ref} className={cn('text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70', className)} {...props} />
+  <label ref={ref} className={cn('font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70', className)} {...props} />
 ));
 Label.displayName = 'Label';
 
@@ -310,7 +310,7 @@ const NavigationMenuTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Trigger
     ref={ref}
-    className={cn(navigationMenuTriggerStyle(), "group", "text-base", className)} // 优化：统一基础字体
+    className={cn(navigationMenuTriggerStyle(), "group", "text-base md:text-lg", className)}
     {...props}
   >
     {children}{" "}
@@ -391,10 +391,8 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
     
     return (
         <header className="w-full z-50 fixed top-0 left-0 bg-black/50 backdrop-blur-sm">
-            {/* 优化: 调整容器左右padding */}
-            <div className="container relative mx-auto h-20 flex justify-between items-center px-4 sm:px-6 lg:px-8">
-                {/* 优化: PC端导航菜单 */}
-                <div className="hidden lg:flex flex-1 justify-start">
+            <div className="container relative mx-auto min-h-20 flex gap-4 flex-row lg:grid lg:grid-cols-3 items-center px-4 md:px-8">
+                <div className="justify-start items-center gap-4 lg:flex hidden flex-row">
                     <NavigationMenu>
                         <NavigationMenuList>
                             {navigationItems.map((item) => (
@@ -402,30 +400,30 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                     {item.href ? (
                                         <NavigationMenuLink asChild>
                                             <Link href={item.href}>
-                                                <Button variant="ghost" className="text-base">{item.title}</Button>
+                                                <Button variant="ghost" className="text-base md:text-lg">{item.title}</Button>
                                             </Link>
                                         </NavigationMenuLink>
                                     ) : (
                                         <>
-                                            <NavigationMenuTrigger className="text-base">
+                                            <NavigationMenuTrigger className="text-base md:text-lg">
                                                 {item.title}
                                             </NavigationMenuTrigger>
                                             <NavigationMenuContent className="!w-[450px] p-4">
                                                 <div className="flex flex-col lg:grid grid-cols-2 gap-4">
                                                     <div className="flex flex-col h-full justify-between">
                                                         <div className="flex flex-col">
-                                                            <p className="font-semibold text-base">{item.title}</p>
-                                                            <p className="text-neutral-400 text-sm">
+                                                            <p className="font-semibold text-base md:text-lg">{item.title}</p>
+                                                            <p className="text-neutral-400 text-base md:text-lg">
                                                                 {item.description}
                                                             </p>
                                                         </div>
                                                         <Link href="https://singapore.apex-elite-service.com/shangyedongcha">
-                                                            <Button size="sm" className="mt-10 text-base" variant="outline">
+                                                            <Button size="sm" className="mt-10 text-base md:text-lg" variant="outline">
                                                                 商业洞察
                                                             </Button>
                                                         </Link>
                                                     </div>
-                                                    <div className="flex flex-col text-sm h-full justify-end">
+                                                    <div className="flex flex-col text-base md:text-lg h-full justify-end">
                                                         {item.items?.map((subItem) => (
                                                             <NavigationMenuLink asChild key={subItem.title}>
                                                                 <a
@@ -448,57 +446,41 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                         </NavigationMenuList>
                     </NavigationMenu>
                 </div>
-
-                {/* Logo */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:static lg:transform-none lg:flex-1 lg:justify-center">
-                    <Link href="/" className="text-3xl md:text-4xl font-semibold">
+                <div className="flex lg:justify-center">
+                    <Link href="/" className="text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                       Apex
                     </Link>
                 </div>
-                
-                {/* 优化: 右侧按钮组 */}
-                <div className="hidden lg:flex flex-1 justify-end items-center gap-2">
-                    <Button variant="ghost" className="text-base">
+                <div className="flex justify-end w-full gap-2 md:gap-4">
+                    <Button variant="ghost" className="hidden md:inline text-base md:text-lg">
                         欢迎您！
                     </Button>
-                    <div className="border-r border-slate-700 h-6"></div>
-                    <Button variant="outline" onClick={onLoginClick} className="text-base">提交</Button>
+                    <div className="border-r border-slate-700 hidden md:inline"></div>
+                    <Button variant="outline" onClick={onLoginClick} className="text-base md:text-lg">提交</Button>
                     <Link href="https://singapore.apex-elite-service.com/shangyedongcha">
-                        <Button variant="default" className="text-base">敬请期待</Button>
+                        <Button variant="default" className="text-base md:text-lg">敬请期待</Button>
                     </Link>
                 </div>
-
-                {/* 优化: 移动端菜单按钮 */}
-                <div className="flex lg:hidden flex-1 justify-end">
+                <div className="flex w-12 shrink lg:hidden items-end justify-end">
                     <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
-                        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </Button>
-                </div>
-
-                {/* 优化: 移动端展开菜单 */}
-                <AnimatePresence>
-                {isOpen && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="absolute top-20 left-0 w-full bg-black shadow-lg border-t border-slate-800"
-                    >
-                        <div className="container mx-auto flex flex-col px-4 py-4 gap-4">
+                    {isOpen && (
+                        <div className="absolute top-20 border-t border-slate-800 flex flex-col w-full right-0 bg-black shadow-lg py-4 container gap-8">
                             {navigationItems.map((item) => (
                                 <div key={item.title}>
                                     <div className="flex flex-col gap-2">
                                         {item.href ? (
                                             <a
                                                 href={item.href}
-                                                className="flex justify-between items-center py-2"
+                                                className="flex justify-between items-center"
                                                 onClick={() => setOpen(false)}
                                             >
-                                                <span className="text-base">{item.title}</span>
+                                                <span className="text-base md:text-lg">{item.title}</span>
                                                 <MoveRight className="w-4 h-4 stroke-1 text-neutral-400" />
                                             </a>
                                         ) : (
-                                            <p className="font-semibold text-base py-2">{item.title}</p>
+                                            <p className="font-semibold text-base md:text-lg">{item.title}</p>
                                         )}
                                         {item.items &&
                                             item.items.map((subItem) => (
@@ -509,9 +491,9 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                       onProtectedLinkClick(e, subItem.href);
                                                       setOpen(false);
                                                     }}
-                                                    className="flex justify-between items-center pl-2 py-2"
+                                                    className="flex justify-between items-center pl-2"
                                                 >
-                                                    <span className="text-neutral-300 text-base">
+                                                    <span className="text-neutral-300 text-base md:text-lg">
                                                         {subItem.title}
                                                     </span>
                                                     <MoveRight className="w-4 h-4 stroke-1" />
@@ -520,22 +502,14 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                     </div>
                                 </div>
                             ))}
-                             <div className="border-t border-slate-700 mt-4 pt-4 flex flex-col gap-4">
-                                <Button variant="outline" onClick={() => { onLoginClick(); setOpen(false); }} className="w-full text-base">提交</Button>
-                                <Link href="https://singapore.apex-elite-service.com/shangyedongcha" className="w-full">
-                                    <Button variant="default" className="w-full text-base">敬请期待</Button>
-                                </Link>
-                            </div>
                         </div>
-                    </motion.div>
-                )}
-                </AnimatePresence>
+                    )}
+                </div>
             </div>
         </header>
     );
 }
 AppNavigationBar.displayName = "AppNavigationBar";
-
 
 // ============================================================================
 // 1.5 新增: 联系资料提交卡片组件及相关数据
@@ -640,14 +614,11 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
         setIsSubmitting(false);
     };
     
-    // 优化: 统一样式类，增加 select 的基础样式
-    const formElementBaseClass = "w-full rounded-md border border-slate-700 bg-black px-3 py-2 text-white placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:cursor-not-allowed disabled:opacity-50 text-base";
-
     return (
-        <div className="bg-black text-white p-4 sm:p-6">
+        <div className="bg-black text-white p-2 sm:p-0">
           <div className="text-center mb-6">
-              <h1 className="text-xl sm:text-2xl font-bold">请留下您的联系资料</h1>
-              <p className="text-neutral-400 mt-2 text-sm sm:text-base">提交后即可访问内容</p>
+              <h1 className="text-2xl font-bold">请留下您的联系资料</h1>
+              <p className="text-neutral-400 mt-2">提交后即可访问内容</p>
           </div>
           <form onSubmit={handleSubmit} noValidate>
               <div className="grid grid-cols-1 gap-y-4">
@@ -658,7 +629,7 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
                   </div>
                   <div>
                       <Label htmlFor="serviceArea">选择服务领域</Label>
-                      <select id="serviceArea" name="serviceArea" value={formData.serviceArea} onChange={handleChange} className={cn(formElementBaseClass, "mt-2", errors.serviceArea && 'border-red-500')}>
+                      <select id="serviceArea" name="serviceArea" value={formData.serviceArea} onChange={handleChange} className={cn("form-input mt-2 w-full bg-black border-slate-700", errors.serviceArea && 'border-red-500')}>
                           <option value="" disabled>请选择...</option>
                           {serviceAreas.map(area => <option key={area} value={area}>{area}</option>)}
                       </select>
@@ -671,19 +642,18 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
                   </div>
                   <div>
                       <Label htmlFor="phone">输入手机号</Label>
-                      {/* 优化: 移动端垂直堆叠，大屏水平排列 */}
-                      <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                          <select id="countryKey" name="countryKey" value={formData.countryKey} onChange={handleChange} className={cn(formElementBaseClass, "sm:w-1/3", errors.countryKey && 'border-red-500')}>
+                      <div className="flex gap-2 mt-2">
+                          <select id="countryKey" name="countryKey" value={formData.countryKey} onChange={handleChange} className={cn("form-input w-1/3 bg-black border-slate-700", errors.countryKey && 'border-red-500')}>
                               <option value="" disabled>国家</option>
                               {countryOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                           </select>
-                          <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} className={cn("sm:w-2/3", errors.phone && 'border-red-500')} placeholder="手机号码"/>
+                          <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} className={cn("w-2/3", errors.phone && 'border-red-500')} placeholder="手机号码"/>
                       </div>
                       {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                   </div>
                   <div>
                       <Label htmlFor="state">州/省</Label>
-                      <select id="state" name="state" value={formData.state} onChange={handleChange} disabled={!formData.countryKey} className={cn(formElementBaseClass, "mt-2", errors.state && 'border-red-500')}>
+                      <select id="state" name="state" value={formData.state} onChange={handleChange} disabled={!formData.countryKey} className={cn("form-input mt-2 w-full bg-black border-slate-700", errors.state && 'border-red-500')}>
                           <option value="" disabled>请先选择国家</option>
                           {availableStates.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
@@ -698,7 +668,6 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
     );
 };
 SubmissionCard.displayName = "SubmissionCard";
-
 
 // ============================================================================
 // 2. 页面区域和布局组件 (现有代码)
@@ -783,37 +752,29 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
 
   return (
-    <div className="w-full bg-transparent font-[Helvetica]" ref={containerRef}>
-      {/* 优化: 统一 Section 的 Padding */}
-      <div className="max-w-7xl mx-auto py-20 px-4 sm:px-6 lg:px-8">
-        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">企业服务 Corporate Services</h2>
-        <p className="text-neutral-300 max-w-lg text-base lg:text-lg">我们深知，在新加坡设立公司，是您全球战略的关键一步，而非一次简单的流程代办。Apex提供的，是从顶层视角出发，为您的商业大厦搭建最稳固、合规且具前瞻性的战略基石，并为后续的持续运营保驾护航。</p>
+    <div className="w-full bg-transparent font-[Helvetica] md:px-10" ref={containerRef}>
+      <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
+        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">企业服务 Corporate Services</h2>
+        <p className="text-neutral-300 max-w-sm text-base md:text-lg">我们深知，在新加坡设立公司，是您全球战略的关键一步，而非一次简单的流程代办。Apex提供的，是从顶层视角出发，为您的商业大厦搭建最稳固、合规且具前瞻性的战略基石，并为后续的持续运营保驾护航。</p>
       </div>
-      <div ref={ref} className="relative max-w-7xl mx-auto pb-20 px-4 sm:px-6 lg:px-8">
+      <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
         {data.map((item, index) => (
-          <div key={index} className="relative flex items-start pt-10 md:pt-16 md:gap-10">
-            {/* 时间线圆点和线条的容器 */}
-            <div className="absolute left-4 md:left-5 top-12 md:top-14 h-full flex flex-col items-center">
-              <div className="sticky top-40 flex-shrink-0 z-10 h-10 w-10 rounded-full bg-black flex items-center justify-center">
-                <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700" />
+          <div key={index} className="flex justify-start pt-10 md:pt-24 md:gap-10">
+            <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
+              <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
+                <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
+              {/* 修改：调整标题字号 */}
+              <h3 className="hidden md:block md:pl-20 font-semibold text-white text-2xl md:text-3xl">{item.title}</h3>
             </div>
-
-            {/* 左侧标题 (仅PC端显示) */}
-            <div className="hidden md:block md:w-1/3 lg:w-1/4 sticky top-40 self-start pr-8">
-               <h3 className="font-semibold text-white text-2xl lg:text-3xl">{item.title}</h3>
-            </div>
-            
-            {/* 右侧内容 */}
-            <div className="pl-12 md:pl-0 w-full md:w-2/3 lg:w-3/4">
-               {/* 移动端标题 */}
-              <h3 className="md:hidden block mb-4 text-left font-semibold text-white text-2xl">{item.title}</h3>
+            <div className="relative pl-20 pr-4 md:pl-4 w-full">
+              {/* 修改：调整标题字号 */}
+              <h3 className="md:hidden block mb-4 text-left font-semibold text-white text-2xl md:text-3xl">{item.title}</h3>
               {item.content}
             </div>
           </div>
         ))}
-        {/* 优化: 确保线条与圆点对齐 */}
-        <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute left-[25px] md:left-[30px] top-12 w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-transparent from-[0%] via-[10%] rounded-full" />
+        <motion.div style={{ height: heightTransform, opacity: opacityTransform }} className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-transparent from-[0%] via-[10%] rounded-full" />
       </div>
     </div>
   );
@@ -826,7 +787,6 @@ interface HalomotButtonProps {
   icon?: React.ReactElement; borderWidth?: string; padding?: string;
   outerBorderRadius?: string; innerBorderRadius?: string; textColor?: string;
   hoverTextColor?: string;
-  className?: string; // 优化：添加className
 }
 
 const HalomotButton: React.FC<HalomotButtonProps> = ({
@@ -834,7 +794,7 @@ const HalomotButton: React.FC<HalomotButtonProps> = ({
   inscription, onClick, fillWidth = false, fixedWidth, href,
   backgroundColor = "#000", icon, borderWidth = "1px", padding,
   outerBorderRadius = "6.34px", innerBorderRadius = "6px",
-  textColor = "#fff", hoverTextColor, className,
+  textColor = "#fff", hoverTextColor,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const containerStyle: React.CSSProperties = fixedWidth ? { width: fixedWidth, display: "inline-block" } : {};
@@ -848,7 +808,6 @@ const HalomotButton: React.FC<HalomotButtonProps> = ({
     onClick: onClick,
     onMouseEnter: () => setIsHovered(true),
     onMouseLeave: () => setIsHovered(false),
-    className: className, // 优化：应用className
   };
 
   const ButtonElement = href ? (
@@ -881,21 +840,23 @@ ImageContainer.displayName = 'ImageContainer';
 const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => void; }) => {
   const [active, setActive] = useState(0);
   
+  // 修改：移除 handleNext 和 handlePrev，因为现在直接点击按钮切换
+
   return (
     <div className="w-full mx-auto font-[Helvetica] py-20 text-white">
-      <div className="mb-12 text-center lg:text-right">
-        <h2 className="mb-4 text-white text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">
+      <div className="mb-12 text-right">
+        <h2 className="mb-4 text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
           留学教育
           <br />
           Study Abroad Education
         </h2>
-        <p className="text-neutral-300 mx-auto lg:mx-0 lg:ml-auto max-w-lg text-base lg:text-lg">
+        <p className="text-neutral-300 ml-auto max-w-lg text-base md:text-lg">
           我们为客户提供卓越的服务，以实现教育目标并取得成功。
         </p>
       </div>
       
-      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <div className="w-full relative aspect-square sm:aspect-[4/3] lg:aspect-[1.37/1]">
+      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="w-full relative aspect-[1.37/1]">
           <AnimatePresence mode="sync">
             {testimonials.map((testimonial, index) => (
               <motion.div
@@ -927,38 +888,38 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className='flex flex-col justify-center space-y-4'
           >
+            {/* 修改：调整标题字号 */}
             <h3 className="text-white text-2xl md:text-3xl font-semibold">
               {testimonials[active].name}
             </h3>
             
-            <motion.p className="text-neutral-200 leading-relaxed text-base lg:text-lg min-h-[100px]">
+            <motion.p className="text-neutral-200 leading-relaxed text-base md:text-lg">
               {testimonials[active].quote}
             </motion.p>
           </motion.div>
-          {/* 优化：按钮组使用 grid 布局，适配不同屏幕 */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-12 w-full">
+          {/* 修改：按钮组布局和样式, 允许换行以适配移动端 */}
+          <div className="flex flex-wrap items-center gap-3 pt-12 w-full">
             {testimonials.map((testimonial, index) => (
               <HalomotButton
                 key={testimonial.name}
-                inscription={testimonial.buttonLabel}
+                inscription={testimonial.buttonLabel} // <-- 修改这里
                 onClick={() => setActive(index)}
-                padding="0.8rem 1rem"
-                backgroundColor={active === index ? '#4a148c' : '#161616'}
+                padding="0.6rem 1.2rem" // 调整内边距使按钮变小
+                backgroundColor={active === index ? '#4a148c' : '#161616'} // 高亮当前选中的项目
                 hoverTextColor='#fff'
                 gradient='linear-gradient(to right, #603dec, #a123f4)'
-                fillWidth={true}
+                fixedWidth="120px" // <-- 添加这一行
               />
             ))}
             <HalomotButton 
               inscription="了解更多" 
               onClick={(e) => onProtectedLinkClick(e, testimonials[active].link || '#')} 
               href={testimonials[active].link || '#'}
-              padding="0.8rem 1rem"
+              padding="0.6rem 1.2rem" // 调整内边距使按钮变小
               backgroundColor='#161616' 
               hoverTextColor='#fff' 
               gradient='linear-gradient(to right, #603dec, #a123f4)'
-              fillWidth={true}
-              className="col-span-2 sm:col-span-1"
+              fixedWidth="120px" // <-- 添加这一行
             />
           </div>
         </div>
@@ -977,7 +938,7 @@ interface InfoSectionProps {
     primaryImageSrc: string;
     secondaryImageSrc: string;
     reverseLayout?: boolean;
-    className?: string; 
+    className?: string; // 新增: 允许传入自定义样式
 }
 
 const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
@@ -986,7 +947,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
     primaryImageSrc,
     secondaryImageSrc,
     reverseLayout = false,
-    className,
+    className, // 新增: 获取自定义样式
 }) => {
     const containerVariants: Variants = {
         hidden: {},
@@ -1003,19 +964,19 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
     };
 
     const layoutClasses = reverseLayout
-        ? "lg:grid-cols-2 lg:grid-flow-col-dense"
-        : "lg:grid-cols-2";
+        ? "md:grid-cols-2 md:grid-flow-col-dense"
+        : "md:grid-cols-2";
 
-    const textOrderClass = reverseLayout ? "lg:col-start-2" : "";
-    const imageOrderClass = reverseLayout ? "lg:col-start-1" : "";
+    const textOrderClass = reverseLayout ? "md:col-start-2" : "";
+    const imageOrderClass = reverseLayout ? "md:col-start-1" : "";
 
 
     return (
-        // 优化: 调整padding
-        <section className={cn("relative py-20 md:py-28 bg-transparent overflow-hidden", className)}>
-            <div className="container max-w-7xl w-full px-4 sm:px-6 lg:px-8 relative z-10 mx-auto">
+        // 修改: 使用 cn 函数合并默认样式和传入的自定义样式
+        <section className={cn("relative py-24 md:py-32 bg-transparent overflow-hidden", className)}>
+            <div className="container max-w-[1220px] w-full px-6 md:px-10 relative z-10 mx-auto">
                 <motion.div
-                     className={`grid grid-cols-1 gap-16 lg:gap-8 w-full items-center ${layoutClasses}`}
+                     className={`grid grid-cols-1 gap-16 md:gap-8 w-full items-center ${layoutClasses}`}
                      variants={containerVariants}
                      initial="hidden"
                      whileInView="visible"
@@ -1023,40 +984,44 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                 >
                     <motion.div
                         className={cn(
-                            "flex flex-col justify-center gap-4",
+                            "flex flex-col justify-center gap-4 mt-10 md:mt-0",
                             textOrderClass,
                             "items-center text-center",
-                            reverseLayout ? "lg:items-end lg:text-right" : "lg:items-start lg:text-left"
+                            reverseLayout ? "md:items-end md:text-right" : "md:items-start md:text-left"
                         )}
                         variants={itemVariants}
                     >
-                         <div className="space-y-2">
-                            <h2 className="text-white text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">
+                         <div className="space-y-2 md:space-y-1">
+                            <h2 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                                 {title}
                             </h2>
                         </div>
 
-                        <p className="text-neutral-300 leading-relaxed text-base lg:text-lg">
+                        <p className="text-[#868f97] leading-6 text-base md:text-lg">
                             {description}
                         </p>
                     </motion.div>
 
                     <motion.div
                         className={cn(
-                            "relative mt-10 lg:mt-0 mx-auto w-full max-w-[300px] sm:max-w-xs md:max-w-sm lg:max-w-md",
-                            imageOrderClass
+                            "relative mt-10 md:mt-0 mx-auto w-full max-w-[300px] md:max-w-[471px]",
+                            imageOrderClass,
+                            reverseLayout ? "md:justify-self-end" : "md:justify-self-start"
                          )}
                         variants={itemVariants}
                     >
                         <motion.div
-                            className="absolute w-full h-full bg-[#090909] rounded-[32px] z-0"
-                            style={{
-                                top: '5%',
-                                left: reverseLayout ? 'auto' : '-10%',
-                                right: reverseLayout ? '-10%' : 'auto',
+                             className={`absolute w-[300px] h-[317px] md:w-[472px] md:h-[500px] bg-[#090909] rounded-[32px] z-0`}
+                             style={{
+                                top: reverseLayout ? 'auto' : '10%',
+                                bottom: reverseLayout ? '10%' : 'auto',
+                                left: reverseLayout ? 'auto' : '-20%',
+                                right: reverseLayout ? '-20%' : 'auto',
+                                transform: reverseLayout ? 'translate(0, 0)' : 'translateY(10%)',
+                                filter: 'blur(2px)'
                             }}
-                            initial={{ y: 0 }}
-                            whileInView={{ y: -20 }}
+                            initial={{ y: reverseLayout ? 0 : 0 }}
+                            whileInView={{ y: reverseLayout ? -20 : -30 }}
                             transition={{ duration: 1.2, ease: "easeOut" }}
                             viewport={{ once: true, amount: 0.5 }}
                         >
@@ -1064,17 +1029,16 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                                 className="relative w-full h-full bg-cover bg-center rounded-[32px]"
                                 style={{
                                     backgroundImage: `url(${secondaryImageSrc})`,
-                                    filter: 'blur(2px)'
                                 }}
                             />
                         </motion.div>
 
                         <motion.div
-                            className="relative w-full aspect-[3/4] bg-white/5 rounded-[32px] backdrop-blur-md border border-white/10 z-10 overflow-hidden"
-                            initial={{ y: 0 }}
-                            whileInView={{ y: 20 }}
-                            transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
-                            viewport={{ once: true, amount: 0.5 }}
+                            className="relative w-full h-[405px] md:h-[637px] bg-[#ffffff0a] rounded-[32px] backdrop-blur-[15px] backdrop-brightness-[100%] border-0 z-10 overflow-hidden"
+                            initial={{ y: reverseLayout ? 0 : 0 }}
+                            whileInView={{ y: reverseLayout ? 20 : 30 }}
+                             transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
+                             viewport={{ once: true, amount: 0.5 }}
                         >
                              <Image
                                 src={primaryImageSrc}
@@ -1097,6 +1061,7 @@ InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 // ============================================================================
 
 const CtaWithGallerySection = () => {
+    // 修复: 将状态管理和对话框逻辑合并到此组件
     const [step, setStep] = useState(0);
 
     const steps = [
@@ -1137,8 +1102,8 @@ const CtaWithGallerySection = () => {
     };
 
     return (
-        <section className="py-20 md:py-28 bg-transparent">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-24 md:py-32 bg-transparent">
+            <div className="container mx-auto px-4 md:px-8">
                 <motion.div
                     className="text-center"
                     variants={containerVariants}
@@ -1146,13 +1111,14 @@ const CtaWithGallerySection = () => {
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.3 }}
                 >
-                    <motion.h2 variants={itemVariants} className="text-white mb-4 text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">
+                    <motion.h2 variants={itemVariants} className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         开启您在新加坡的全新篇章
                     </motion.h2>
-                    <motion.p variants={itemVariants} className="text-neutral-300 max-w-2xl mx-auto mb-8 text-base lg:text-lg">
+                    <motion.p variants={itemVariants} className="text-neutral-300 max-w-2xl mx-auto mb-8 text-base md:text-lg">
                         一切伟大的事业，都始于一次深度的战略对话。欢迎预约与我们进行一对一沟通，共同擘画您在新加坡的商业与家族蓝图。
                     </motion.p>
                     <motion.div variants={itemVariants} className="flex justify-center">
+                      {/* 修复: 添加 onOpenChange 以便在关闭时重置步骤 */}
                       <Dialog onOpenChange={(open) => !open && setStep(0)}>
                         <DialogTrigger asChild>
                            <HalomotButton 
@@ -1161,18 +1127,17 @@ const CtaWithGallerySection = () => {
                              backgroundColor='#161616' 
                              hoverTextColor='#fff' 
                              gradient='linear-gradient(to right, #603dec, #a123f4)'
-                             padding="1.2rem 4rem"
                            />
                         </DialogTrigger>
                         <DialogContent
                             className={cn(
-                            "max-w-4xl w-[90vw] p-0 overflow-hidden rounded-xl border-neutral-800 shadow-2xl",
+                            "max-w-3xl p-0 overflow-hidden rounded-xl border-neutral-800 shadow-2xl",
                             "bg-black text-white",
                             "data-[state=open]:animate-none data-[state=closed]:animate-none"
                             )}
                         >
-                            <div className="flex flex-col md:flex-row w-full h-full max-h-[90vh] md:max-h-none">
-                                <div className="w-full md:w-1/3 p-6 border-b md:border-b-0 md:border-r border-neutral-800 flex-shrink-0">
+                            <div className="flex flex-col md:flex-row w-full h-full">
+                                <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
                                     <div className="flex flex-col gap-3">
                                     <Image
                                         src="https://zh.apex-elite-service.com/wangzhantupian/logo.png"
@@ -1198,9 +1163,9 @@ const CtaWithGallerySection = () => {
                                             )}
                                         >
                                             {index < step ? (
-                                            <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                            <CheckCircle2 className="w-4 h-4 text-green-500" />
                                             ) : (
-                                            <div className="w-2.5 h-2.5 rounded-full bg-white/40 flex-shrink-0" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
                                             )}
                                             <span className="font-normal">{s.title}</span>
                                         </div>
@@ -1209,7 +1174,7 @@ const CtaWithGallerySection = () => {
                                     </div>
                                 </div>
 
-                                <div className="w-full md:w-2/3 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto">
+                                <div className="w-full md:w-2/3 p-8 flex flex-col justify-between">
                                     <div className="space-y-4">
                                     <DialogHeader>
                                         <AnimatePresence mode="wait">
@@ -1219,7 +1184,7 @@ const CtaWithGallerySection = () => {
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: -10 }}
                                             transition={{ duration: 0.25 }}
-                                            className="text-xl sm:text-2xl font-medium"
+                                            className="text-2xl font-medium"
                                         >
                                             {steps[step].title}
                                         </motion.h2>
@@ -1233,7 +1198,7 @@ const CtaWithGallerySection = () => {
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: -10 }}
                                             transition={{ duration: 0.25 }}
-                                            className="text-neutral-400 text-sm sm:text-base"
+                                            className="text-neutral-400 text-base"
                                             >
                                             {steps[step].description}
                                             </motion.p>
@@ -1241,12 +1206,12 @@ const CtaWithGallerySection = () => {
                                         </div>
                                     </DialogHeader>
 
-                                    <div className="w-full aspect-video bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
+                                    <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
                                         <Image
                                         src="https://zh.apex-elite-service.com/wangzhantupian/xinjiapo.jpg"
                                         alt="Step Visual"
-                                        width={400}
-                                        height={225}
+                                        width={200}
+                                        height={200}
                                         className="w-full h-full object-cover"
                                         />
                                     </div>
@@ -1369,7 +1334,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-[90vw] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-slate-800 bg-black p-0 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-slate-800 bg-black p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
         className,
       )}
       {...props}
@@ -1515,15 +1480,17 @@ const PricingSection = () => {
 
     return (
         <div className="w-full py-0 font-sans">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col items-center gap-6 text-center mt-10">
                     <div className="flex flex-col gap-2">
+                        {/* 需求 2: 字体大小和格式与“学校申请支持”一致 */}
                         <h3 className="text-2xl md:text-3xl font-semibold text-white">
                             核心服务详情
                             <br />
                             Core Service Details
                         </h3>
-                        <p className="max-w-2xl text-base lg:text-lg text-neutral-300">
+                        {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
+                        <p className="max-w-2xl text-base md:text-lg text-neutral-300">
                             您可以清晰地看到我们提供的不同服务计划，帮助您选择最适合您的需求的方案。
                         </p>
                     </div>
@@ -1536,16 +1503,19 @@ const PricingSection = () => {
                             className="flex h-full flex-col bg-transparent border-neutral-700"
                         >
                             <CardHeader className="p-6 pb-4 text-center">
-                                <CardTitle className="text-xl font-bold text-white">{plan.name}</CardTitle>
-                                <CardDescription className="text-base text-neutral-300 mt-2">{plan.description}</CardDescription>
+                                {/* 需求 3: 字体大小和格式与“有时候，眼见为实。”一致 */}
+                                <CardTitle className="text-2xl font-bold text-white">{plan.name}</CardTitle>
+                                {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
+                                <CardDescription className="text-base md:text-lg text-neutral-300 mt-2">{plan.description}</CardDescription>
                             </CardHeader>
                             <CardContent className="flex flex-1 flex-col justify-between gap-6 p-6 pt-0">
                                 <div className="flex-grow">
                                     <div className="flex flex-col gap-4 mt-4 items-center">
                                         {plan.features.map((feature) => (
-                                            <div key={feature} className="flex flex-row items-start gap-3 w-full max-w-xs text-left">
+                                            <div key={feature} className="flex flex-row items-start gap-3">
                                                 <Check className="h-5 w-5 flex-shrink-0 text-green-500 mt-1" />
-                                                <p className="text-base text-neutral-300">{feature}</p>
+                                                {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
+                                                <p className="text-base md:text-lg text-neutral-300">{feature}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -1596,10 +1566,11 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
 ));
 MemoizedZap.displayName = 'ZapIcon';
 
+// 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
   { icon: MemoizedCpu, title: "企业服务", description: "公司注册、准证、财税及人力资源的一站式运营方案" },
   { icon: MemoizedShieldCheck, title: "留学教育", description: "作为您家庭的教育合伙人，规划最优的成长路径" },
-  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，链接中新跨境医疗资源，一站式为您守护健康" },
+  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，链接中新跨境医疗资源，一站式为您守护健康" }, // 修改文本内容
   { icon: MemoizedZap, title: "战略发展", description: "链接本地核心资源，为您的事业发展提供战略支持" },
 ];
 
@@ -1608,7 +1579,7 @@ const timelineData = [
       title: "公司注册",
       content: (
         <div>
-          <p className="text-neutral-200 font-normal mb-8 text-base lg:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/wangzhantupian/gongsi.jpg" 
@@ -1625,7 +1596,7 @@ const timelineData = [
       title: "准证申请",
       content: (
         <div>
-          <p className="text-neutral-200 font-normal mb-8 text-base lg:text-lg">为创始人、高管及家人量身定制整体准证方案（EP、DP等），通过深度评估与战略规划，极大化成功率，提供核心身份保障。</p>
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">为创始人、高管及家人量身定制整体准证方案（EP、DP等），通过深度评估与战略规划，极大化成功率，提供核心身份保障。</p>
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/wangzhantupian/zhunzheng.jpg" 
@@ -1642,7 +1613,7 @@ const timelineData = [
       title: "财务税务合规",
       content: (
         <div>
-          <p className="text-neutral-200 font-normal mb-8 text-base lg:text-lg">提供专业的年度财税申报、财税合规与规划服务，我们不仅确保您的企业稳健合规，更助力您充分享受新加坡的政策优势。</p>
+          <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供专业的年度财税申报、财税合规与规划服务，我们不仅确保您的企业稳健合规，更助力您充分享受新加坡的政策优势。</p>
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/wangzhantupian/caishui.jpg" 
@@ -1659,7 +1630,7 @@ const timelineData = [
       title: "人力资源支持",
       content: (
         <div>
-          <p className="text-neutral-200 mb-4 text-base lg:text-lg">提供从核心人才招聘、名义雇主（EOR）到跨境薪酬合规的一站式人力资源解决方案，助您在新加坡高效、合规地组建并管理顶尖团队。</p>
+          <p className="text-neutral-200 mb-4 text-base md:text-lg">提供从核心人才招聘、名义雇主（EOR）到跨境薪酬合规的一站式人力资源解决方案，助您在新加坡高效、合规地组建并管理顶尖团队。</p>
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/wangzhantupian/renliziyuan.jpg" 
@@ -1677,7 +1648,7 @@ const timelineData = [
 const projectShowcaseData = [
   {
     name: "教育路径规划",
-    buttonLabel: "教育蓝图",
+    buttonLabel: "教育蓝图", // <-- 新增：按钮上显示的文字
     quote: '我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。',
     designation: "Next.js 项目",
     src: "https://zh.apex-elite-service.com/wangzhantupian/arif-riyanto-UD9nADGj2mc-unsplash.jpg",
@@ -1685,7 +1656,7 @@ const projectShowcaseData = [
   },
   {
     name: "学校申请支持",
-    buttonLabel: "名校起航",
+    buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
     quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
     src: "https://zh.apex-elite-service.com/wangzhantupian/decima-athens-P57zlRsjC7I-unsplash.jpg",
@@ -1693,7 +1664,7 @@ const projectShowcaseData = [
   },
   {
     name: "长期成长陪伴",
-    buttonLabel: "全程护航",
+    buttonLabel: "全程护航", // <-- 新增：按钮上显示的文字
     quote: "我们提供超越申请的长期陪伴服务。作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
     designation: "Vue 项目",
     src: "https://zh.apex-elite-service.com/wangzhantupian/pexels-naomi-shi-374023-1001914.jpg",
@@ -1747,6 +1718,7 @@ const infoSectionData2 = {
     secondaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/tijian2.jpg',
 };
 
+// 新增: FAQ 数据
 const faqData = [
     {
         question: "中新跨境就医服务",
@@ -1859,9 +1831,10 @@ function ScrollAdventure() {
         e.preventDefault();
         const touchEndY = e.changedTouches[0].clientY;
         const deltaY = touchEndY - touchStartY.current;
+        // 阈值判断，防止过于灵敏
         if(Math.abs(deltaY) > 50) {
-            handleScroll(-deltaY);
-            touchStartY.current = touchEndY;
+            handleScroll(-deltaY); // 注意方向与滚轮相反
+            touchStartY.current = touchEndY; // 重置起始点
         }
     };
 
@@ -1903,13 +1876,14 @@ function ScrollAdventure() {
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
                 style={{ backgroundImage: page.leftBgImage ? `url(${page.leftBgImage})` : 'none', backgroundColor: '#111' }}
               >
-                <div className="flex flex-col items-center justify-center h-full text-white p-6 md:p-8">
+                <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.leftContent && (
-                    <div className="text-center max-w-md">
-                      <h2 className="mb-4 tracking-widest text-xl md:text-2xl font-semibold">
+                    <div className="text-center">
+                      {/* 修改：调整标题字号 */}
+                      <h2 className="mb-4 tracking-widest text-2xl md:text-3xl font-semibold">
                         {page.leftContent.heading}
                       </h2>
-                      <p className="text-base">
+                      <p className="text-base md:text-lg">
                         {page.leftContent.description}
                       </p>
                     </div>
@@ -1925,13 +1899,14 @@ function ScrollAdventure() {
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
                 style={{ backgroundImage: page.rightBgImage ? `url(${page.rightBgImage})` : 'none', backgroundColor: '#111' }}
               >
-                <div className="flex flex-col items-center justify-center h-full text-white p-6 md:p-8">
+                <div className="flex flex-col items-center justify-center h-full text-white p-4 md:p-8">
                   {page.rightContent && (
-                     <div className="text-center max-w-md">
-                      <h2 className="mb-4 tracking-widest text-xl md:text-2xl font-semibold">
+                     <div className="text-center">
+                       {/* 修改：调整标题字号 */}
+                      <h2 className="mb-4 tracking-widest text-2xl md:text-3xl font-semibold">
                         {page.rightContent.heading}
                       </h2>
-                       <div className="text-base">
+                       <div className="text-base md:text-lg">
                           {page.rightContent.description}
                         </div>
                     </div>
@@ -1951,6 +1926,7 @@ ScrollAdventure.displayName = "ScrollAdventure";
 // 9. 文本揭示卡片组件 (新)
 // ============================================================================
 
+// Stars 子组件，用于背景的星星动画
 const Stars = () => {
   const randomMove = () => Math.random() * 4 - 2;
   const randomOpacity = () => Math.random();
@@ -1990,6 +1966,7 @@ const Stars = () => {
 const MemoizedStars = memo(Stars);
 MemoizedStars.displayName = "MemoizedStars";
 
+// TextRevealCardTitle 子组件
 const TextRevealCardTitle = ({
   children,
   className,
@@ -2005,6 +1982,7 @@ const TextRevealCardTitle = ({
 };
 TextRevealCardTitle.displayName = "TextRevealCardTitle";
 
+// TextRevealCardDescription 子组件
 const TextRevealCardDescription = ({
   children,
   className,
@@ -2018,6 +1996,7 @@ const TextRevealCardDescription = ({
 };
 TextRevealCardDescription.displayName = "TextRevealCardDescription";
 
+// TextRevealCard 核心组件
 const TextRevealCard = ({
   text,
   revealText,
@@ -2090,7 +2069,8 @@ const TextRevealCard = ({
       onTouchMove={touchMoveHandler}
       ref={cardRef}
       className={cn(
-        "bg-transparent w-full rounded-lg p-4 sm:p-8 relative overflow-hidden",
+        // 更新：移除了背景色和边框，使卡片透明
+        "bg-transparent w-full rounded-lg p-8 relative overflow-hidden",
         className
       )}
     >
@@ -2110,11 +2090,12 @@ const TextRevealCard = ({
                 }
           }
           transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
+          // 更新：移除了此处的背景色
           className="absolute bg-transparent z-20 will-change-transform"
         >
           <p
             style={{ textShadow: "4px 4px 15px rgba(0,0,0,0.5)" }}
-            className="text-center py-10 text-2xl md:text-4xl font-semibold leading-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-300"
+            className="py-10 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px] text-white bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-300"
           >
             {revealText}
           </p>
@@ -2129,6 +2110,7 @@ const TextRevealCard = ({
           className="h-40 w-[8px] bg-gradient-to-b from-transparent via-neutral-800 to-transparent absolute z-50 will-change-transform"
         ></motion.div>
 
+        {/* 更新：为底层文本添加 motion.div 以动画化 clipPath */}
         <motion.div
           animate={{
             clipPath: `inset(0 0 0 ${widthPercentage}%)`
@@ -2136,7 +2118,7 @@ const TextRevealCard = ({
           transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
           className="overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,white,transparent)] w-full"
         >
-          <p className="text-center py-10 text-2xl md:text-4xl font-semibold leading-tight bg-clip-text text-transparent bg-[#323238]">
+          <p className="py-10 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px] bg-clip-text text-transparent bg-[#323238]">
             {text}
           </p>
           <MemoizedStars />
@@ -2211,22 +2193,25 @@ const CustomFooter = () => {
 
     return (
       <footer className="bg-transparent text-white py-12 mt-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
-            <div className="mb-8 w-48 h-48 md:w-64 md:h-64 bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center p-2">
+            <div className="mb-8 w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center p-2">
               <Image
                 src="https://zh.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
                 alt="官方公众号二维码"
-                width={240}
-                height={240}
+                width={280}
+                height={280}
                 className="w-full h-full object-contain rounded-lg"
               />
             </div>
-            <nav className="mb-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-neutral-300 text-base">
+            <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300 text-base md:text-lg">
               <Link href="#" className="hover:text-white">Apex</Link>
+              {/* 点击“留学”跳转到留学教育板块 */}
               <Link href="#study-abroad" className="hover:text-white">留学</Link>
+               {/* 点击“医疗”跳转到健康管理板块 */}
               <Link href="#health-management" className="hover:text-white">医疗</Link>
+              {/* 点击“企业服务”跳转到企业服务板块 */}
               <Link href="#corporate-services" className="hover:text-white">企业服务</Link>
               <Link href="#" className="hover:text-white">敬请期待</Link>
             </nav>
@@ -2237,7 +2222,10 @@ const CustomFooter = () => {
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative"
+                    className={cn(
+                      "relative",
+                      hoveredIcon === social.name ? "z-50" : "z-0"
+                    )}
                     onMouseEnter={() => setHoveredIcon(social.name)}
                     onMouseLeave={() => setHoveredIcon(null)}
                   >
@@ -2245,36 +2233,29 @@ const CustomFooter = () => {
                       {social.icon}
                       <span className="sr-only">{social.name}</span>
                     </Button>
-                    <AnimatePresence>
                     {hoveredIcon === social.name && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute -top-40 left-1/2 -translate-x-1/2 w-36 h-36 bg-white border rounded-md shadow-lg p-1 flex items-center justify-center z-50">
+                      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-36 h-36 bg-white border rounded-md shadow-lg p-1 flex items-center justify-center">
                         <Image src={social.qrcode} alt={`${social.name} QR Code`} width={136} height={136} className="w-full h-full object-cover" />
-                      </motion.div>
+                      </div>
                     )}
-                    </AnimatePresence>
                  </a>
               ))}
             </div>
             <div className="mb-8 w-full max-w-md">
-              {/* 优化: 移动端垂直堆叠 */}
-              <form className="flex flex-col sm:flex-row gap-2" onSubmit={handleEmailSubmit}>
+              <form className="flex space-x-2" onSubmit={handleEmailSubmit}>
                 <div className="flex-grow">
                   <Label htmlFor="email-footer" className="sr-only">Email</Label>
                   <Input 
                     id="email-footer" 
                     placeholder="输入您的邮箱" 
                     type="email" 
-                    className="rounded-full text-center sm:text-left" 
+                    className="rounded-full" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
-                <Button type="submit" variant="default" className="rounded-full text-base" disabled={isSubmitting}>
+                <Button type="submit" variant="default" className="rounded-full text-base md:text-lg" disabled={isSubmitting}>
                   {isSubmitting ? '提交中...' : '提交'}
                 </Button>
               </form>
@@ -2310,35 +2291,64 @@ const FaqItem = React.forwardRef<
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.1 }}
-      className="group rounded-lg border border-white/10 transition-all duration-300 ease-in-out hover:bg-white/5"
+      className={cn(
+        "group rounded-lg",
+        "transition-all duration-200 ease-in-out",
+        "border border-white/10" // 使用页面已有的边框颜色
+      )}
     >
-      <button
+      <Button
+        variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-4 sm:px-6 sm:py-5 flex justify-between items-center text-left"
+        className="w-full px-6 py-4 h-auto justify-between hover:bg-transparent"
       >
-        <h3 className="text-base md:text-lg font-medium text-white">
+        <h3
+          className={cn(
+            "text-base md:text-lg font-medium transition-colors duration-200 text-left",
+            "text-white", // <-- 修改这里
+            isOpen && "text-white"
+          )}
+        >
           {question}
         </h3>
         <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
+          animate={{ rotate: isOpen ? 180 : 0, scale: isOpen ? 1.1 : 1 }}
           transition={{ duration: 0.2 }}
-          className="text-neutral-400"
+          className={cn(
+            "p-0.5 rounded-full flex-shrink-0",
+            "transition-colors duration-200",
+            isOpen ? "text-white" : "text-neutral-400"
+          )}
         >
-          <ChevronDownIcon className="h-5 w-5" /> 
+          {/* 复用已导入的图标 */}
+          <ChevronDownIcon className="h-4 w-4" /> 
         </motion.div>
-      </button>
+      </Button>
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1, transition: { duration: 0.3, ease: "easeOut" } }}
-            exit={{ height: 0, opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
-            className="overflow-hidden"
+            animate={{
+              height: "auto",
+              opacity: 1,
+              transition: { duration: 0.2, ease: "easeOut" },
+            }}
+            exit={{
+              height: 0,
+              opacity: 0,
+              transition: { duration: 0.2, ease: "easeIn" },
+            }}
           >
-            <div className="px-4 pb-4 sm:px-6 sm:pb-5">
-              <p className="text-base text-neutral-300 leading-relaxed">
+            <div className="px-6 pb-4 pt-2">
+              <motion.p
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                // 需求 5: 字体大小和格式与“我们深知...”一致
+                className="text-base md:text-lg text-neutral-400 leading-relaxed"
+              >
                 {answer}
-              </p>
+              </motion.p>
             </div>
           </motion.div>
         )}
@@ -2363,8 +2373,8 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
         className={cn("w-full", className)}
         {...props}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto space-y-3">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto space-y-2">
             {items.map((item, index) => (
               <FaqItem
                 key={index}
@@ -2392,17 +2402,24 @@ export default function HomePage() {
   const [isEntered, setIsEntered] = useState(false);
 
   useEffect(() => {
+    // 检查是否已经提交过表单
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
     if (submittedFlag === 'true') {
       setHasSubmitted(true);
     }
 
+    // [新增] 检查是否是首次访问，用于控制开门动画
     const hasVisited = sessionStorage.getItem('hasVisitedHomePage');
     if (hasVisited) {
+      // 如果不是首次访问，直接“进入”主页
       setIsEntered(true);
-    } 
+    } else {
+      // 如果是首次访问，设置标记，但动画仍然显示
+      // 点击动画后才会标记为“已访问”
+    }
+    // 客户端检查完成，结束加载状态
     setIsLoading(false);
-  }, []);
+  }, []); // 空依赖数组，确保只在组件挂载时运行一次
   
   const handleSuccess = () => {
     localStorage.setItem('hasSubmittedForm', 'true');
@@ -2424,10 +2441,12 @@ export default function HomePage() {
   };
 
   const handleEnter = () => {
+      // [新增] 点击后，设置访问标记并触发进入动画
       sessionStorage.setItem('hasVisitedHomePage', 'true');
       setIsEntered(true);
   };
 
+  // 在客户端检查完成前，返回一个空的黑色屏幕，防止内容闪烁
   if (isLoading) {
       return <div className="fixed inset-0 bg-black z-[200]" />;
   }
@@ -2443,6 +2462,7 @@ export default function HomePage() {
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.8, ease: "easeInOut" } }}
           >
             <div className="w-full max-w-2xl px-4">
+              {/* 修改：传入副标题 */}
               <TextShineEffect 
                 text="Apex" 
                 subtitle="轻触，开启非凡。"
@@ -2469,29 +2489,31 @@ export default function HomePage() {
         <Scene />
 
         <main className="relative z-10 pt-20">
-            <div className="min-h-screen w-full flex flex-col items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
-                <div className="w-full max-w-6xl text-center space-y-12 md:space-y-16">
-                    <div className="space-y-6">
-                        <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-white">
-                            为您而来，不止于此
-                        </h1>
-                        <p className="text-neutral-300 max-w-3xl mx-auto text-base lg:text-lg">
-                            Apex是一家总部位于新加坡的综合性专业服务机构。我们深刻理解全球高净值人士与出海企业所面临的机遇与挑战，矢志成为您在新加坡的首席合作伙伴，提供从商业顶层设计、子女教育规划到主动式健康管理的无缝衔接解决方案。
-                        </p>
+            <div className="min-h-screen w-full flex flex-col items-center justify-center py-24">
+                <div className="w-full max-w-6xl px-8 space-y-16 flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center text-center space-y-8">
+                    <div className="space-y-6 flex items-center justify-center flex-col">
+                    <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
+                        为您而来，不止于此
+                    </h1>
+                    <p className="text-neutral-300 max-w-2xl text-base md:text-lg">
+                        Apex是一家总部位于新加坡的综合性专业服务机构。我们深刻理解全球高净值人士与出海企业所面临的机遇与挑战，矢志成为您在新加坡的首席合作伙伴，提供从商业顶层设计、子女教育规划到主动式健康管理的无缝衔接解决方案。
+                    </p>
                     </div>
-                    {/* 优化: 特性卡片网格布局 */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
-                        {features.map((feature, idx) => (
-                        <div
-                            key={idx}
-                            className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 min-h-[180px] flex flex-col justify-start items-start text-left space-y-2 md:space-y-3"
-                        >
-                            <feature.icon size={20} className="text-white/80 md:w-6 md:h-6" />
-                            <h3 className="text-base font-bold text-white">{feature.title}</h3>
-                            <p className="text-neutral-400 text-sm">{feature.description}</p>
-                        </div>
-                        ))}
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+                    {features.map((feature, idx) => (
+                    <div
+                        key={idx}
+                        className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
+                    >
+                        <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
+                        <h3 className="text-base font-bold text-white">{feature.title}</h3>
+                        {/* 修改：调整字体大小 */}
+                        <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
                     </div>
+                    ))}
+                </div>
                 </div>
             </div>
             
@@ -2499,7 +2521,7 @@ export default function HomePage() {
               <Timeline data={timelineData} />
             </div>
 
-            <div id="study-abroad" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="study-abroad" className="max-w-7xl mx-auto px-8">
                 <ProjectShowcase 
                 testimonials={projectShowcaseData} 
                 onProtectedLinkClick={handleProtectedLinkClick}
@@ -2510,46 +2532,47 @@ export default function HomePage() {
               <InfoSectionWithMockup {...infoSectionData1} />
             </div>
             
-            <div className="py-16">
-                <FaqSection items={faqData} className="w-full max-w-4xl mx-auto"/>
+            <div className="py-16 px-8 flex flex-col justify-center items-center">
+                <FaqSection items={faqData} className="w-full max-w-4xl"/>
             </div>
 
             <div id="integration-section">
                 <InfoSectionWithMockup
                     {...infoSectionData2}
                     reverseLayout={true}
-                    className="pt-12 md:pt-20 pb-0"
+                    className="pt-24 md:pt-32 pb-0" // 保留顶部padding，移除底部padding
                 />
             </div>
 
-            <div className="pt-8 pb-16 md:pb-28">
+            {/* 需求 1: 插入定价方案板块 */}
+            <div className="pt-0 px-8 flex flex-col items-center">
               <PricingSection />
             </div>
 
             <CtaWithGallerySection />
             
-            <div className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center">
+            <div className="py-24 px-8 flex flex-col justify-center items-center">
                 <div className="text-center mb-12">
-                    <h2 className="text-white mb-4 text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">
+                    <h2 className="text-white mb-4 text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
                         我们的承诺与流程
                     </h2>
-                    <p className="text-neutral-300 max-w-2xl mx-auto text-base lg:text-lg">
+                    <p className="text-neutral-300 max-w-2xl mx-auto text-base md:text-lg">
                         探索我们如何通过透明、高效的流程，为您在新加坡的旅程保驾护航。
                     </p>
                 </div>
                 <ScrollAdventure />
             </div>
 
-            <div className="py-12 md:py-20 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div className="py-12 md:py-20 flex items-center justify-center">
                 <TextRevealCard
                     text="真正的价值，蕴藏于深度对话之中。"
                     revealText="与我们同行，让您的卓越在新加坡从容绽放。"
                     className="w-full max-w-4xl"
                 >
-                    <TextRevealCardTitle className="text-2xl font-bold text-center sm:text-left">
+                    <TextRevealCardTitle className="text-2xl font-bold">
                     洞见未来，共谱新章
                     </TextRevealCardTitle>
-                    <TextRevealCardDescription className="text-base text-center sm:text-left">
+                    <TextRevealCardDescription className="text-base md:text-lg">
                     我们深知，每一个伟大的决策，都需要前瞻性的洞察与值得信赖的伙伴。Apex将两者融为一体，陪伴您开启未来。
                     </TextRevealCardDescription>
                 </TextRevealCard>
@@ -2559,7 +2582,7 @@ export default function HomePage() {
         </main>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogContent className="p-0">
+            <DialogContent>
                 <SubmissionCard onSuccess={handleSuccess} />
             </DialogContent>
         </Dialog>
