@@ -11,8 +11,10 @@ import React, {
     memo
 } from 'react';
 import Image from 'next/image';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import {
   motion,
   useScroll,
@@ -69,122 +71,6 @@ const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => 
     return <a href={href} {...props}>{children}</a>;
 };
 Link.displayName = "Link";
-
-// ============================================================================
-// “开场动画/门” - SVG 自动扫描光效文字组件 (已修改为实体样式)
-// ============================================================================
-const TextShineEffect = ({
-  text,
-  subtitle,
-  scanDuration = 4,
-  onClick
-}: {
-  text: string;
-  subtitle?: string;
-  scanDuration?: number;
-  onClick?: () => void;
-}) => {
-  return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox="0 0 400 200"
-      xmlns="http://www.w3.org/2000/svg"
-      className="select-none cursor-pointer"
-      onClick={onClick}
-    >
-      <defs>
-        {/* 这部分是定义颜色和光效，保持不变 */}
-        <linearGradient id="textGradient">
-            <stop offset="0%" stopColor="#8b5cf6" />
-            <stop offset="25%" stopColor="#3b82f6" />
-            <stop offset="50%" stopColor="#06b6d4" />
-            <stop offset="75%" stopColor="#ef4444" />
-            <stop offset="100%" stopColor="#eab308" />
-        </linearGradient>
-        <motion.radialGradient
-          id="revealMask"
-          gradientUnits="userSpaceOnUse"
-          r="25%"
-          animate={{ cx: ["-25%", "125%"] }}
-          transition={{
-            duration: scanDuration,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-        >
-          <stop offset="0%" stopColor="white" />
-          <stop offset="100%" stopColor="black" />
-        </motion.radialGradient>
-        <mask id="textMask">
-          <rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            fill="url(#revealMask)"
-          />
-        </mask>
-      </defs>
-
-      {/* 主标题 (例如 "Apex") */}
-      {/* 第一层: 白色实体字作为底色 */}
-      <text
-        x="50%"
-        y="45%"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill="white"
-        className="font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
-      >
-        {text}
-      </text>
-      {/* 第二层: 带闪光效果的彩色字，叠在上面 */}
-      <text
-        x="50%"
-        y="45%"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill="url(#textGradient)"
-        mask="url(#textMask)"
-        className="font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
-      >
-        {text}
-      </text>
-
-      {/* 副标题 (例如 "轻触，开启非凡。") */}
-      {subtitle && (
-        <>
-          {/* 第一层: 白色实体字作为底色 */}
-          <text
-            x="50%"
-            y="70%"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="white"
-            className="font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
-          >
-            {subtitle}
-          </text>
-          {/* 第二层: 带闪光效果的彩色字，叠在上面 */}
-          <text
-            x="50%"
-            y="70%"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="url(#textGradient)"
-            mask="url(#textMask)"
-            className="font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
-          >
-            {subtitle}
-          </text>
-        </>
-      )}
-    </svg>
-  );
-};
-TextShineEffect.displayName = "TextShineEffect";
 
 
 // ============================================================================
@@ -1862,15 +1748,10 @@ function ScrollAdventure() {
   }, [handleScroll]);
 
   return (
-    // [要求 1 & 2 已修改] 
-    // 1. 响应式比例：移除了固定的视口高度(h-[80vh])，改用 aspect-ratio 确保面板在不同屏幕尺寸下始终为正方形。
-    //    - `aspect-[1/2]` 用于移动端竖向布局（一个宽度，两个高度单位），确保每个 h-1/2 的面板是正方形。
-    //    - `lg:aspect-[2/1]` 用于桌面端横向布局（两个宽度，一个高度单位），确保每个 w-1/2 的面板是正方形。
-    // 2. 透明背景：将 `bg-black` 改为 `bg-transparent`，让父组件的动画背景可以透视。
-    // 3. 居中：添加 `mx-auto` 以便在超宽屏幕上居中显示。
+    // [要求 2 已修改] 移除了边框样式 `border` 和 `border-neutral-700`
     <div 
       ref={componentRef} 
-      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl border border-neutral-700 shadow-2xl aspect-[1/2] lg:aspect-[2/1]"
+      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl shadow-2xl aspect-[1/2] lg:aspect-[2/1]"
     >
       {scrollAnimationPages.map((page, i) => {
         const idx = i + 1;
@@ -1881,14 +1762,13 @@ function ScrollAdventure() {
             {/* Left Panel */}
             <div
               className={cn(
-                "w-full h-1/2 lg:w-1/2 lg:h-full", // 关键尺寸定义，确保在不同布局下占据正确空间形成正方形
+                "w-full h-1/2 lg:w-1/2 lg:h-full",
                 "transition-transform duration-[1000ms] ease-in-out",
                 isActive ? 'translate-x-0' : '-translate-x-full'
               )}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
-                // [要求 2 已修改] 将背景色从 #111 改为 transparent
                 style={{ 
                   backgroundImage: page.leftBgImage ? `url(${page.leftBgImage})` : 'none', 
                   backgroundColor: 'transparent' 
@@ -1912,14 +1792,13 @@ function ScrollAdventure() {
             {/* Right Panel */}
             <div
               className={cn(
-                "w-full h-1/2 lg:w-1/2 lg:h-full", // 关键尺寸定义
+                "w-full h-1/2 lg:w-1/2 lg:h-full",
                 "transition-transform duration-[1000ms] ease-in-out",
                 isActive ? 'translate-x-0' : 'translate-x-full'
               )}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
-                // [要求 2 已修改] 将背景色从 #111 改为 transparent
                 style={{ 
                   backgroundImage: page.rightBgImage ? `url(${page.rightBgImage})` : 'none', 
                   backgroundColor: 'transparent' 
@@ -2416,6 +2295,222 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
 );
 FaqSection.displayName = "FaqSection";
 
+
+// ============================================================================
+// [新增] 12. 开场动画 - “文字解体”和“星海穿梭”
+// ============================================================================
+
+// 字体文件的 URL，这里使用一个开源的、支持中文的字体
+// 为确保加载，建议将字体文件放在项目的 public 目录下
+const FONT_URL = "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosanssc/NotoSansSC-Bold.otf";
+
+// 文本粒子组件
+const TextParticles = ({ text, position, size, animateOut, font }: { text: string; position: [number, number, number]; size: number; animateOut: boolean; font: any; }) => {
+  const pointsRef = useRef<THREE.Points>(null!);
+  const materialRef = useRef<THREE.PointsMaterial>(null!);
+  
+  // 1. 创建文本几何体并提取粒子位置
+  const particles = useMemo(() => {
+    if (!font) return null;
+    
+    const textGeometry = new TextGeometry(text, {
+      font: font,
+      size: size,
+      height: 0.2,
+      curveSegments: 12,
+      bevelEnabled: false,
+    });
+    
+    textGeometry.center(); // 将几何体居中
+    
+    const count = textGeometry.attributes.position.count;
+    const posArray = new Float32Array(count * 3);
+    const targetPosArray = new Float32Array(count * 3); // 粒子动画的目标位置
+    const randomVelocities = new Float32Array(count * 3); // 粒子的随机速度
+
+    for (let i = 0; i < count; i++) {
+        // 初始位置
+        posArray[i * 3 + 0] = textGeometry.attributes.position.getX(i);
+        posArray[i * 3 + 1] = textGeometry.attributes.position.getY(i);
+        posArray[i * 3 + 2] = textGeometry.attributes.position.getZ(i);
+
+        // 目标位置（向外扩散）
+        const radius = 5 + Math.random() * 5;
+        const phi = Math.random() * Math.PI * 2;
+        const theta = Math.random() * Math.PI;
+        targetPosArray[i * 3 + 0] = radius * Math.sin(theta) * Math.cos(phi);
+        targetPosArray[i * 3 + 1] = radius * Math.sin(theta) * Math.sin(phi);
+        targetPosArray[i * 3 + 2] = radius * Math.cos(theta);
+
+        // 随机速度
+        randomVelocities[i*3 + 0] = (Math.random() - 0.5) * 0.02;
+        randomVelocities[i*3 + 1] = (Math.random() - 0.5) * 0.02;
+        randomVelocities[i*3 + 2] = (Math.random() - 0.5) * 0.02;
+    }
+
+    const bufferGeometry = new THREE.BufferGeometry();
+    bufferGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    bufferGeometry.setAttribute('targetPosition', new THREE.BufferAttribute(targetPosArray, 3));
+
+    return { geometry: bufferGeometry, velocities: randomVelocities };
+
+  }, [font, text, size]);
+
+  // 2. 动画循环
+  useFrame((state, delta) => {
+    if (!particles || !pointsRef.current) return;
+    
+    // 如果触发了 "animateOut"
+    if(animateOut) {
+        // 粒子材质逐渐透明
+        materialRef.current.opacity -= delta * 0.5;
+
+        const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
+        const targets = pointsRef.current.geometry.attributes.targetPosition as THREE.BufferAttribute;
+
+        // 粒子向目标位置移动
+        for (let i = 0; i < positions.count; i++) {
+            const x = positions.getX(i);
+            const y = positions.getY(i);
+            const z = positions.getZ(i);
+
+            const tx = targets.getX(i);
+            const ty = targets.getY(i);
+            const tz = targets.getZ(i);
+
+            positions.setX(i, x + (tx - x) * 0.05);
+            positions.setY(i, y + (ty - y) * 0.05);
+            positions.setZ(i, z + (tz - z) * 0.05);
+        }
+        positions.needsUpdate = true;
+    }
+  });
+
+  if (!particles) return null;
+
+  return (
+    <points ref={pointsRef} position={position} geometry={particles.geometry}>
+        <pointsMaterial ref={materialRef} color="white" size={0.05} transparent={true} />
+    </points>
+  );
+};
+TextParticles.displayName = "TextParticles";
+
+
+// 星海穿梭组件
+const Starfield = ({ animate }: { animate: boolean }) => {
+  const pointsRef = useRef<THREE.Points>(null!);
+
+  // 创建星星粒子
+  const stars = useMemo(() => {
+    const count = 5000;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      positions[i * 3 + 0] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geometry;
+  }, []);
+
+  // 动画循环
+  useFrame((state, delta) => {
+    if (!pointsRef.current || !animate) return;
+    const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
+    
+    for (let i = 0; i < positions.count; i++) {
+      let z = positions.getZ(i);
+      z += delta * 50; // 向镜头移动
+      if (z > 50) {
+        // 如果星星飞过镜头，则重置到深处
+        z = -50;
+      }
+      positions.setZ(i, z);
+    }
+    positions.needsUpdate = true;
+  });
+
+  return (
+    <points ref={pointsRef} geometry={stars}>
+      <pointsMaterial color="white" size={0.03} />
+    </points>
+  );
+};
+Starfield.displayName = "Starfield";
+
+
+// 整体开场动画控制组件
+const IntroAnimation = ({ onEnter }: { onEnter: () => void; }) => {
+  const [stage, setStage] = useState<'idle' | 'disintegrating' | 'warping' | 'finished'>('idle');
+  const [isClicked, setIsClicked] = useState(false);
+  
+  // 使用 useLoader 加载字体
+  // 这是 react-three-fiber 推荐的方式，它能更好地与 React Suspense 集成
+  const font = useLoader(FontLoader, FONT_URL);
+
+  const handleClick = () => {
+    if (stage === 'idle' && !isClicked) {
+      setIsClicked(true);
+      
+      // 开始文字解体
+      setStage('disintegrating');
+      
+      // 1.5秒后开始星海穿梭
+      setTimeout(() => {
+        setStage('warping');
+      }, 1500);
+
+      // 4秒后结束整个动画
+      setTimeout(() => {
+        setStage('finished');
+        onEnter();
+      }, 4000);
+    }
+  };
+
+  return (
+    <div 
+      className="w-full h-full cursor-pointer"
+      onClick={handleClick}
+    >
+      <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
+        <ambientLight intensity={1.5} />
+        <React.Suspense fallback={null}>
+          {(stage === 'idle' || stage === 'disintegrating') && font && (
+            <>
+              <TextParticles
+                font={font}
+                text="Apex"
+                position={[0, 0.8, 0]}
+                size={2}
+                animateOut={stage === 'disintegrating'}
+              />
+              <TextParticles
+                font={font}
+                text="轻触，开启非凡。"
+                position={[0, -0.8, 0]}
+                size={0.5}
+                animateOut={stage === 'disintegrating'}
+              />
+            </>
+          )}
+          {(stage === 'warping') && <Starfield animate={true} />}
+        </React.Suspense>
+      </Canvas>
+      {/* 添加提示信息，引导用户点击 */}
+      {!isClicked && (
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 animate-pulse text-sm">
+            点击任意处继续
+        </div>
+      )}
+    </div>
+  );
+};
+IntroAnimation.displayName = "IntroAnimation";
+
+
 // ============================================================================
 // 12. 主页面组件
 // ============================================================================
@@ -2427,24 +2522,18 @@ export default function HomePage() {
   const [isEntered, setIsEntered] = useState(false);
 
   useEffect(() => {
-    // 检查是否已经提交过表单
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
     if (submittedFlag === 'true') {
       setHasSubmitted(true);
     }
 
-    // [新增] 检查是否是首次访问，用于控制开门动画
     const hasVisited = sessionStorage.getItem('hasVisitedHomePage');
     if (hasVisited) {
-      // 如果不是首次访问，直接“进入”主页
       setIsEntered(true);
-    } else {
-      // 如果是首次访问，设置标记，但动画仍然显示
-      // 点击动画后才会标记为“已访问”
     }
-    // 客户端检查完成，结束加载状态
+    
     setIsLoading(false);
-  }, []); // 空依赖数组，确保只在组件挂载时运行一次
+  }, []); 
   
   const handleSuccess = () => {
     localStorage.setItem('hasSubmittedForm', 'true');
@@ -2466,12 +2555,10 @@ export default function HomePage() {
   };
 
   const handleEnter = () => {
-      // [新增] 点击后，设置访问标记并触发进入动画
       sessionStorage.setItem('hasVisitedHomePage', 'true');
       setIsEntered(true);
   };
 
-  // 在客户端检查完成前，返回一个空的黑色屏幕，防止内容闪烁
   if (isLoading) {
       return <div className="fixed inset-0 bg-black z-[200]" />;
   }
@@ -2479,22 +2566,18 @@ export default function HomePage() {
   return (
     <div className="relative isolate bg-black text-white">
       
+      {/* [要求 1 已修改] 使用全新的开场动画组件 */}
       <AnimatePresence>
         {!isEntered && (
           <motion.div
             key="splash-screen"
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
-            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.8, ease: "easeInOut" } }}
+            className="fixed inset-0 z-[100] bg-black"
+            exit={{ opacity: 0, transition: { duration: 0.5 } }}
           >
-            <div className="w-full max-w-2xl px-4">
-              {/* 修改：传入副标题 */}
-              <TextShineEffect 
-                text="Apex" 
-                subtitle="轻触，开启非凡。"
-                scanDuration={4} 
-                onClick={handleEnter} 
-              />
-            </div>
+            {/* 使用 Suspense 来优雅地处理字体加载 */}
+            <React.Suspense fallback={<div className="w-full h-full bg-black" />}>
+              <IntroAnimation onEnter={handleEnter} />
+            </React.Suspense>
           </motion.div>
         )}
       </AnimatePresence>
@@ -2503,8 +2586,8 @@ export default function HomePage() {
         key="main-content"
         initial={{ opacity: 0 }}
         animate={{ opacity: isEntered ? 1 : 0 }}
-        transition={{ duration: 0.5, delay: isEntered ? 0.5 : 0 }}
-        className={cn(!isEntered && "pointer-events-none", "transition-opacity duration-500")}
+        transition={{ duration: 1.0, delay: isEntered ? 0.2 : 0 }}
+        className={cn(!isEntered && "pointer-events-none", "transition-opacity")}
       >
         <AppNavigationBar 
             onLoginClick={() => setIsModalOpen(true)}
@@ -2534,7 +2617,6 @@ export default function HomePage() {
                     >
                         <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
                         <h3 className="text-base font-bold text-white">{feature.title}</h3>
-                        {/* 修改：调整字体大小 */}
                         <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
                     </div>
                     ))}
@@ -2565,11 +2647,10 @@ export default function HomePage() {
                 <InfoSectionWithMockup
                     {...infoSectionData2}
                     reverseLayout={true}
-                    className="pt-24 md:pt-32 pb-0" // 保留顶部padding，移除底部padding
+                    className="pt-24 md:pt-32 pb-0"
                 />
             </div>
 
-            {/* 需求 1: 插入定价方案板块 */}
             <div className="pt-0 px-8 flex flex-col items-center">
               <PricingSection />
             </div>
