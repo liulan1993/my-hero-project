@@ -1586,7 +1586,7 @@ const timelineData = [
               alt="启动模板" 
               width={500}
               height={300}
-              className="rounded-lg object-cover w-full h-auto shadow-xl" 
+              className="rounded-lg object-cover w-full max-w-xl h-auto shadow-xl" 
             />
           </div>
         </div>
@@ -1603,7 +1603,7 @@ const timelineData = [
               alt="启动模板" 
               width={500}
               height={300}
-              className="rounded-lg object-cover w-full h-auto shadow-xl" 
+              className="rounded-lg object-cover w-full max-w-xl h-auto shadow-xl" 
             />
           </div>
         </div>
@@ -1620,7 +1620,7 @@ const timelineData = [
               alt="英雄区模板" 
               width={500}
               height={300}
-              className="rounded-lg object-cover w-full h-auto shadow-xl" 
+              className="rounded-lg object-cover w-full max-w-xl h-auto shadow-xl" 
             />
           </div>
         </div>
@@ -1637,7 +1637,7 @@ const timelineData = [
               alt="新组件预览" 
               width={500}
               height={300}
-              className="rounded-lg object-cover w-full h-auto shadow-xl"
+              className="rounded-lg object-cover w-full max-w-xl h-auto shadow-xl"
             />
           </div>
         </div>
@@ -2429,7 +2429,6 @@ export default function HomePage() {
   
   const handleProtectedLinkClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => {
     if (href === '#') {
-        e.preventDefault();
         alert("此功能正在开发中，敬请期待！");
         return;
     }
