@@ -10,7 +10,7 @@ import React, {
     useCallback,
     memo
 } from 'react';
-// import Image from 'next/image'; // Removed to fix build error
+import Image from 'next/image';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -22,8 +22,8 @@ import {
   type HTMLMotionProps,
 } from "framer-motion";
 
-// Removed to fix build error
-// import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
+// 修复：导入真实的 Server Actions
+import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight, Check } from 'lucide-react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
@@ -36,66 +36,11 @@ import { twMerge } from 'tailwind-merge';
 
 
 // ============================================================================
-// 0. 工具函数和模拟组件 (修复编译错误)
+// 0. 工具函数 (来自 shadcn/ui)
 // ============================================================================
-
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-// Mock 'next/image' component to resolve build error in this environment.
-// This mock simulates the basic behavior of the Next.js Image component.
-const Image = ({ src, alt, width, height, className, style, fill, priority, unoptimized, ...props }: any) => {
-    const imageStyles: React.CSSProperties = {
-        ...style,
-        objectFit: fill ? 'cover' : style?.objectFit,
-    };
-
-    if (fill) {
-        return (
-            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                <img
-                    src={src}
-                    alt={alt}
-                    className={className}
-                    style={{ ...imageStyles, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                    loading={priority ? 'eager' : 'lazy'}
-                    {...props}
-                />
-            </div>
-        );
-    }
-
-    return (
-        <img
-            src={src}
-            alt={alt}
-            width={width}
-            height={height}
-            className={className}
-            style={imageStyles}
-            loading={priority ? 'eager' : 'lazy'}
-            {...props}
-        />
-    );
-};
-Image.displayName = 'Image';
-
-
-// Mock server actions to resolve import error for './actions'.
-// These functions simulate the expected async behavior.
-const saveContactToRedis = async (formData: any) => {
-  console.log("Simulating saving contact to Redis:", formData);
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  return { success: true }; // Simulate a successful response
-};
-
-const saveFooterEmailToRedis = async (data: any) => {
-  console.log("Simulating saving footer email to Redis:", data);
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  return { success: true }; // Simulate a successful response
-};
-
 
 // 为联系人表单数据定义类型接口
 interface ContactFormData {
@@ -124,6 +69,67 @@ const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => 
     return <a href={href} {...props}>{children}</a>;
 };
 Link.displayName = "Link";
+
+// ============================================================================
+// 新增：星场/粒子穿梭动画组件
+// ============================================================================
+const Starfield = ({
+  speed = 2,
+  particleCount = 1500,
+  warpSpeedActive = false,
+}) => {
+  const ref = useRef<THREE.Points>(null);
+
+  const [positions] = useState(() => {
+    const particles = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      particles[i * 3] = (Math.random() - 0.5) * 10;
+      particles[i * 3 + 1] = (Math.random() - 0.5) * 10;
+      particles[i * 3 + 2] = (Math.random() - 0.5) * 10;
+    }
+    return particles;
+  });
+
+  useFrame((state, delta) => {
+    if (ref.current) {
+      const positions = ref.current.geometry.attributes.position.array as Float32Array;
+      let currentSpeed = warpSpeedActive ? speed * 35 : speed; // 穿梭时速度加快
+
+      for (let i = 0; i < particleCount; i++) {
+        positions[i * 3 + 2] += delta * currentSpeed;
+
+        // 当粒子超出视野时重置位置
+        if (positions[i * 3 + 2] > 5) {
+          positions[i * 3] = (Math.random() - 0.5) * 10;
+          positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+          positions[i * 3 + 2] = -5;
+        }
+      }
+      ref.current.geometry.attributes.position.needsUpdate = true;
+    }
+  });
+
+  return (
+    <points ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={particleCount}
+          args={[positions, 3]}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.015}
+        color="#ffffff"
+        transparent
+        opacity={0.7}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
+  );
+};
+Starfield.displayName = "Starfield";
+
 
 // ============================================================================
 // “开场动画/门” - SVG 自动扫描光效文字组件 (已修改为实体样式)
@@ -240,73 +246,6 @@ const TextShineEffect = ({
   );
 };
 TextShineEffect.displayName = "TextShineEffect";
-
-// ============================================================================
-// [新增] 1. 穿梭动画组件
-// ============================================================================
-const StarWarpParticles = () => {
-  const pointsRef = useRef<THREE.Points>(null);
-  
-  // 使用 useMemo 创建粒子，防止重复计算
-  const particles = useMemo(() => {
-    const count = 5000;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-    }
-    return positions;
-  }, []);
-
-  // 速度引用
-  const speedRef = useRef(0.01);
-
-  useFrame((state, delta) => {
-    if (pointsRef.current) {
-      // 动画逻辑：粒子向镜头移动，并加速
-      const positions = (pointsRef.current.geometry.attributes.position as THREE.BufferAttribute).array as Float32Array;
-      
-      for (let i = 0; i < positions.length / 3; i++) {
-        positions[i * 3 + 2] += speedRef.current; // Z轴移动
-
-        // 如果粒子穿过镜头，重置到远处
-        if (positions[i * 3 + 2] > 5) {
-          positions[i * 3 + 2] = -5;
-        }
-      }
-      pointsRef.current.geometry.attributes.position.needsUpdate = true;
-      
-      // 加速效果：速度随时间增加
-      speedRef.current += 0.0005 * delta * 60; // 乘以60以标准化delta
-    }
-    
-    // 镜头也向前移动，增强穿梭感
-    state.camera.position.z -= 0.005;
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particles.length / 3}
-          array={particles}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial size={0.015} color="white" />
-    </points>
-  );
-};
-StarWarpParticles.displayName = "StarWarpParticles";
-
-const StarWarp = () => (
-    <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-      <StarWarpParticles />
-    </Canvas>
-);
-StarWarp.displayName = "StarWarp";
 
 
 // ============================================================================
@@ -1984,10 +1923,12 @@ function ScrollAdventure() {
   }, [handleScroll]);
 
   return (
-    // [需求 2 已修改] 移除了 'border' 和 'border-neutral-700' 类
+    // [要求 2 已修改] 
+    // 边框和阴影已被移除: `border border-neutral-700 shadow-2xl` -> `border-none`
+    // 背景已设为透明: `bg-black` -> `bg-transparent`
     <div 
       ref={componentRef} 
-      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl shadow-2xl aspect-[1/2] lg:aspect-[2/1]"
+      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl border-none aspect-[1/2] lg:aspect-[2/1]"
     >
       {scrollAnimationPages.map((page, i) => {
         const idx = i + 1;
@@ -1998,7 +1939,7 @@ function ScrollAdventure() {
             {/* Left Panel */}
             <div
               className={cn(
-                "w-full h-1/2 lg:w-1/2 lg:h-full", 
+                "w-full h-1/2 lg:w-1/2 lg:h-full", // 关键尺寸定义，确保在不同布局下占据正确空间形成正方形
                 "transition-transform duration-[1000ms] ease-in-out",
                 isActive ? 'translate-x-0' : '-translate-x-full'
               )}
@@ -2028,7 +1969,7 @@ function ScrollAdventure() {
             {/* Right Panel */}
             <div
               className={cn(
-                "w-full h-1/2 lg:w-1/2 lg:h-full",
+                "w-full h-1/2 lg:w-1/2 lg:h-full", // 关键尺寸定义
                 "transition-transform duration-[1000ms] ease-in-out",
                 isActive ? 'translate-x-0' : 'translate-x-full'
               )}
@@ -2538,43 +2479,28 @@ FaqSection.displayName = "FaqSection";
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // [动画状态修改]
-  // 'start': 显示初始闪光文字
-  // 'warping': 显示穿梭动画
-  // 'entered': 显示主页内容
-  const [animationStep, setAnimationStep] = useState<'start' | 'warping' | 'entered'>('start');
-  const [isLoading, setIsLoading] = useState(true);
+  const [animationState, setAnimationState] = useState('initial'); // 'initial', 'textFading', 'warping', 'finished'
+  const [mainContentVisible, setMainContentVisible] = useState(false);
+
 
   useEffect(() => {
-    // 检查是否已经提交过表单
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
     if (submittedFlag === 'true') {
       setHasSubmitted(true);
     }
 
-    // 检查是否是首次访问，用于控制开门动画
     const hasVisited = sessionStorage.getItem('hasVisitedHomePage');
     if (hasVisited) {
-      // 如果不是首次访问，直接进入主页
-      setAnimationStep('entered');
+      setAnimationState('finished');
+      setMainContentVisible(true);
     }
     
-    // 客户端检查完成，结束加载状态
     setIsLoading(false);
-  }, []); // 空依赖数组，确保只在组件挂载时运行一次
+  }, []);
 
-  // [动画控制修改]
-  useEffect(() => {
-    if (animationStep === 'warping') {
-      const timer = setTimeout(() => {
-        setAnimationStep('entered');
-      }, 5000); // 穿梭动画持续5秒
-      return () => clearTimeout(timer);
-    }
-  }, [animationStep]);
-
-  
   const handleSuccess = () => {
     localStorage.setItem('hasSubmittedForm', 'true');
     setHasSubmitted(true);
@@ -2595,12 +2521,21 @@ export default function HomePage() {
   };
 
   const handleEnter = () => {
-      // 点击后，标记已访问并开始穿梭
-      sessionStorage.setItem('hasVisitedHomePage', 'true');
-      setAnimationStep('warping');
+      if (animationState === 'initial') {
+          sessionStorage.setItem('hasVisitedHomePage', 'true');
+          setAnimationState('textFading'); // 1. 开始文本消失
+          
+          setTimeout(() => {
+              setAnimationState('warping'); // 2. 开始穿梭
+              setMainContentVisible(true);  // 3. 主内容开始渐显
+          }, 1500); // 文本消失动画时长
+          
+          setTimeout(() => {
+              setAnimationState('finished'); // 4. 穿梭结束，动画完成
+          }, 1500 + 5000); // 穿梭动画总时长 (1.5s + 5s)
+      }
   };
 
-  // 在客户端检查完成前，返回一个空的黑色屏幕，防止内容闪烁
   if (isLoading) {
       return <div className="fixed inset-0 bg-black z-[200]" />;
   }
@@ -2608,51 +2543,55 @@ export default function HomePage() {
   return (
     <div className="relative isolate bg-black text-white">
       
-      {/* 动画层 */}
       <AnimatePresence>
-        {animationStep === 'start' && (
+        {animationState !== 'finished' && (
+          <motion.div
+            key="animation-wrapper"
+            className="fixed inset-0 z-[100] bg-black"
+            exit={{ opacity: 0, transition: { duration: 1.0, delay: 0.5 } }}
+          >
+            {/* 初始文本 */}
             <motion.div
-                key="splash-screen"
-                className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
-                exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeInOut" } }}
+                className="absolute inset-0 flex items-center justify-center"
+                animate={{
+                    opacity: animationState === 'initial' || animationState === 'textFading' ? 1 : 0,
+                    scale: animationState === 'textFading' ? 0.8 : 1,
+                }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
             >
-                <div className="w-full max-w-2xl px-4">
-                <TextShineEffect 
+               <div className="w-full max-w-2xl px-4">
+                  <TextShineEffect 
                     text="Apex" 
                     subtitle="轻触，开启非凡。"
                     scanDuration={4} 
                     onClick={handleEnter} 
-                />
+                  />
                 </div>
             </motion.div>
-        )}
-        {animationStep === 'warping' && (
+            
+            {/* 粒子/星空效果 */}
             <motion.div
-                key="warp-screen"
-                className="fixed inset-0 z-[90] bg-black"
+                className="absolute inset-0"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { duration: 0.5, ease: "easeIn" } }}
-                exit={{ opacity: 0, transition: { duration: 1, ease: "easeOut" } }}
+                animate={{
+                    opacity: animationState === 'warping' || animationState === 'textFading' ? 1 : 0,
+                }}
+                transition={{ duration: 2.0, ease: "easeIn" }}
             >
-                <StarWarp />
+                <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+                    <Starfield warpSpeedActive={animationState === 'warping'} />
+                </Canvas>
             </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 主内容层 */}
       <motion.div
         key="main-content"
-        initial={false} // 初始时不应用任何动画
-        animate={{ 
-          // 在穿梭时开始渐渐显示，穿梭结束后完全显示
-          opacity: animationStep === 'warping' || animationStep === 'entered' ? 1 : 0 
-        }}
-        transition={{ 
-          // 渐变过程持续整个穿梭动画时长
-          duration: animationStep === 'warping' ? 5 : 0.5, 
-          ease: "easeInOut" 
-        }}
-        className={cn(animationStep !== 'entered' && "pointer-events-none")}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: mainContentVisible ? 1 : 0 }}
+        transition={{ duration: 2.5, delay: mainContentVisible && animationState === 'warping' ? 2.5 : 0, ease: "easeInOut" }}
+        className={cn(animationState !== 'finished' && "pointer-events-none")}
       >
         <AppNavigationBar 
             onLoginClick={() => setIsModalOpen(true)}
