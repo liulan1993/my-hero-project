@@ -1568,10 +1568,10 @@ MemoizedZap.displayName = 'ZapIcon';
 
 // 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
-  { icon: MemoizedCpu, title: "企业服务", description: "企业全方位解决方案：从架构到人力" },
-  { icon: MemoizedShieldCheck, title: "健康管理", description: "您只管安心就医，其他我们一站搞定" },
-  { icon: MemoizedLayers, title: "溯源式体检", description: "预见健康风险，掌控未来生活" }, // 修改文本内容
-  { icon: MemoizedZap, title: "留学教育", description: "精准匹配资源，为孩子定制最优成长路径" },
+  { icon: MemoizedCpu, title: "企业服务", description: "公司注册、准证、财税及人力资源的一站式运营方案" },
+  { icon: MemoizedShieldCheck, title: "留学教育", description: "作为您家庭的教育合伙人，规划最优的成长路径" },
+  { icon: MemoizedLayers, title: "健康管理", description: "溯源式体检与中新跨境一站式医疗服务" }, // 修改文本内容
+  { icon: MemoizedZap, title: "战略发展", description: "链接本地核心资源，为您的事业发展提供战略支持" },
 ];
 
 const timelineData = [
