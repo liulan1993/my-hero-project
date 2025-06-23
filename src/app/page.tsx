@@ -11,8 +11,6 @@ import React, {
     memo
 } from 'react';
 import Image from 'next/image';
-// [错误修复] 引入 dynamic 来实现组件的动态加载
-import dynamic from 'next/dynamic';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -24,7 +22,7 @@ import {
   type HTMLMotionProps,
 } from "framer-motion";
 
-// 导入真实的 Server Actions
+// 修复：导入真实的 Server Actions
 import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight, Check } from 'lucide-react';
@@ -71,6 +69,122 @@ const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => 
     return <a href={href} {...props}>{children}</a>;
 };
 Link.displayName = "Link";
+
+// ============================================================================
+// “开场动画/门” - SVG 自动扫描光效文字组件 (已修改为实体样式)
+// ============================================================================
+const TextShineEffect = ({
+  text,
+  subtitle,
+  scanDuration = 4,
+  onClick
+}: {
+  text: string;
+  subtitle?: string;
+  scanDuration?: number;
+  onClick?: () => void;
+}) => {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 400 200"
+      xmlns="http://www.w3.org/2000/svg"
+      className="select-none cursor-pointer"
+      onClick={onClick}
+    >
+      <defs>
+        {/* 这部分是定义颜色和光效，保持不变 */}
+        <linearGradient id="textGradient">
+            <stop offset="0%" stopColor="#8b5cf6" />
+            <stop offset="25%" stopColor="#3b82f6" />
+            <stop offset="50%" stopColor="#06b6d4" />
+            <stop offset="75%" stopColor="#ef4444" />
+            <stop offset="100%" stopColor="#eab308" />
+        </linearGradient>
+        <motion.radialGradient
+          id="revealMask"
+          gradientUnits="userSpaceOnUse"
+          r="25%"
+          animate={{ cx: ["-25%", "125%"] }}
+          transition={{
+            duration: scanDuration,
+            ease: "linear",
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
+        >
+          <stop offset="0%" stopColor="white" />
+          <stop offset="100%" stopColor="black" />
+        </motion.radialGradient>
+        <mask id="textMask">
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="url(#revealMask)"
+          />
+        </mask>
+      </defs>
+
+      {/* 主标题 (例如 "Apex") */}
+      {/* 第一层: 白色实体字作为底色 */}
+      <text
+        x="50%"
+        y="45%"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="white"
+        className="font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
+      >
+        {text}
+      </text>
+      {/* 第二层: 带闪光效果的彩色字，叠在上面 */}
+      <text
+        x="50%"
+        y="45%"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="url(#textGradient)"
+        mask="url(#textMask)"
+        className="font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold"
+      >
+        {text}
+      </text>
+
+      {/* 副标题 (例如 "轻触，开启非凡。") */}
+      {subtitle && (
+        <>
+          {/* 第一层: 白色实体字作为底色 */}
+          <text
+            x="50%"
+            y="70%"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="white"
+            className="font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
+          >
+            {subtitle}
+          </text>
+          {/* 第二层: 带闪光效果的彩色字，叠在上面 */}
+          <text
+            x="50%"
+            y="70%"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="url(#textGradient)"
+            mask="url(#textMask)"
+            className="font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold"
+          >
+            {subtitle}
+          </text>
+        </>
+      )}
+    </svg>
+  );
+};
+TextShineEffect.displayName = "TextShineEffect";
 
 
 // ============================================================================
@@ -650,9 +764,11 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
+              {/* 修改：调整标题字号 */}
               <h3 className="hidden md:block md:pl-20 font-semibold text-white text-2xl md:text-3xl">{item.title}</h3>
             </div>
             <div className="relative pl-20 pr-4 md:pl-4 w-full">
+              {/* 修改：调整标题字号 */}
               <h3 className="md:hidden block mb-4 text-left font-semibold text-white text-2xl md:text-3xl">{item.title}</h3>
               {item.content}
             </div>
@@ -724,6 +840,8 @@ ImageContainer.displayName = 'ImageContainer';
 const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => void; }) => {
   const [active, setActive] = useState(0);
   
+  // 修改：移除 handleNext 和 handlePrev，因为现在直接点击按钮切换
+
   return (
     <div className="w-full mx-auto font-[Helvetica] py-20 text-white">
       <div className="mb-12 text-right">
@@ -770,6 +888,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className='flex flex-col justify-center space-y-4'
           >
+            {/* 修改：调整标题字号 */}
             <h3 className="text-white text-2xl md:text-3xl font-semibold">
               {testimonials[active].name}
             </h3>
@@ -778,28 +897,29 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               {testimonials[active].quote}
             </motion.p>
           </motion.div>
+          {/* 修改：按钮组布局和样式, 允许换行以适配移动端 */}
           <div className="flex flex-wrap items-center gap-3 pt-12 w-full">
             {testimonials.map((testimonial, index) => (
               <HalomotButton
                 key={testimonial.name}
-                inscription={testimonial.buttonLabel}
+                inscription={testimonial.buttonLabel} // <-- 修改这里
                 onClick={() => setActive(index)}
-                padding="0.6rem 1.2rem"
-                backgroundColor={active === index ? '#4a148c' : '#161616'}
+                padding="0.6rem 1.2rem" // 调整内边距使按钮变小
+                backgroundColor={active === index ? '#4a148c' : '#161616'} // 高亮当前选中的项目
                 hoverTextColor='#fff'
                 gradient='linear-gradient(to right, #603dec, #a123f4)'
-                fixedWidth="120px"
+                fixedWidth="120px" // <-- 添加这一行
               />
             ))}
             <HalomotButton 
               inscription="了解更多" 
               onClick={(e) => onProtectedLinkClick(e, testimonials[active].link || '#')} 
               href={testimonials[active].link || '#'}
-              padding="0.6rem 1.2rem"
+              padding="0.6rem 1.2rem" // 调整内边距使按钮变小
               backgroundColor='#161616' 
               hoverTextColor='#fff' 
               gradient='linear-gradient(to right, #603dec, #a123f4)'
-              fixedWidth="120px"
+              fixedWidth="120px" // <-- 添加这一行
             />
           </div>
         </div>
@@ -818,7 +938,7 @@ interface InfoSectionProps {
     primaryImageSrc: string;
     secondaryImageSrc: string;
     reverseLayout?: boolean;
-    className?: string;
+    className?: string; // 新增: 允许传入自定义样式
 }
 
 const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
@@ -827,7 +947,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
     primaryImageSrc,
     secondaryImageSrc,
     reverseLayout = false,
-    className,
+    className, // 新增: 获取自定义样式
 }) => {
     const containerVariants: Variants = {
         hidden: {},
@@ -852,6 +972,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 
 
     return (
+        // 修改: 使用 cn 函数合并默认样式和传入的自定义样式
         <section className={cn("relative py-24 md:py-32 bg-transparent overflow-hidden", className)}>
             <div className="container max-w-[1220px] w-full px-6 md:px-10 relative z-10 mx-auto">
                 <motion.div
@@ -940,6 +1061,7 @@ InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 // ============================================================================
 
 const CtaWithGallerySection = () => {
+    // 修复: 将状态管理和对话框逻辑合并到此组件
     const [step, setStep] = useState(0);
 
     const steps = [
@@ -996,6 +1118,7 @@ const CtaWithGallerySection = () => {
                         一切伟大的事业，都始于一次深度的战略对话。欢迎预约与我们进行一对一沟通，共同擘画您在新加坡的商业与家族蓝图。
                     </motion.p>
                     <motion.div variants={itemVariants} className="flex justify-center">
+                      {/* 修复: 添加 onOpenChange 以便在关闭时重置步骤 */}
                       <Dialog onOpenChange={(open) => !open && setStep(0)}>
                         <DialogTrigger asChild>
                            <HalomotButton 
@@ -1360,11 +1483,13 @@ const PricingSection = () => {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col items-center gap-6 text-center mt-10">
                     <div className="flex flex-col gap-2">
+                        {/* 需求 2: 字体大小和格式与“学校申请支持”一致 */}
                         <h3 className="text-2xl md:text-3xl font-semibold text-white">
                             核心服务详情
                             <br />
                             Core Service Details
                         </h3>
+                        {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                         <p className="max-w-2xl text-base md:text-lg text-neutral-300">
                             您可以清晰地看到我们提供的不同服务计划，帮助您选择最适合您的需求的方案。
                         </p>
@@ -1378,7 +1503,9 @@ const PricingSection = () => {
                             className="flex h-full flex-col bg-transparent border-neutral-700"
                         >
                             <CardHeader className="p-6 pb-4 text-center">
+                                {/* 需求 3: 字体大小和格式与“有时候，眼见为实。”一致 */}
                                 <CardTitle className="text-2xl font-bold text-white">{plan.name}</CardTitle>
+                                {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                                 <CardDescription className="text-base md:text-lg text-neutral-300 mt-2">{plan.description}</CardDescription>
                             </CardHeader>
                             <CardContent className="flex flex-1 flex-col justify-between gap-6 p-6 pt-0">
@@ -1387,6 +1514,7 @@ const PricingSection = () => {
                                         {plan.features.map((feature) => (
                                             <div key={feature} className="flex flex-row items-start gap-3">
                                                 <Check className="h-5 w-5 flex-shrink-0 text-green-500 mt-1" />
+                                                {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                                                 <p className="text-base md:text-lg text-neutral-300">{feature}</p>
                                             </div>
                                         ))}
@@ -1438,10 +1566,11 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
 ));
 MemoizedZap.displayName = 'ZapIcon';
 
+// 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
   { icon: MemoizedCpu, title: "企业服务", description: "公司注册、准证、财税及人力资源的一站式运营方案" },
   { icon: MemoizedShieldCheck, title: "留学教育", description: "作为您家庭的教育合伙人，规划最优的成长路径" },
-  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，链接中新跨境医疗资源，一站式为您守护健康" },
+  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，链接中新跨境医疗资源，一站式为您守护健康" }, // 修改文本内容
   { icon: MemoizedZap, title: "战略发展", description: "链接本地核心资源，为您的事业发展提供战略支持" },
 ];
 
@@ -1454,7 +1583,7 @@ const timelineData = [
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/1111/1111.jpg" 
-              alt="公司注册流程图" 
+              alt="启动模板" 
               width={500}
               height={300}
               className="rounded-lg object-cover w-full h-auto shadow-xl" 
@@ -1471,7 +1600,7 @@ const timelineData = [
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/1111/2222.jpg" 
-              alt="准证申请文件示例" 
+              alt="启动模板" 
               width={500}
               height={300}
               className="rounded-lg object-cover w-full h-auto shadow-xl" 
@@ -1488,7 +1617,7 @@ const timelineData = [
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/1111/3333.jpg" 
-              alt="财务报表示意图" 
+              alt="英雄区模板" 
               width={500}
               height={300}
               className="rounded-lg object-cover w-full h-auto shadow-xl" 
@@ -1505,7 +1634,7 @@ const timelineData = [
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/1111/4444.jpg" 
-              alt="人力资源团队协作图" 
+              alt="新组件预览" 
               width={500}
               height={300}
               className="rounded-lg object-cover w-full h-auto shadow-xl"
@@ -1519,7 +1648,7 @@ const timelineData = [
 const projectShowcaseData = [
   {
     name: "教育路径规划",
-    buttonLabel: "教育蓝图",
+    buttonLabel: "教育蓝图", // <-- 新增：按钮上显示的文字
     quote: '我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。',
     designation: "Next.js 项目",
     src: "https://zh.apex-elite-service.com/1111/5555.jpg",
@@ -1527,7 +1656,7 @@ const projectShowcaseData = [
   },
   {
     name: "学校申请支持",
-    buttonLabel: "名校起航",
+    buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
     quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
     src: "https://zh.apex-elite-service.com/1111/6666.jpg",
@@ -1535,7 +1664,7 @@ const projectShowcaseData = [
   },
   {
     name: "长期成长陪伴",
-    buttonLabel: "全程护航",
+    buttonLabel: "全程护航", // <-- 新增：按钮上显示的文字
     quote: "我们提供超越申请的长期陪伴服务。作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
     designation: "Vue 项目",
     src: "https://zh.apex-elite-service.com/1111/7777.jpg",
@@ -1589,6 +1718,7 @@ const infoSectionData2 = {
     secondaryImageSrc: 'https://zh.apex-elite-service.com/1111/11111111.jpg',
 };
 
+// 新增: FAQ 数据
 const faqData = [
     {
         question: "中新跨境就医服务",
@@ -1701,15 +1831,17 @@ function ScrollAdventure() {
         e.preventDefault();
         const touchEndY = e.changedTouches[0].clientY;
         const deltaY = touchEndY - touchStartY.current;
+        // 阈值判断，防止过于灵敏
         if(Math.abs(deltaY) > 50) {
-            handleScroll(-deltaY);
-            touchStartY.current = touchEndY;
+            handleScroll(-deltaY); // 注意方向与滚轮相反
+            touchStartY.current = touchEndY; // 重置起始点
         }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
         const rect = scrollComponent.getBoundingClientRect();
         const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+
         if (isVisible && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
             e.preventDefault();
             handleScroll(e.key === 'ArrowDown' ? 1 : -1);
@@ -1730,9 +1862,15 @@ function ScrollAdventure() {
   }, [handleScroll]);
 
   return (
+    // [要求 1 & 2 已修改] 
+    // 1. 响应式比例：移除了固定的视口高度(h-[80vh])，改用 aspect-ratio 确保面板在不同屏幕尺寸下始终为正方形。
+    //    - `aspect-[1/2]` 用于移动端竖向布局（一个宽度，两个高度单位），确保每个 h-1/2 的面板是正方形。
+    //    - `lg:aspect-[2/1]` 用于桌面端横向布局（两个宽度，一个高度单位），确保每个 w-1/2 的面板是正方形。
+    // 2. 透明背景：将 `bg-black` 改为 `bg-transparent`，让父组件的动画背景可以透视。
+    // 3. 居中：添加 `mx-auto` 以便在超宽屏幕上居中显示。
     <div 
       ref={componentRef} 
-      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl shadow-2xl aspect-[1/2] lg:aspect-[2/1]"
+      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl border border-neutral-700 shadow-2xl aspect-[1/2] lg:aspect-[2/1]"
     >
       {scrollAnimationPages.map((page, i) => {
         const idx = i + 1;
@@ -1740,15 +1878,17 @@ function ScrollAdventure() {
         
         return (
           <div key={idx} className="absolute inset-0 flex flex-col lg:flex-row">
+            {/* Left Panel */}
             <div
               className={cn(
-                "w-full h-1/2 lg:w-1/2 lg:h-full",
+                "w-full h-1/2 lg:w-1/2 lg:h-full", // 关键尺寸定义，确保在不同布局下占据正确空间形成正方形
                 "transition-transform duration-[1000ms] ease-in-out",
                 isActive ? 'translate-x-0' : '-translate-x-full'
               )}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
+                // [要求 2 已修改] 将背景色从 #111 改为 transparent
                 style={{ 
                   backgroundImage: page.leftBgImage ? `url(${page.leftBgImage})` : 'none', 
                   backgroundColor: 'transparent' 
@@ -1768,15 +1908,18 @@ function ScrollAdventure() {
                 </div>
               </div>
             </div>
+
+            {/* Right Panel */}
             <div
               className={cn(
-                "w-full h-1/2 lg:w-1/2 lg:h-full",
+                "w-full h-1/2 lg:w-1/2 lg:h-full", // 关键尺寸定义
                 "transition-transform duration-[1000ms] ease-in-out",
                 isActive ? 'translate-x-0' : 'translate-x-full'
               )}
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
+                // [要求 2 已修改] 将背景色从 #111 改为 transparent
                 style={{ 
                   backgroundImage: page.rightBgImage ? `url(${page.rightBgImage})` : 'none', 
                   backgroundColor: 'transparent' 
@@ -1807,6 +1950,8 @@ ScrollAdventure.displayName = "ScrollAdventure";
 // ============================================================================
 // 9. 文本揭示卡片组件 (新)
 // ============================================================================
+
+// Stars 子组件，用于背景的星星动画
 const Stars = () => {
   const randomMove = () => Math.random() * 4 - 2;
   const randomOpacity = () => Math.random();
@@ -1846,6 +1991,7 @@ const Stars = () => {
 const MemoizedStars = memo(Stars);
 MemoizedStars.displayName = "MemoizedStars";
 
+// TextRevealCardTitle 子组件
 const TextRevealCardTitle = ({
   children,
   className,
@@ -1861,6 +2007,7 @@ const TextRevealCardTitle = ({
 };
 TextRevealCardTitle.displayName = "TextRevealCardTitle";
 
+// TextRevealCardDescription 子组件
 const TextRevealCardDescription = ({
   children,
   className,
@@ -1874,6 +2021,7 @@ const TextRevealCardDescription = ({
 };
 TextRevealCardDescription.displayName = "TextRevealCardDescription";
 
+// TextRevealCard 核心组件
 const TextRevealCard = ({
   text,
   revealText,
@@ -1946,6 +2094,7 @@ const TextRevealCard = ({
       onTouchMove={touchMoveHandler}
       ref={cardRef}
       className={cn(
+        // 更新：移除了背景色和边框，使卡片透明
         "bg-transparent w-full rounded-lg p-8 relative overflow-hidden",
         className
       )}
@@ -1966,6 +2115,7 @@ const TextRevealCard = ({
                 }
           }
           transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
+          // 更新：移除了此处的背景色
           className="absolute bg-transparent z-20 will-change-transform"
         >
           <p
@@ -1984,6 +2134,8 @@ const TextRevealCard = ({
           transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
           className="h-40 w-[8px] bg-gradient-to-b from-transparent via-neutral-800 to-transparent absolute z-50 will-change-transform"
         ></motion.div>
+
+        {/* 更新：为底层文本添加 motion.div 以动画化 clipPath */}
         <motion.div
           animate={{
             clipPath: `inset(0 0 0 ${widthPercentage}%)`
@@ -2080,8 +2232,11 @@ const CustomFooter = () => {
             </div>
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300 text-base md:text-lg">
               <Link href="#" className="hover:text-white">Apex</Link>
+              {/* 点击“留学”跳转到留学教育板块 */}
               <Link href="#study-abroad" className="hover:text-white">留学</Link>
+               {/* 点击“医疗”跳转到健康管理板块 */}
               <Link href="#health-management" className="hover:text-white">医疗</Link>
+              {/* 点击“企业服务”跳转到企业服务板块 */}
               <Link href="#corporate-services" className="hover:text-white">企业服务</Link>
               <Link href="#" className="hover:text-white">敬请期待</Link>
             </nav>
@@ -2164,7 +2319,7 @@ const FaqItem = React.forwardRef<
       className={cn(
         "group rounded-lg",
         "transition-all duration-200 ease-in-out",
-        "border border-white/10"
+        "border border-white/10" // 使用页面已有的边框颜色
       )}
     >
       <Button
@@ -2175,7 +2330,7 @@ const FaqItem = React.forwardRef<
         <h3
           className={cn(
             "text-base md:text-lg font-medium transition-colors duration-200 text-left",
-            "text-white",
+            "text-white", // <-- 修改这里
             isOpen && "text-white"
           )}
         >
@@ -2190,6 +2345,7 @@ const FaqItem = React.forwardRef<
             isOpen ? "text-white" : "text-neutral-400"
           )}
         >
+          {/* 复用已导入的图标 */}
           <ChevronDownIcon className="h-4 w-4" /> 
         </motion.div>
       </Button>
@@ -2213,6 +2369,7 @@ const FaqItem = React.forwardRef<
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
+                // 需求 5: 字体大小和格式与“我们深知...”一致
                 className="text-base md:text-lg text-neutral-400 leading-relaxed"
               >
                 {answer}
@@ -2260,139 +2417,34 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
 FaqSection.displayName = "FaqSection";
 
 // ============================================================================
-// [最终方案] 开场动画
+// 12. 主页面组件
 // ============================================================================
 
-const Starfield = ({ animate, progress }: { animate: boolean; progress: React.MutableRefObject<number> }) => {
-  const pointsRef = useRef<THREE.Points>(null!);
-  const materialRef = useRef<THREE.PointsMaterial>(null!);
-
-  const stars = useMemo(() => {
-    const count = 5000;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      positions[i * 3 + 0] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 2] = (Math.random() - 1.0) * 100;
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    return geometry;
-  }, []);
-
-  useFrame((state, delta) => {
-    if (!pointsRef.current || !materialRef.current) return;
-    
-    // 控制星星的出现
-    materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, animate ? 1.0 : 0.0, 0.1);
-
-    if (!animate) return;
-
-    const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
-    const speed = 20 + (progress.current * 80);
-
-    for (let i = 0; i < positions.count; i++) {
-      let z = positions.getZ(i);
-      z += delta * speed;
-      if (z > 50) z = -50;
-      positions.setZ(i, z);
-    }
-    pointsRef.current.rotation.z += delta * 0.01;
-    positions.needsUpdate = true;
-  });
-
-  return (
-    <points ref={pointsRef} geometry={stars}>
-      <pointsMaterial ref={materialRef} color="#ffffff" size={0.03} sizeAttenuation={true} transparent={true} opacity={0} />
-    </points>
-  );
-};
-Starfield.displayName = "Starfield";
-
-const IntroAnimation = ({ onEnter, setIntroProgress }: { onEnter: () => void; setIntroProgress: (p: number) => void; }) => {
-  const [stage, setStage] = useState<'idle' | 'warping' | 'finished'>('idle');
-  const [isClicked, setIsClicked] = useState(false);
-  const progress = useRef(0);
-  
-  const handleClick = () => {
-    if (stage === 'idle' && !isClicked) {
-      setIsClicked(true);
-
-      // 直接进入穿梭阶段
-      setStage('warping');
-
-      // 3.5秒后结束
-      setTimeout(() => {
-        setStage('finished');
-        onEnter();
-      }, 3500);
-    }
-  };
-
-  useFrame((state, delta) => {
-      if (stage === 'warping') {
-          progress.current = Math.min(progress.current + delta * 0.4, 1);
-          setIntroProgress(progress.current);
-      }
-  });
-
-  return (
-    <div className="w-full h-full cursor-pointer relative" onClick={handleClick}>
-       <AnimatePresence>
-        {!isClicked && (
-          <motion.div 
-            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
-            exit={{ opacity: 0, y: -20, transition: { duration: 0.8 } }}
-          >
-            <h1 className="text-white font-[Helvetica] text-6xl sm:text-7xl md:text-8xl font-bold">Apex</h1>
-            <p className="text-white font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold mt-4">
-              轻触，开启非凡。
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
-        <React.Suspense fallback={null}>
-            <Starfield animate={stage === 'warping'} progress={progress}/>
-        </React.Suspense>
-      </Canvas>
-      
-      {!isClicked && (
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 animate-pulse text-sm">
-            点击任意处继续
-        </div>
-      )}
-    </div>
-  );
-};
-IntroAnimation.displayName = "IntroAnimation";
-
-const DynamicIntroAnimation = dynamic(() => Promise.resolve(IntroAnimation), {
-    ssr: false,
-    loading: () => <div className="w-full h-full bg-black" />,
-});
-
-
-// ============================================================================
-// 主页面组件
-// ============================================================================
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isEntered, setIsEntered] = useState(false);
-  const [introProgress, setIntroProgress] = useState(0);
 
   useEffect(() => {
+    // 检查是否已经提交过表单
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
-    if (submittedFlag === 'true') setHasSubmitted(true);
-    
+    if (submittedFlag === 'true') {
+      setHasSubmitted(true);
+    }
+
+    // [新增] 检查是否是首次访问，用于控制开门动画
     const hasVisited = sessionStorage.getItem('hasVisitedHomePage');
-    if (hasVisited) setIsEntered(true);
-    
+    if (hasVisited) {
+      // 如果不是首次访问，直接“进入”主页
+      setIsEntered(true);
+    } else {
+      // 如果是首次访问，设置标记，但动画仍然显示
+      // 点击动画后才会标记为“已访问”
+    }
+    // 客户端检查完成，结束加载状态
     setIsLoading(false);
-  }, []); 
+  }, []); // 空依赖数组，确保只在组件挂载时运行一次
   
   const handleSuccess = () => {
     localStorage.setItem('hasSubmittedForm', 'true');
@@ -2406,6 +2458,7 @@ export default function HomePage() {
         alert("此功能正在开发中，敬请期待！");
         return;
     }
+
     if (!hasSubmitted) {
         e.preventDefault();
         setIsModalOpen(true);
@@ -2413,25 +2466,35 @@ export default function HomePage() {
   };
 
   const handleEnter = () => {
+      // [新增] 点击后，设置访问标记并触发进入动画
       sessionStorage.setItem('hasVisitedHomePage', 'true');
       setIsEntered(true);
   };
 
+  // 在客户端检查完成前，返回一个空的黑色屏幕，防止内容闪烁
   if (isLoading) {
       return <div className="fixed inset-0 bg-black z-[200]" />;
   }
 
   return (
     <div className="relative isolate bg-black text-white">
+      
       <AnimatePresence>
         {!isEntered && (
           <motion.div
             key="splash-screen"
-            className="fixed inset-0 z-[100] bg-black"
-            animate={{ opacity: 1 - introProgress }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.8, ease: "easeInOut" } }}
           >
-            <DynamicIntroAnimation onEnter={handleEnter} setIntroProgress={setIntroProgress}/>
+            <div className="w-full max-w-2xl px-4">
+              {/* 修改：传入副标题 */}
+              <TextShineEffect 
+                text="Apex" 
+                subtitle="轻触，开启非凡。"
+                scanDuration={4} 
+                onClick={handleEnter} 
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -2439,9 +2502,9 @@ export default function HomePage() {
       <motion.div
         key="main-content"
         initial={{ opacity: 0 }}
-        animate={{ opacity: isEntered ? 1 : introProgress }}
-        transition={{ duration: 1.5, ease: "easeIn" }}
-        className={cn(!isEntered && introProgress < 0.5 && "pointer-events-none")}
+        animate={{ opacity: isEntered ? 1 : 0 }}
+        transition={{ duration: 0.5, delay: isEntered ? 0.5 : 0 }}
+        className={cn(!isEntered && "pointer-events-none", "transition-opacity duration-500")}
       >
         <AppNavigationBar 
             onLoginClick={() => setIsModalOpen(true)}
@@ -2471,6 +2534,7 @@ export default function HomePage() {
                     >
                         <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
                         <h3 className="text-base font-bold text-white">{feature.title}</h3>
+                        {/* 修改：调整字体大小 */}
                         <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
                     </div>
                     ))}
@@ -2501,10 +2565,11 @@ export default function HomePage() {
                 <InfoSectionWithMockup
                     {...infoSectionData2}
                     reverseLayout={true}
-                    className="pt-24 md:pt-32 pb-0"
+                    className="pt-24 md:pt-32 pb-0" // 保留顶部padding，移除底部padding
                 />
             </div>
 
+            {/* 需求 1: 插入定价方案板块 */}
             <div className="pt-0 px-8 flex flex-col items-center">
               <PricingSection />
             </div>
