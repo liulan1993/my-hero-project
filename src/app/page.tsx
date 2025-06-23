@@ -1208,7 +1208,7 @@ const CtaWithGallerySection = () => {
 
                                     <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
                                         <Image
-                                        src="https://zh.apex-elite-service.com/wangzhantupian/xinjiapo.jpg"
+                                        src="https://zh.apex-elite-service.com/1111/12121212.jpg"
                                         alt="Step Visual"
                                         width={200}
                                         height={200}
@@ -1582,7 +1582,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
           <div>
             <Image 
-              src="hhttps://zh.apex-elite-service.com/1111/1111.jpg" 
+              src="https://zh.apex-elite-service.com/1111/1111.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1616,7 +1616,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供专业的年度财税申报、财税合规与规划服务，我们不仅确保您的企业稳健合规，更助力您充分享受新加坡的政策优势。</p>
           <div>
             <Image 
-              src="hhttps://zh.apex-elite-service.com/1111/3333.jpg" 
+              src="https://zh.apex-elite-service.com/1111/3333.jpg" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1659,7 +1659,7 @@ const projectShowcaseData = [
     buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
     quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
-    src: "https://zh.apex-elite-service.com/wangzhantupian/decima-athens-P57zlRsjC7I-unsplash.jpg",
+    src: "https://zh.apex-elite-service.com/1111/6666.jpg",
     link: "https://namer-ui.netlify.app/",
   },
   {
@@ -1667,7 +1667,7 @@ const projectShowcaseData = [
     buttonLabel: "全程护航", // <-- 新增：按钮上显示的文字
     quote: "我们提供超越申请的长期陪伴服务。作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
     designation: "Vue 项目",
-    src: "https://zh.apex-elite-service.com/wangzhantupian/pexels-naomi-shi-374023-1001914.jpg",
+    src: "https://zh.apex-elite-service.com/1111/7777.jpg",
     link: "https://namer-ui-for-vue.netlify.app/",
   },
 ];
@@ -1691,8 +1691,8 @@ const infoSectionData1 = {
             致力于助您主动掌控健康，预见未来
         </>
     ),
-    primaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/jiankangguanli.jpg',
-    secondaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/jiankangguanli2.jpg',
+    primaryImageSrc: 'https://zh.apex-elite-service.com/1111/8888.jpg',
+    secondaryImageSrc: 'https://zh.apex-elite-service.com/1111/9999.jpg',
 };
 
 const infoSectionData2 = {
@@ -1714,8 +1714,8 @@ const infoSectionData2 = {
             将未来的不确定性，转化为尽在掌握的主动权
         </>
     ),
-    primaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/tijian.jpg',
-    secondaryImageSrc: 'https://zh.apex-elite-service.com/wangzhantupian/tijian2.jpg',
+    primaryImageSrc: 'https://zh.apex-elite-service.com/1111/10101010.jpg',
+    secondaryImageSrc: 'https://zh.apex-elite-service.com/1111/11111111.jpg',
 };
 
 // 新增: FAQ 数据
@@ -1744,7 +1744,7 @@ const faqData = [
 
 const scrollAnimationPages = [
   {
-    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/pexels-mikhail-nilov-7682132.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/1111/13131313.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1754,7 +1754,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/pexels-brandaohh-3959482.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/1111/14141414.jpg',
     leftContent: {
       heading: '安心保障',
       description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
@@ -1762,7 +1762,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/pexels-mart-production-7709301.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/1111/15151515.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1772,7 +1772,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://zh.apex-elite-service.com/wangzhantupian/pexels-pixabay-273886.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/1111/16161616.jpg',
     leftContent: {
       heading: '即刻启程',
       description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
