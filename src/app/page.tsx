@@ -2263,10 +2263,8 @@ FaqSection.displayName = "FaqSection";
 // [最终方案] 开场动画
 // ============================================================================
 
-// 使用 three.js 官方提供的、轻量级的 Helvetiker 字体 (仅36KB), 几乎不会加载失败
 const FONT_URL = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/fonts/helvetiker_regular.typeface.json";
 
-// 文本粒子组件 (只用于 "Apex")
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TextParticles = ({ text, position, size, animateOut, font }: { text: string; position: [number, number, number]; size: number; animateOut: boolean; font: any; }) => {
   const pointsRef = useRef<THREE.Points>(null!);
@@ -2285,14 +2283,22 @@ const TextParticles = ({ text, position, size, animateOut, font }: { text: strin
     
     textGeometry.center();
     
-    const count = textGeometry.attributes.position.count;
+    // [修复字体显示不全] 增加粒子数量以填充字体
+    // 之前只用了顶点，现在我们用更多的粒子来填充表面
+    const count = textGeometry.attributes.position.count * 3;
     const posArray = new Float32Array(count * 3);
     const targetPosArray = new Float32Array(count * 3);
 
+    const originalPositions = textGeometry.attributes.position.array;
     for (let i = 0; i < count; i++) {
-        posArray[i * 3 + 0] = textGeometry.attributes.position.getX(i);
-        posArray[i * 3 + 1] = textGeometry.attributes.position.getY(i);
-        posArray[i * 3 + 2] = textGeometry.attributes.position.getZ(i);
+        // 通过在原始顶点之间插值来创建更密集的粒子
+        const p1Index = Math.floor(Math.random() * (originalPositions.length / 3)) * 3;
+        const p2Index = Math.floor(Math.random() * (originalPositions.length / 3)) * 3;
+        const ratio = Math.random();
+
+        posArray[i * 3 + 0] = THREE.MathUtils.lerp(originalPositions[p1Index], originalPositions[p2Index], ratio);
+        posArray[i * 3 + 1] = THREE.MathUtils.lerp(originalPositions[p1Index + 1], originalPositions[p2Index + 1], ratio);
+        posArray[i * 3 + 2] = THREE.MathUtils.lerp(originalPositions[p1Index + 2], originalPositions[p2Index + 2], ratio);
 
         const radius = 7 + Math.random() * 7;
         const phi = Math.random() * Math.PI * 2;
@@ -2311,7 +2317,7 @@ const TextParticles = ({ text, position, size, animateOut, font }: { text: strin
   useFrame((state, delta) => {
     if (!particles || !pointsRef.current || !animateOut) return;
     
-    materialRef.current.opacity -= delta * 0.5;
+    materialRef.current.opacity -= delta * 0.7; // 加快消失速度
     const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
     const targets = pointsRef.current.geometry.attributes.targetPosition as THREE.BufferAttribute;
 
@@ -2322,9 +2328,9 @@ const TextParticles = ({ text, position, size, animateOut, font }: { text: strin
         const tx = targets.getX(i);
         const ty = targets.getY(i);
         const tz = targets.getZ(i);
-        positions.setX(i, x + (tx - x) * 0.05);
-        positions.setY(i, y + (ty - y) * 0.05);
-        positions.setZ(i, z + (tz - z) * 0.05);
+        positions.setX(i, x + (tx - x) * 0.08); // 加快扩散速度
+        positions.setY(i, y + (ty - y) * 0.08);
+        positions.setZ(i, z + (tz - z) * 0.08);
     }
     positions.needsUpdate = true;
   });
@@ -2333,22 +2339,40 @@ const TextParticles = ({ text, position, size, animateOut, font }: { text: strin
 
   return (
     <points ref={pointsRef} position={position} geometry={particles.geometry}>
-        <pointsMaterial ref={materialRef} color="white" size={0.05} transparent={true} />
+       {/* [修复闪光效果] 使用 ShaderMaterial 创建闪光和渐变效果 */}
+      <shaderMaterial
+        ref={materialRef}
+        depthWrite={false}
+        transparent={true}
+        vertexShader={`
+          attribute float size;
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = 4.0;
+          }
+        `}
+        fragmentShader={`
+          void main() {
+            float strength = distance(gl_PointCoord, vec2(0.5));
+            strength = 1.0 - step(0.5, strength);
+            gl_FragColor = vec4(1.0, 1.0, 1.0, strength);
+          }
+        `}
+      />
     </points>
   );
 };
 TextParticles.displayName = "TextParticles";
 
-// 星海穿梭组件
-const Starfield = ({ animate }: { animate: boolean }) => {
+const Starfield = ({ animate, progress }: { animate: boolean; progress: React.MutableRefObject<number> }) => {
   const pointsRef = useRef<THREE.Points>(null!);
   const stars = useMemo(() => {
     const count = 5000;
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      positions[i * 3 + 0] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+      positions[i * 3 + 0] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 2] = (Math.random() - 1.0) * 100;
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -2359,27 +2383,31 @@ const Starfield = ({ animate }: { animate: boolean }) => {
     if (!pointsRef.current || !animate) return;
     const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
     
+    // [修复穿梭效果] 根据 progress 控制穿梭速度，实现缓入缓出
+    const speed = 20 + (progress.current * 80);
+
     for (let i = 0; i < positions.count; i++) {
       let z = positions.getZ(i);
-      z += delta * 50;
+      z += delta * speed;
       if (z > 50) z = -50;
       positions.setZ(i, z);
     }
+    pointsRef.current.rotation.z += delta * 0.01;
     positions.needsUpdate = true;
   });
 
   return (
     <points ref={pointsRef} geometry={stars}>
-      <pointsMaterial color="white" size={0.03} />
+      <pointsMaterial color="#ffffff" size={0.03} sizeAttenuation={true} />
     </points>
   );
 };
 Starfield.displayName = "Starfield";
 
-// 整体开场动画控制组件
-const IntroAnimation = ({ onEnter }: { onEnter: () => void; }) => {
+const IntroAnimation = ({ onEnter, setIntroProgress }: { onEnter: () => void; setIntroProgress: (p: number) => void; }) => {
   const [stage, setStage] = useState<'idle' | 'disintegrating' | 'warping' | 'finished'>('idle');
   const [isClicked, setIsClicked] = useState(false);
+  const progress = useRef(0);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const font: any = useLoader(FontLoader, FONT_URL);
@@ -2388,33 +2416,46 @@ const IntroAnimation = ({ onEnter }: { onEnter: () => void; }) => {
     if (stage === 'idle' && !isClicked) {
       setIsClicked(true);
       setStage('disintegrating');
-      setTimeout(() => setStage('warping'), 1500);
+
+      // [修复卡顿] 优化时间线，让动画无缝衔接
+      setTimeout(() => {
+        setStage('warping');
+      }, 800); 
+
       setTimeout(() => {
         setStage('finished');
         onEnter();
-      }, 4000);
+      }, 3500); // 缩短总时长
     }
   };
 
+  // [修复穿梭效果] 使用 useFrame 驱动平滑的进度条，而不是依赖 setTimeout
+  useFrame((state, delta) => {
+      if (stage === 'warping') {
+          progress.current = Math.min(progress.current + delta * 0.5, 1);
+          setIntroProgress(progress.current);
+      }
+  });
+
   return (
     <div className="w-full h-full cursor-pointer relative" onClick={handleClick}>
-      <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
-        <ambientLight intensity={1.5} />
+      <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
+        <ambientLight intensity={2} />
+        <pointLight position={[0,0,10]} intensity={10} />
         <React.Suspense fallback={null}>
           {(stage === 'idle' || stage === 'disintegrating') && font && (
               <TextParticles
                 font={font}
                 text="Apex"
-                position={[0, 0, 0]} // 居中显示 "Apex"
+                position={[0, 0, 0]}
                 size={2.5}
                 animateOut={stage === 'disintegrating'}
               />
           )}
-          {(stage === 'warping') && <Starfield animate={true} />}
+          {(stage === 'warping') && <Starfield animate={true} progress={progress}/>}
         </React.Suspense>
       </Canvas>
       
-      {/* 中文副标题作为 HTML 元素，用 framer-motion 控制动画 */}
       <AnimatePresence>
         {!isClicked && (
           <motion.div 
@@ -2447,6 +2488,8 @@ export default function HomePage() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isEntered, setIsEntered] = useState(false);
+  // [修复穿梭效果] 新增 state 用于同步动画进度
+  const [introProgress, setIntroProgress] = useState(0);
 
   useEffect(() => {
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
@@ -2489,24 +2532,27 @@ export default function HomePage() {
     <div className="relative isolate bg-black text-white">
       <AnimatePresence>
         {!isEntered && (
+           // [修复穿梭效果] 使用 introProgress 控制开场动画的淡出
           <motion.div
             key="splash-screen"
             className="fixed inset-0 z-[100] bg-black"
-            exit={{ opacity: 0, transition: { duration: 0.5 } }}
+            animate={{ opacity: 1 - introProgress }}
+            transition={{ duration: 1, ease: "easeOut" }}
           >
             <React.Suspense fallback={<div className="w-full h-full bg-black" />}>
-              <IntroAnimation onEnter={handleEnter} />
+              <IntroAnimation onEnter={handleEnter} setIntroProgress={setIntroProgress}/>
             </React.Suspense>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* [修复穿梭效果] 使用 introProgress 控制主页的淡入，实现同步 */}
       <motion.div
         key="main-content"
         initial={{ opacity: 0 }}
-        animate={{ opacity: isEntered ? 1 : 0 }}
-        transition={{ duration: 1.0, delay: isEntered ? 0.2 : 0 }}
-        className={cn(!isEntered && "pointer-events-none", "transition-opacity")}
+        animate={{ opacity: isEntered ? 1 : introProgress }}
+        transition={{ duration: 1.5, ease: "easeIn" }}
+        className={cn(!isEntered && introProgress < 0.5 && "pointer-events-none")}
       >
         <AppNavigationBar 
             onLoginClick={() => setIsModalOpen(true)}
