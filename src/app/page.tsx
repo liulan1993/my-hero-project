@@ -1570,7 +1570,7 @@ MemoizedZap.displayName = 'ZapIcon';
 const features = [
   { icon: MemoizedCpu, title: "企业服务", description: "公司注册、准证、财税及人力资源的一站式运营方案" },
   { icon: MemoizedShieldCheck, title: "留学教育", description: "作为您家庭的教育合伙人，规划最优的成长路径" },
-  { icon: MemoizedLayers, title: "健康管理", description: "溯源式体检与中新跨境一站式医疗服务" }, // 修改文本内容
+  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，链接中新跨境医疗资源，一站式为您守护健康" }, // 修改文本内容
   { icon: MemoizedZap, title: "战略发展", description: "链接本地核心资源，为您的事业发展提供战略支持" },
 ];
 
