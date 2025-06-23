@@ -1582,7 +1582,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/wangzhantupian/gongsi.jpg" 
+              src="hhttps://zh.apex-elite-service.com/1111/1111.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1599,7 +1599,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">为创始人、高管及家人量身定制整体准证方案（EP、DP等），通过深度评估与战略规划，极大化成功率，提供核心身份保障。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/wangzhantupian/zhunzheng.jpg" 
+              src="https://zh.apex-elite-service.com/1111/2222.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1616,7 +1616,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供专业的年度财税申报、财税合规与规划服务，我们不仅确保您的企业稳健合规，更助力您充分享受新加坡的政策优势。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/wangzhantupian/caishui.jpg" 
+              src="hhttps://zh.apex-elite-service.com/1111/3333.jpg" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1633,7 +1633,7 @@ const timelineData = [
           <p className="text-neutral-200 mb-4 text-base md:text-lg">提供从核心人才招聘、名义雇主（EOR）到跨境薪酬合规的一站式人力资源解决方案，助您在新加坡高效、合规地组建并管理顶尖团队。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/wangzhantupian/renliziyuan.jpg" 
+              src="https://zh.apex-elite-service.com/1111/4444.jpg" 
               alt="新组件预览" 
               width={500}
               height={300}
@@ -1651,7 +1651,7 @@ const projectShowcaseData = [
     buttonLabel: "教育蓝图", // <-- 新增：按钮上显示的文字
     quote: '我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。',
     designation: "Next.js 项目",
-    src: "https://zh.apex-elite-service.com/wangzhantupian/arif-riyanto-UD9nADGj2mc-unsplash.jpg",
+    src: "https://zh.apex-elite-service.com/1111/5555.jpg",
     link: "https://plum-cave.netlify.app/",
   },
   {
