@@ -13,7 +13,6 @@ import React, {
 import Image from 'next/image';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
-// [错误修复 1] 从 'three' 库中直接导入 Font 类型
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import {
@@ -25,7 +24,7 @@ import {
   type HTMLMotionProps,
 } from "framer-motion";
 
-// 修复：导入真实的 Server Actions
+// 导入真实的 Server Actions
 import { saveContactToRedis, saveFooterEmailToRedis } from './actions';
 
 import { Menu, MoveRight, X, CheckCircle2, ArrowRight, Check } from 'lucide-react';
@@ -651,11 +650,9 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
-              {/* 修改：调整标题字号 */}
               <h3 className="hidden md:block md:pl-20 font-semibold text-white text-2xl md:text-3xl">{item.title}</h3>
             </div>
             <div className="relative pl-20 pr-4 md:pl-4 w-full">
-              {/* 修改：调整标题字号 */}
               <h3 className="md:hidden block mb-4 text-left font-semibold text-white text-2xl md:text-3xl">{item.title}</h3>
               {item.content}
             </div>
@@ -727,8 +724,6 @@ ImageContainer.displayName = 'ImageContainer';
 const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials: Testimonial[], onProtectedLinkClick: (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => void; }) => {
   const [active, setActive] = useState(0);
   
-  // 修改：移除 handleNext 和 handlePrev，因为现在直接点击按钮切换
-
   return (
     <div className="w-full mx-auto font-[Helvetica] py-20 text-white">
       <div className="mb-12 text-right">
@@ -775,7 +770,6 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className='flex flex-col justify-center space-y-4'
           >
-            {/* 修改：调整标题字号 */}
             <h3 className="text-white text-2xl md:text-3xl font-semibold">
               {testimonials[active].name}
             </h3>
@@ -784,29 +778,28 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
               {testimonials[active].quote}
             </motion.p>
           </motion.div>
-          {/* 修改：按钮组布局和样式, 允许换行以适配移动端 */}
           <div className="flex flex-wrap items-center gap-3 pt-12 w-full">
             {testimonials.map((testimonial, index) => (
               <HalomotButton
                 key={testimonial.name}
-                inscription={testimonial.buttonLabel} // <-- 修改这里
+                inscription={testimonial.buttonLabel}
                 onClick={() => setActive(index)}
-                padding="0.6rem 1.2rem" // 调整内边距使按钮变小
-                backgroundColor={active === index ? '#4a148c' : '#161616'} // 高亮当前选中的项目
+                padding="0.6rem 1.2rem"
+                backgroundColor={active === index ? '#4a148c' : '#161616'}
                 hoverTextColor='#fff'
                 gradient='linear-gradient(to right, #603dec, #a123f4)'
-                fixedWidth="120px" // <-- 添加这一行
+                fixedWidth="120px"
               />
             ))}
             <HalomotButton 
               inscription="了解更多" 
               onClick={(e) => onProtectedLinkClick(e, testimonials[active].link || '#')} 
               href={testimonials[active].link || '#'}
-              padding="0.6rem 1.2rem" // 调整内边距使按钮变小
+              padding="0.6rem 1.2rem"
               backgroundColor='#161616' 
               hoverTextColor='#fff' 
               gradient='linear-gradient(to right, #603dec, #a123f4)'
-              fixedWidth="120px" // <-- 添加这一行
+              fixedWidth="120px"
             />
           </div>
         </div>
@@ -825,7 +818,7 @@ interface InfoSectionProps {
     primaryImageSrc: string;
     secondaryImageSrc: string;
     reverseLayout?: boolean;
-    className?: string; // 新增: 允许传入自定义样式
+    className?: string;
 }
 
 const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
@@ -834,7 +827,7 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
     primaryImageSrc,
     secondaryImageSrc,
     reverseLayout = false,
-    className, // 新增: 获取自定义样式
+    className,
 }) => {
     const containerVariants: Variants = {
         hidden: {},
@@ -859,7 +852,6 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
 
 
     return (
-        // 修改: 使用 cn 函数合并默认样式和传入的自定义样式
         <section className={cn("relative py-24 md:py-32 bg-transparent overflow-hidden", className)}>
             <div className="container max-w-[1220px] w-full px-6 md:px-10 relative z-10 mx-auto">
                 <motion.div
@@ -948,7 +940,6 @@ InfoSectionWithMockup.displayName = "InfoSectionWithMockup";
 // ============================================================================
 
 const CtaWithGallerySection = () => {
-    // 修复: 将状态管理和对话框逻辑合并到此组件
     const [step, setStep] = useState(0);
 
     const steps = [
@@ -1005,7 +996,6 @@ const CtaWithGallerySection = () => {
                         一切伟大的事业，都始于一次深度的战略对话。欢迎预约与我们进行一对一沟通，共同擘画您在新加坡的商业与家族蓝图。
                     </motion.p>
                     <motion.div variants={itemVariants} className="flex justify-center">
-                      {/* 修复: 添加 onOpenChange 以便在关闭时重置步骤 */}
                       <Dialog onOpenChange={(open) => !open && setStep(0)}>
                         <DialogTrigger asChild>
                            <HalomotButton 
@@ -1370,13 +1360,11 @@ const PricingSection = () => {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col items-center gap-6 text-center mt-10">
                     <div className="flex flex-col gap-2">
-                        {/* 需求 2: 字体大小和格式与“学校申请支持”一致 */}
                         <h3 className="text-2xl md:text-3xl font-semibold text-white">
                             核心服务详情
                             <br />
                             Core Service Details
                         </h3>
-                        {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                         <p className="max-w-2xl text-base md:text-lg text-neutral-300">
                             您可以清晰地看到我们提供的不同服务计划，帮助您选择最适合您的需求的方案。
                         </p>
@@ -1390,9 +1378,7 @@ const PricingSection = () => {
                             className="flex h-full flex-col bg-transparent border-neutral-700"
                         >
                             <CardHeader className="p-6 pb-4 text-center">
-                                {/* 需求 3: 字体大小和格式与“有时候，眼见为实。”一致 */}
                                 <CardTitle className="text-2xl font-bold text-white">{plan.name}</CardTitle>
-                                {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                                 <CardDescription className="text-base md:text-lg text-neutral-300 mt-2">{plan.description}</CardDescription>
                             </CardHeader>
                             <CardContent className="flex flex-1 flex-col justify-between gap-6 p-6 pt-0">
@@ -1401,7 +1387,6 @@ const PricingSection = () => {
                                         {plan.features.map((feature) => (
                                             <div key={feature} className="flex flex-row items-start gap-3">
                                                 <Check className="h-5 w-5 flex-shrink-0 text-green-500 mt-1" />
-                                                {/* 需求 4: 字体大小和格式与“我们深知...”一致 */}
                                                 <p className="text-base md:text-lg text-neutral-300">{feature}</p>
                                             </div>
                                         ))}
@@ -1453,11 +1438,10 @@ const MemoizedZap = React.memo(({ size = 24, ...props }: IconProps) => (
 ));
 MemoizedZap.displayName = 'ZapIcon';
 
-// 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
   { icon: MemoizedCpu, title: "企业服务", description: "公司注册、准证、财税及人力资源的一站式运营方案" },
   { icon: MemoizedShieldCheck, title: "留学教育", description: "作为您家庭的教育合伙人，规划最优的成长路径" },
-  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，链接中新跨境医疗资源，一站式为您守护健康" }, // 修改文本内容
+  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，链接中新跨境医疗资源，一站式为您守护健康" },
   { icon: MemoizedZap, title: "战略发展", description: "链接本地核心资源，为您的事业发展提供战略支持" },
 ];
 
@@ -1470,7 +1454,7 @@ const timelineData = [
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/1111/1111.jpg" 
-              alt="启动模板" 
+              alt="公司注册流程图" 
               width={500}
               height={300}
               className="rounded-lg object-cover w-full h-auto shadow-xl" 
@@ -1487,7 +1471,7 @@ const timelineData = [
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/1111/2222.jpg" 
-              alt="启动模板" 
+              alt="准证申请文件示例" 
               width={500}
               height={300}
               className="rounded-lg object-cover w-full h-auto shadow-xl" 
@@ -1504,7 +1488,7 @@ const timelineData = [
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/1111/3333.jpg" 
-              alt="英雄区模板" 
+              alt="财务报表示意图" 
               width={500}
               height={300}
               className="rounded-lg object-cover w-full h-auto shadow-xl" 
@@ -1521,7 +1505,7 @@ const timelineData = [
           <div>
             <Image 
               src="https://zh.apex-elite-service.com/1111/4444.jpg" 
-              alt="新组件预览" 
+              alt="人力资源团队协作图" 
               width={500}
               height={300}
               className="rounded-lg object-cover w-full h-auto shadow-xl"
@@ -1535,7 +1519,7 @@ const timelineData = [
 const projectShowcaseData = [
   {
     name: "教育路径规划",
-    buttonLabel: "教育蓝图", // <-- 新增：按钮上显示的文字
+    buttonLabel: "教育蓝图",
     quote: '我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。',
     designation: "Next.js 项目",
     src: "https://zh.apex-elite-service.com/1111/5555.jpg",
@@ -1543,7 +1527,7 @@ const projectShowcaseData = [
   },
   {
     name: "学校申请支持",
-    buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
+    buttonLabel: "名校起航",
     quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
     src: "https://zh.apex-elite-service.com/1111/6666.jpg",
@@ -1551,7 +1535,7 @@ const projectShowcaseData = [
   },
   {
     name: "长期成长陪伴",
-    buttonLabel: "全程护航", // <-- 新增：按钮上显示的文字
+    buttonLabel: "全程护航",
     quote: "我们提供超越申请的长期陪伴服务。作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
     designation: "Vue 项目",
     src: "https://zh.apex-elite-service.com/1111/7777.jpg",
@@ -1605,7 +1589,6 @@ const infoSectionData2 = {
     secondaryImageSrc: 'https://zh.apex-elite-service.com/1111/11111111.jpg',
 };
 
-// 新增: FAQ 数据
 const faqData = [
     {
         question: "中新跨境就医服务",
@@ -1718,17 +1701,15 @@ function ScrollAdventure() {
         e.preventDefault();
         const touchEndY = e.changedTouches[0].clientY;
         const deltaY = touchEndY - touchStartY.current;
-        // 阈值判断，防止过于灵敏
         if(Math.abs(deltaY) > 50) {
-            handleScroll(-deltaY); // 注意方向与滚轮相反
-            touchStartY.current = touchEndY; // 重置起始点
+            handleScroll(-deltaY);
+            touchStartY.current = touchEndY;
         }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
         const rect = scrollComponent.getBoundingClientRect();
         const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
-
         if (isVisible && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
             e.preventDefault();
             handleScroll(e.key === 'ArrowDown' ? 1 : -1);
@@ -1749,7 +1730,6 @@ function ScrollAdventure() {
   }, [handleScroll]);
 
   return (
-    // [要求 2 已修改] 移除了边框样式 `border` 和 `border-neutral-700`
     <div 
       ref={componentRef} 
       className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl shadow-2xl aspect-[1/2] lg:aspect-[2/1]"
@@ -1760,7 +1740,6 @@ function ScrollAdventure() {
         
         return (
           <div key={idx} className="absolute inset-0 flex flex-col lg:flex-row">
-            {/* Left Panel */}
             <div
               className={cn(
                 "w-full h-1/2 lg:w-1/2 lg:h-full",
@@ -1789,8 +1768,6 @@ function ScrollAdventure() {
                 </div>
               </div>
             </div>
-
-            {/* Right Panel */}
             <div
               className={cn(
                 "w-full h-1/2 lg:w-1/2 lg:h-full",
@@ -1830,8 +1807,6 @@ ScrollAdventure.displayName = "ScrollAdventure";
 // ============================================================================
 // 9. 文本揭示卡片组件 (新)
 // ============================================================================
-
-// Stars 子组件，用于背景的星星动画
 const Stars = () => {
   const randomMove = () => Math.random() * 4 - 2;
   const randomOpacity = () => Math.random();
@@ -1871,7 +1846,6 @@ const Stars = () => {
 const MemoizedStars = memo(Stars);
 MemoizedStars.displayName = "MemoizedStars";
 
-// TextRevealCardTitle 子组件
 const TextRevealCardTitle = ({
   children,
   className,
@@ -1887,7 +1861,6 @@ const TextRevealCardTitle = ({
 };
 TextRevealCardTitle.displayName = "TextRevealCardTitle";
 
-// TextRevealCardDescription 子组件
 const TextRevealCardDescription = ({
   children,
   className,
@@ -1901,7 +1874,6 @@ const TextRevealCardDescription = ({
 };
 TextRevealCardDescription.displayName = "TextRevealCardDescription";
 
-// TextRevealCard 核心组件
 const TextRevealCard = ({
   text,
   revealText,
@@ -1974,7 +1946,6 @@ const TextRevealCard = ({
       onTouchMove={touchMoveHandler}
       ref={cardRef}
       className={cn(
-        // 更新：移除了背景色和边框，使卡片透明
         "bg-transparent w-full rounded-lg p-8 relative overflow-hidden",
         className
       )}
@@ -1995,7 +1966,6 @@ const TextRevealCard = ({
                 }
           }
           transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
-          // 更新：移除了此处的背景色
           className="absolute bg-transparent z-20 will-change-transform"
         >
           <p
@@ -2014,8 +1984,6 @@ const TextRevealCard = ({
           transition={isMouseOver ? { duration: 0 } : { duration: 0.4 }}
           className="h-40 w-[8px] bg-gradient-to-b from-transparent via-neutral-800 to-transparent absolute z-50 will-change-transform"
         ></motion.div>
-
-        {/* 更新：为底层文本添加 motion.div 以动画化 clipPath */}
         <motion.div
           animate={{
             clipPath: `inset(0 0 0 ${widthPercentage}%)`
@@ -2112,11 +2080,8 @@ const CustomFooter = () => {
             </div>
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300 text-base md:text-lg">
               <Link href="#" className="hover:text-white">Apex</Link>
-              {/* 点击“留学”跳转到留学教育板块 */}
               <Link href="#study-abroad" className="hover:text-white">留学</Link>
-               {/* 点击“医疗”跳转到健康管理板块 */}
               <Link href="#health-management" className="hover:text-white">医疗</Link>
-              {/* 点击“企业服务”跳转到企业服务板块 */}
               <Link href="#corporate-services" className="hover:text-white">企业服务</Link>
               <Link href="#" className="hover:text-white">敬请期待</Link>
             </nav>
@@ -2199,7 +2164,7 @@ const FaqItem = React.forwardRef<
       className={cn(
         "group rounded-lg",
         "transition-all duration-200 ease-in-out",
-        "border border-white/10" // 使用页面已有的边框颜色
+        "border border-white/10"
       )}
     >
       <Button
@@ -2210,7 +2175,7 @@ const FaqItem = React.forwardRef<
         <h3
           className={cn(
             "text-base md:text-lg font-medium transition-colors duration-200 text-left",
-            "text-white", // <-- 修改这里
+            "text-white",
             isOpen && "text-white"
           )}
         >
@@ -2225,7 +2190,6 @@ const FaqItem = React.forwardRef<
             isOpen ? "text-white" : "text-neutral-400"
           )}
         >
-          {/* 复用已导入的图标 */}
           <ChevronDownIcon className="h-4 w-4" /> 
         </motion.div>
       </Button>
@@ -2249,7 +2213,6 @@ const FaqItem = React.forwardRef<
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
-                // 需求 5: 字体大小和格式与“我们深知...”一致
                 className="text-base md:text-lg text-neutral-400 leading-relaxed"
               >
                 {answer}
@@ -2296,22 +2259,19 @@ const FaqSection = React.forwardRef<HTMLElement, FaqSectionProps>(
 );
 FaqSection.displayName = "FaqSection";
 
-
 // ============================================================================
-// [新增] 12. 开场动画 - “文字解体”和“星海穿梭”
+// [最终方案] 开场动画
 // ============================================================================
 
-// 字体文件的 URL，这里使用一个开源的、支持中文的字体
-// 为确保加载，建议将字体文件放在项目的 public 目录下
-const FONT_URL = "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosanssc/NotoSansSC-Bold.otf";
+// 使用 three.js 官方提供的、轻量级的 Helvetiker 字体 (仅36KB), 几乎不会加载失败
+const FONT_URL = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/fonts/helvetiker_regular.typeface.json";
 
-// 文本粒子组件
+// 文本粒子组件 (只用于 "Apex")
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TextParticles = ({ text, position, size, animateOut, font }: { text: string; position: [number, number, number]; size: number; animateOut: boolean; font: any; }) => {
   const pointsRef = useRef<THREE.Points>(null!);
   const materialRef = useRef<THREE.PointsMaterial>(null!);
   
-  // 1. 创建文本几何体并提取粒子位置
   const particles = useMemo(() => {
     if (!font) return null;
     
@@ -2323,69 +2283,50 @@ const TextParticles = ({ text, position, size, animateOut, font }: { text: strin
       bevelEnabled: false,
     });
     
-    textGeometry.center(); // 将几何体居中
+    textGeometry.center();
     
     const count = textGeometry.attributes.position.count;
     const posArray = new Float32Array(count * 3);
-    const targetPosArray = new Float32Array(count * 3); // 粒子动画的目标位置
-    const randomVelocities = new Float32Array(count * 3); // 粒子的随机速度
+    const targetPosArray = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i++) {
-        // 初始位置
         posArray[i * 3 + 0] = textGeometry.attributes.position.getX(i);
         posArray[i * 3 + 1] = textGeometry.attributes.position.getY(i);
         posArray[i * 3 + 2] = textGeometry.attributes.position.getZ(i);
 
-        // 目标位置（向外扩散）
-        const radius = 5 + Math.random() * 5;
+        const radius = 7 + Math.random() * 7;
         const phi = Math.random() * Math.PI * 2;
         const theta = Math.random() * Math.PI;
         targetPosArray[i * 3 + 0] = radius * Math.sin(theta) * Math.cos(phi);
         targetPosArray[i * 3 + 1] = radius * Math.sin(theta) * Math.sin(phi);
         targetPosArray[i * 3 + 2] = radius * Math.cos(theta);
-
-        // 随机速度
-        randomVelocities[i*3 + 0] = (Math.random() - 0.5) * 0.02;
-        randomVelocities[i*3 + 1] = (Math.random() - 0.5) * 0.02;
-        randomVelocities[i*3 + 2] = (Math.random() - 0.5) * 0.02;
     }
 
     const bufferGeometry = new THREE.BufferGeometry();
     bufferGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
     bufferGeometry.setAttribute('targetPosition', new THREE.BufferAttribute(targetPosArray, 3));
-
-    return { geometry: bufferGeometry, velocities: randomVelocities };
-
+    return { geometry: bufferGeometry };
   }, [font, text, size]);
 
-  // 2. 动画循环
   useFrame((state, delta) => {
-    if (!particles || !pointsRef.current) return;
+    if (!particles || !pointsRef.current || !animateOut) return;
     
-    // 如果触发了 "animateOut"
-    if(animateOut) {
-        // 粒子材质逐渐透明
-        materialRef.current.opacity -= delta * 0.5;
+    materialRef.current.opacity -= delta * 0.5;
+    const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
+    const targets = pointsRef.current.geometry.attributes.targetPosition as THREE.BufferAttribute;
 
-        const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
-        const targets = pointsRef.current.geometry.attributes.targetPosition as THREE.BufferAttribute;
-
-        // 粒子向目标位置移动
-        for (let i = 0; i < positions.count; i++) {
-            const x = positions.getX(i);
-            const y = positions.getY(i);
-            const z = positions.getZ(i);
-
-            const tx = targets.getX(i);
-            const ty = targets.getY(i);
-            const tz = targets.getZ(i);
-
-            positions.setX(i, x + (tx - x) * 0.05);
-            positions.setY(i, y + (ty - y) * 0.05);
-            positions.setZ(i, z + (tz - z) * 0.05);
-        }
-        positions.needsUpdate = true;
+    for (let i = 0; i < positions.count; i++) {
+        const x = positions.getX(i);
+        const y = positions.getY(i);
+        const z = positions.getZ(i);
+        const tx = targets.getX(i);
+        const ty = targets.getY(i);
+        const tz = targets.getZ(i);
+        positions.setX(i, x + (tx - x) * 0.05);
+        positions.setY(i, y + (ty - y) * 0.05);
+        positions.setZ(i, z + (tz - z) * 0.05);
     }
+    positions.needsUpdate = true;
   });
 
   if (!particles) return null;
@@ -2398,12 +2339,9 @@ const TextParticles = ({ text, position, size, animateOut, font }: { text: strin
 };
 TextParticles.displayName = "TextParticles";
 
-
 // 星海穿梭组件
 const Starfield = ({ animate }: { animate: boolean }) => {
   const pointsRef = useRef<THREE.Points>(null!);
-
-  // 创建星星粒子
   const stars = useMemo(() => {
     const count = 5000;
     const positions = new Float32Array(count * 3);
@@ -2417,18 +2355,14 @@ const Starfield = ({ animate }: { animate: boolean }) => {
     return geometry;
   }, []);
 
-  // 动画循环
   useFrame((state, delta) => {
     if (!pointsRef.current || !animate) return;
     const positions = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute;
     
     for (let i = 0; i < positions.count; i++) {
       let z = positions.getZ(i);
-      z += delta * 50; // 向镜头移动
-      if (z > 50) {
-        // 如果星星飞过镜头，则重置到深处
-        z = -50;
-      }
+      z += delta * 50;
+      if (z > 50) z = -50;
       positions.setZ(i, z);
     }
     positions.needsUpdate = true;
@@ -2442,29 +2376,19 @@ const Starfield = ({ animate }: { animate: boolean }) => {
 };
 Starfield.displayName = "Starfield";
 
-
 // 整体开场动画控制组件
 const IntroAnimation = ({ onEnter }: { onEnter: () => void; }) => {
   const [stage, setStage] = useState<'idle' | 'disintegrating' | 'warping' | 'finished'>('idle');
   const [isClicked, setIsClicked] = useState(false);
   
-  // 使用 useLoader 加载字体
-  // 这是 react-three-fiber 推荐的方式，它能更好地与 React Suspense 集成
-  const font = useLoader(FontLoader, FONT_URL);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const font: any = useLoader(FontLoader, FONT_URL);
 
   const handleClick = () => {
     if (stage === 'idle' && !isClicked) {
       setIsClicked(true);
-      
-      // 开始文字解体
       setStage('disintegrating');
-      
-      // 1.5秒后开始星海穿梭
-      setTimeout(() => {
-        setStage('warping');
-      }, 1500);
-
-      // 4秒后结束整个动画
+      setTimeout(() => setStage('warping'), 1500);
       setTimeout(() => {
         setStage('finished');
         onEnter();
@@ -2473,35 +2397,37 @@ const IntroAnimation = ({ onEnter }: { onEnter: () => void; }) => {
   };
 
   return (
-    <div 
-      className="w-full h-full cursor-pointer"
-      onClick={handleClick}
-    >
+    <div className="w-full h-full cursor-pointer relative" onClick={handleClick}>
       <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
         <ambientLight intensity={1.5} />
         <React.Suspense fallback={null}>
           {(stage === 'idle' || stage === 'disintegrating') && font && (
-            <>
               <TextParticles
                 font={font}
                 text="Apex"
-                position={[0, 0.8, 0]}
-                size={2}
+                position={[0, 0, 0]} // 居中显示 "Apex"
+                size={2.5}
                 animateOut={stage === 'disintegrating'}
               />
-              <TextParticles
-                font={font}
-                text="轻触，开启非凡。"
-                position={[0, -0.8, 0]}
-                size={0.5}
-                animateOut={stage === 'disintegrating'}
-              />
-            </>
           )}
           {(stage === 'warping') && <Starfield animate={true} />}
         </React.Suspense>
       </Canvas>
-      {/* 添加提示信息，引导用户点击 */}
+      
+      {/* 中文副标题作为 HTML 元素，用 framer-motion 控制动画 */}
+      <AnimatePresence>
+        {!isClicked && (
+          <motion.div 
+            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+            exit={{ opacity: 0, y: 20, transition: { duration: 0.5 } }}
+          >
+            <p className="text-white font-[Helvetica] text-xl sm:text-2xl md:text-3xl font-semibold mt-48">
+              轻触，开启非凡。
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       {!isClicked && (
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 animate-pulse text-sm">
             点击任意处继续
@@ -2514,9 +2440,8 @@ IntroAnimation.displayName = "IntroAnimation";
 
 
 // ============================================================================
-// 12. 主页面组件
+// 主页面组件
 // ============================================================================
-
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -2525,14 +2450,10 @@ export default function HomePage() {
 
   useEffect(() => {
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
-    if (submittedFlag === 'true') {
-      setHasSubmitted(true);
-    }
-
+    if (submittedFlag === 'true') setHasSubmitted(true);
+    
     const hasVisited = sessionStorage.getItem('hasVisitedHomePage');
-    if (hasVisited) {
-      setIsEntered(true);
-    }
+    if (hasVisited) setIsEntered(true);
     
     setIsLoading(false);
   }, []); 
@@ -2549,7 +2470,6 @@ export default function HomePage() {
         alert("此功能正在开发中，敬请期待！");
         return;
     }
-
     if (!hasSubmitted) {
         e.preventDefault();
         setIsModalOpen(true);
@@ -2567,8 +2487,6 @@ export default function HomePage() {
 
   return (
     <div className="relative isolate bg-black text-white">
-      
-      {/* [要求 1 已修改] 使用全新的开场动画组件 */}
       <AnimatePresence>
         {!isEntered && (
           <motion.div
@@ -2576,7 +2494,6 @@ export default function HomePage() {
             className="fixed inset-0 z-[100] bg-black"
             exit={{ opacity: 0, transition: { duration: 0.5 } }}
           >
-            {/* 使用 Suspense 来优雅地处理字体加载 */}
             <React.Suspense fallback={<div className="w-full h-full bg-black" />}>
               <IntroAnimation onEnter={handleEnter} />
             </React.Suspense>
@@ -2696,5 +2613,5 @@ export default function HomePage() {
         </Dialog>
       </motion.div>
     </div>
-  ); 
+  );
 }
