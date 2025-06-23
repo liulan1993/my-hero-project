@@ -13,6 +13,7 @@ import React, {
 import Image from 'next/image';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+// [错误修复 1] 从 'three' 库中直接导入 Font 类型
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import {
@@ -2305,6 +2306,7 @@ FaqSection.displayName = "FaqSection";
 const FONT_URL = "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosanssc/NotoSansSC-Bold.otf";
 
 // 文本粒子组件
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const TextParticles = ({ text, position, size, animateOut, font }: { text: string; position: [number, number, number]; size: number; animateOut: boolean; font: any; }) => {
   const pointsRef = useRef<THREE.Points>(null!);
   const materialRef = useRef<THREE.PointsMaterial>(null!);
@@ -2316,7 +2318,7 @@ const TextParticles = ({ text, position, size, animateOut, font }: { text: strin
     const textGeometry = new TextGeometry(text, {
       font: font,
       size: size,
-      height: 0.2,
+      depth: 0.2,
       curveSegments: 12,
       bevelEnabled: false,
     });
@@ -2694,5 +2696,5 @@ export default function HomePage() {
         </Dialog>
       </motion.div>
     </div>
-  );
+  ); 
 }
