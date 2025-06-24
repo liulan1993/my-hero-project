@@ -8,15 +8,12 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 // --- 内部实现的 cn 工具函数 ---
-// 为了解决 "Module not found: Can't resolve '@/lib/utils'" 错误，
-// 我们在此直接定义 cn 函数，让组件不再依赖外部文件。
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 
 // --- 从 background-beams-with-Collision.tsx 合并进来的组件 ---
-// --- 这些组件共同构成了“雨滴”和碰撞爆炸效果 ---
 
 const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   const spans = Array.from({ length: 20 }, (_, index) => ({
@@ -53,26 +50,27 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   );
 };
 
-const CollisionMechanism = React.forwardRef<
-  HTMLDivElement,
-  {
-    // 错误修复：将 RefObject 类型修改为接受 null，以匹配父组件中的 useRef 初始化
-    containerRef: React.RefObject<HTMLDivElement | null>;
-    parentRef: React.RefObject<HTMLDivElement | null>;
-    beamOptions?: {
-      initialX?: number;
-      translateX?: number;
-      initialY?: number;
-      translateY?: number;
-      rotate?: number;
-      className?: string;
-      duration?: number;
-      delay?: number;
-      repeatDelay?: number;
-    };
-  }
-// 错误修复：将未使用的 'ref' 参数重命名为 '_ref' 来消除 ESLint 警告。
->(({ parentRef, containerRef, beamOptions = {} }, _ref) => {
+// 错误修复：彻底移除多余的 React.forwardRef，因为它没有被使用，并且是导致部署失败的根本原因。
+// 将其改为一个普通的函数组件。
+const CollisionMechanism = ({
+  parentRef,
+  containerRef,
+  beamOptions = {},
+}: {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  parentRef: React.RefObject<HTMLDivElement | null>;
+  beamOptions?: {
+    initialX?: number;
+    translateX?: number;
+    initialY?: number;
+    translateY?: number;
+    rotate?: number;
+    className?: string;
+    duration?: number;
+    delay?: number;
+    repeatDelay?: number;
+  };
+}) => {
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{
     detected: boolean;
@@ -138,14 +136,12 @@ const CollisionMechanism = React.forwardRef<
         ref={beamRef}
         animate="animate"
         initial={{
-          // 错误修复：使用 'y' 和 'x' 替代 'translateY' 和 'translateX'
           y: beamOptions.initialY || -200,
           x: beamOptions.initialX || 0,
           rotate: beamOptions.rotate || 0,
         }}
         variants={{
           animate: {
-            // 错误修复：使用 'y' 和 'x' 替代 'translateY' 和 'translateX'
             y: beamOptions.translateY || 1800,
             x: beamOptions.translateX || 0,
             rotate: beamOptions.rotate || 0,
@@ -179,9 +175,7 @@ const CollisionMechanism = React.forwardRef<
       </AnimatePresence>
     </>
   );
-});
-
-CollisionMechanism.displayName = "CollisionMechanism";
+};
 
 export const BackgroundBeamsWithCollision = ({
   children,
@@ -235,7 +229,6 @@ export const BackgroundBeamsWithCollision = ({
 
 
 // --- 您原有的 page.tsx 代码 ---
-// --- 这部分是3D旋转盒子背景动画 ---
 
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
     const shape = new THREE.Shape();
@@ -338,15 +331,11 @@ const Scene = () => {
 // --- 最终的、合并后的页面组件 ---
 export default function Page() {
   return (
-    // 主容器，设置背景渐变和全屏样式。`relative`定位是子元素绝对定位的关键
     <div className="relative min-h-screen w-full bg-[#000] text-white flex flex-col items-center justify-center p-8 overflow-hidden" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
       
-      {/* 渲染层级 1: 3D旋转盒子背景 (z-0) */}
       <Scene />
 
-      {/* 渲染层级 2: “雨滴”光束动画和标题 (z-10) */}
       <BackgroundBeamsWithCollision>
-        {/* 这是从 demo.tsx 合并过来的标题内容 */}
         <h2 className="text-2xl relative z-20 md:text-4xl lg:text-7xl font-bold text-center text-black dark:text-white font-sans tracking-tight">
           What&apos;s cooler than Beams?{" "}
           <div className="relative mx-auto inline-block w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
