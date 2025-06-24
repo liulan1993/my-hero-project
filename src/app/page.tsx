@@ -2551,7 +2551,7 @@ export default function HomePage() {
           
           setTimeout(() => {
               setAnimationState('finished'); // 4. 穿梭结束，动画完成
-          }, 1500 + 5000); // 穿梭动画总时长 (1.5s + 5s)
+          }, 1500 + 1500); // 穿梭动画总时长 (1.5s + 5s)
       }
   };
 
