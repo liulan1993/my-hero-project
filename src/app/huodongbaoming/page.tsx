@@ -33,27 +33,30 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
 
     return (
         <div className="w-full h-2 bg-gray-500/20 rounded-full overflow-hidden relative mt-auto">
+            {/* 错误修复：将扫光动画嵌套在进度条填充部分内部，并添加 overflow-hidden */}
+            {/* 这样扫光动画就会被父元素的宽度（即进度）所裁剪 */}
             <motion.div
-                className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full"
+                className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative overflow-hidden"
                 initial={{ width: '0%' }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 1, ease: "linear" }}
-            />
-            <motion.div
-                className="absolute top-0 left-0 h-full w-10 opacity-80"
-                style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent)',
-                    filter: 'blur(4px)',
-                }}
-                animate={{
-                    x: ['-100%', '1000%'] // 确保光束能划过整个进度条
-                }}
-                transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "linear"
-                }}
-            />
+            >
+                <motion.div
+                    className="absolute top-0 left-0 h-full w-10 opacity-80"
+                    style={{
+                        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent)',
+                        filter: 'blur(4px)',
+                    }}
+                    animate={{
+                        x: ['-100%', '1000%'] // 动画范围可以很大，父级会裁剪它
+                    }}
+                    transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                />
+            </motion.div>
         </div>
     );
 };
