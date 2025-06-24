@@ -453,7 +453,7 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                 { title: "问卷调查", href: "https://www.apex-elite-service.com/wenjuandiaocha" },
                 { title: "资料上传", href: "https://zl.apex-elite-service.com/" },
                 { title: "客户反馈", href: "https://www.apex-elite-service.com/kehufankui" },
-                { title: "敬请期待", href: "#" },
+                { title: "活动报名", href: "https://www.apex-elite-service.com/huodongbaoming" },
             ],
         },
         {
