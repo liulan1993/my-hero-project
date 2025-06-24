@@ -1227,7 +1227,7 @@ const CtaWithGallerySection = () => {
                                     <div className="w-full md:w-1/3 p-6 border-b md:border-b-0 md:border-r border-neutral-800">
                                         <div className="flex flex-col gap-3">
                                             <Image
-                                                src="https://zh.apex-elite-service.com/wenjian/logo.png"
+                                                src="https://zh.apex-elite-service.com/wenjian/logo-1.png"
                                                 alt="Logo"
                                                 width={48}
                                                 height={48}
