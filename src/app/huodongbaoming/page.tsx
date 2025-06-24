@@ -12,20 +12,60 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// --- 新增：动态倒计时及百分比显示组件 ---
+const CountdownDisplay = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
+    const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    const [percentage, setPercentage] = useState(0);
+    const startDate = useMemo(() => new Date(startDateString), [startDateString]);
+    const endDate = useMemo(() => new Date(endDateString), [endDateString]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = new Date();
+            const totalDuration = endDate.getTime() - startDate.getTime();
+            const remainingTimeMs = endDate.getTime() - now.getTime();
+
+            if (remainingTimeMs > 0) {
+                const days = Math.floor(remainingTimeMs / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((remainingTimeMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remainingTimeMs % (1000 * 60)) / 1000);
+                setTimeLeft({ days, hours, minutes, seconds });
+
+                const currentPercentage = (remainingTimeMs / totalDuration) * 100;
+                setPercentage(currentPercentage);
+            } else {
+                setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+                setPercentage(0);
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [startDate, endDate]);
+
+    return (
+        <div className="text-center my-4">
+            <p className="text-sm text-gray-400">报名截止还剩</p>
+            <p className="text-xl font-semibold my-1">{`${timeLeft.days}天 ${String(timeLeft.hours).padStart(2, '0')}:${String(timeLeft.minutes).padStart(2, '0')}:${String(timeLeft.seconds).padStart(2, '0')}`}</p>
+            <div className="text-xs p-1 border border-gray-500/50 rounded-md inline-block bg-black/20">
+                {percentage.toFixed(4)}%
+            </div>
+        </div>
+    );
+};
+
+
 // --- 新增：动态进度条组件 ---
 const ProgressBar = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [progress, setProgress] = useState(0);
     const startDate = useMemo(() => new Date(startDateString), [startDateString]);
     const endDate = useMemo(() => new Date(endDateString), [endDateString]);
 
-    // 错误修复: 动态计算扫光动画的速度
     const animationDuration = useMemo(() => {
-        // 当进度接近100%时，速度加快
-        const maxDuration = 1.5; // 开始时的速度 (秒)
-        const minDuration = 0.3; // 结束时的最快速度 (秒)
-        // 使用一个缓动函数来计算当前进度下的动画时间
+        const maxDuration = 1.5;
+        const minDuration = 0.3;
         const duration = maxDuration - (maxDuration - minDuration) * (progress / 100);
-        return Math.max(duration, minDuration); // 确保速度不会低于最快速度
+        return Math.max(duration, minDuration);
     }, [progress]);
 
     useEffect(() => {
@@ -67,7 +107,6 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
                     />
                 </motion.div>
             ) : (
-                // 错误修复：当进度达到100%时，执行闪烁动画
                 <motion.div
                     className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full"
                     style={{ width: '100%' }}
@@ -240,7 +279,7 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
                     </div>
                 </motion.div>
 
-                <div className="mb-auto text-center">
+                <div className="text-center">
                     <h3 className="text-2xl font-medium text-white mb-3">
                         {product.title}
                     </h3>
@@ -248,7 +287,11 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
                         {product.description}
                     </p>
                 </div>
-                <ProgressBar startDateString={product.startDate} endDateString={product.endDate} />
+
+                <div className="mt-auto">
+                    <CountdownDisplay startDateString={product.startDate} endDateString={product.endDate} />
+                    <ProgressBar startDateString={product.startDate} endDateString={product.endDate} />
+                </div>
             </div>
         </motion.div>
     </div>
@@ -374,9 +417,9 @@ export default function Page() {
       id: 1,
       title: "智能收件箱整理",
       description: "OpenMail通过AI驱动的分类彻底改变了电子邮件管理，提高了生产力和可访问性。",
-      startDate: "2025-06-25T05:40:00",
-      endDate: "2025-06-25T05:59:59",
-      markdownContent: `# 智能收件箱整理\n\n### 工作原理\n我们的AI模型能够实时分析收到的每一封邮件，并根据其内容、发件人、重要性等多个维度进行智能分类。无论是工作邮件、订阅信息、社交通知还是垃圾邮件，都能被精准地放入对应的文件夹。\n\n### 主要特性\n- **自动归档**: 将不重要的邮件自动归档，保持收件箱清爽。\n- **智能提醒**: 对于重要邮件，系统会通过智能提醒功能，确保您不会错过任何关键信息。\n- **自定义规则**: 用户可以根据自己的需求，创建个性化的分类规则，AI将学习并自动执行。\n\n报名截止：2025-07-01`
+      startDate: "2025-06-25T05:50:00",
+      endDate: "2025-06-25T06:00:00",
+      markdownContent: `# 智能收件箱整理\n\n### 工作原理\n我们的AI模型能够实时分析收到的每一封邮件，并根据其内容、发件人、重要性等多个维度进行智能分类。无论是工作邮件、订阅信息、社交通知还是垃圾邮件，都能被精准地放入对应的文件夹。\n\n### 主要特性\n- **自动归档**: 将不重要的邮件自动归档，保持收件箱清爽。\n- **智能提醒**: 对于重要邮件，系统会通过智能提醒功能，确保您不会错过任何关键信息。\n- **自定义规则**: 用户可以根据自己的需求，创建个性化的分类规则，AI将学习并自动执行。\n\n报名截止：2025-06-25T06:00:00`
     },
     {
       id: 2,
