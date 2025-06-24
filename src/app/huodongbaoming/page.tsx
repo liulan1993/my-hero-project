@@ -4,10 +4,15 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from "framer-motion";
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-// 这是一个常用的工具函数，用于合并Tailwind CSS类名。
-// 根据您的要求，我假设路径和配置都是正确的。
-import { cn } from "@/lib/utils";
+// --- 内部实现的 cn 工具函数 ---
+// 为了解决 "Module not found: Can't resolve '@/lib/utils'" 错误，
+// 我们在此直接定义 cn 函数，让组件不再依赖外部文件。
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 
 // --- 从 background-beams-with-Collision.tsx 合并进来的组件 ---
