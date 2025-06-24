@@ -292,19 +292,27 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   );
 };
 
-// 修复了碰撞逻辑，移除了未使用的 containerRef，改为检测浏览器窗口底部
+// 修复：通过 useEffect 在客户端安全地获取 window.innerHeight，避免了服务端渲染错误
 const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.RefObject<HTMLDivElement | null>; beamOptions?: { initialX?: number; translateX?: number; initialY?: number; translateY?: number; rotate?: number; className?: string; duration?: number; delay?: number; repeatDelay?: number; }; }) => {
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{ detected: boolean; coordinates: { x: number; y: number } | null; }>({ detected: false, coordinates: null });
   const [beamKey, setBeamKey] = useState(0);
+  const [targetY, setTargetY] = useState(0); // 为动画目标Y坐标创建 state
 
+  // 该 effect 仅在客户端运行以获取窗口高度
   useEffect(() => {
+    setTargetY(window.innerHeight + 200);
+  }, []); // 空依赖数组确保该 effect 仅在挂载时运行一次（客户端）
+
+  // 该 effect 处理碰撞检测逻辑
+  useEffect(() => {
+    if (targetY === 0) return; // 在设置窗口高度前不运行碰撞检测
+
     const checkCollision = () => {
       if (beamRef.current && parentRef.current) {
         const beamRect = beamRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight; // 获取窗口高度
+        const windowHeight = window.innerHeight; 
 
-        // 当光束底部接触或超过窗口底部时，触发碰撞
         if (beamRect.bottom >= windowHeight && !collision.detected) {
           const parentRect = parentRef.current.getBoundingClientRect();
           const relativeX = beamRect.left - parentRect.left + beamRect.width / 2;
@@ -319,11 +327,19 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
     };
     const animationInterval = setInterval(checkCollision, 50);
     return () => clearInterval(animationInterval);
-  }, [collision.detected, parentRef]); // 移除了 containerRef 依赖
+  }, [collision.detected, parentRef, targetY]); // 将 targetY 添加到依赖项
 
   return (
     <>
-      <motion.div key={beamKey} ref={beamRef} animate="animate" initial={{ y: beamOptions.initialY || -200, x: beamOptions.initialX || 0, rotate: beamOptions.rotate || 0 }} variants={{ animate: { y: window.innerHeight + 200, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }} transition={{ duration: beamOptions.duration || 8, repeat: Infinity, repeatType: "loop", ease: "linear", delay: beamOptions.delay || 0, repeatDelay: beamOptions.repeatDelay || 0 }} className={cn("absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent", beamOptions.className)} />
+      <motion.div 
+        key={beamKey} 
+        ref={beamRef} 
+        animate="animate" 
+        initial={{ y: beamOptions.initialY || -200, x: beamOptions.initialX || 0, rotate: beamOptions.rotate || 0 }} 
+        variants={{ animate: { y: targetY, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }} // 使用 state 替代直接访问 window
+        transition={{ duration: beamOptions.duration || 8, repeat: Infinity, repeatType: "loop", ease: "linear", delay: beamOptions.delay || 0, repeatDelay: beamOptions.repeatDelay || 0 }} 
+        className={cn("absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent", beamOptions.className)} 
+      />
       <AnimatePresence>
         {collision.detected && collision.coordinates && ( <Explosion key={`${collision.coordinates.x}-${collision.coordinates.y}`} style={{ left: `${collision.coordinates.x}px`, top: `${collision.coordinates.y}px`, transform: "translate(-50%, -50%)" }} /> )}
       </AnimatePresence>
@@ -337,7 +353,6 @@ const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) =>
   
   return (
     <div ref={parentRef} className={cn("absolute inset-0 w-full h-full overflow-hidden", className)}>
-        {/* 移除了未使用的 containerRef */}
         {beams.map((beam, index) => (<CollisionMechanism key={beam.initialX + `beam-idx-${index}`} beamOptions={beam} parentRef={parentRef} />))}
     </div>
   );
@@ -391,13 +406,16 @@ export default function Page() {
   const [showExpiredModal, setShowExpiredModal] = useState(false); 
 
   useEffect(() => {
-    if (expandedCardId !== null || showExpiredModal) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = 'auto';
-    }
-    return () => { // 组件卸载时恢复滚动
-        document.body.style.overflow = 'auto';
+    // 修复：添加客户端检查，以安全地操作 document 对象
+    if (typeof window !== 'undefined' && document.body) {
+        if (expandedCardId !== null || showExpiredModal) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        return () => { // 组件卸载时恢复滚动
+            document.body.style.overflow = 'auto';
+        }
     }
   }, [expandedCardId, showExpiredModal]);
 
