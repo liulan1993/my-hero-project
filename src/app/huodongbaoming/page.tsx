@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,12 +12,57 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// --- 新增：动态进度条组件 ---
+const ProgressBar = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
+    const [progress, setProgress] = useState(0);
+    const startDate = useMemo(() => new Date(startDateString), [startDateString]);
+    const endDate = useMemo(() => new Date(endDateString), [endDateString]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = new Date();
+            const totalDuration = endDate.getTime() - startDate.getTime();
+            const elapsedTime = now.getTime() - startDate.getTime();
+            const currentProgress = (elapsedTime / totalDuration) * 100;
+
+            setProgress(Math.min(Math.max(currentProgress, 0), 100));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [startDate, endDate]);
+
+    return (
+        <div className="w-full h-2 bg-gray-500/20 rounded-full overflow-hidden relative mt-auto">
+            <motion.div
+                className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full"
+                initial={{ width: '0%' }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 1, ease: "linear" }}
+            />
+            <motion.div
+                className="absolute top-0 left-0 h-full w-10 opacity-80"
+                style={{
+                    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent)',
+                    filter: 'blur(4px)',
+                }}
+                animate={{
+                    x: ['-100%', '1000%'] // 确保光束能划过整个进度条
+                }}
+                transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "linear"
+                }}
+            />
+        </div>
+    );
+};
+
+
 // --- Markdown 渲染组件 ---
-// 一个简单的 Markdown 解析器，用于将文本转换为基本的 HTML 标签
 const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
     const lines = content.split('\n').map(line => line.trim());
     return (
-        // 错误修复：添加了 text-center 来居中文本
         <div className="text-gray-300 text-center">
             {lines.map((line, index) => {
                 if (line.startsWith('# ')) {
@@ -31,6 +76,9 @@ const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
                 }
                 if (line === '') {
                     return <br key={index} />;
+                }
+                if(line.includes('报名截止')) {
+                    return <p key={index} className="my-2 leading-relaxed font-semibold text-purple-300">{line}</p>;
                 }
                 return <p key={index} className="my-2 leading-relaxed">{line}</p>;
             })}
@@ -56,7 +104,7 @@ const ArticleModal = ({ product, onClose }: { product: Product | null; onClose: 
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 50, opacity: 0 }}
                 className="bg-[#121624] rounded-2xl w-full max-w-3xl h-full max-h-[80vh] overflow-y-auto p-8 relative shadow-2xl border border-white/10"
-                onClick={(e) => e.stopPropagation()} // 防止点击内容区域关闭模态窗口
+                onClick={(e) => e.stopPropagation()}
             >
                 <button
                     onClick={onClose}
@@ -78,6 +126,8 @@ interface Product {
   title: string;
   description: string;
   markdownContent: string;
+  startDate: string;
+  endDate: string;
 }
 
 const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: number) => void }) => {
@@ -86,7 +136,7 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
   return (
     <div onClick={() => onExpand(product.id)} className="cursor-pointer">
         <motion.div
-            className="relative rounded-[32px] overflow-hidden"
+            className="relative rounded-[32px] overflow-hidden flex flex-col" // 使用 flex 布局
             style={{
             width: "360px",
             height: "450px",
@@ -95,7 +145,7 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
             }}
             initial={{ y: 0 }}
             animate={{
-            y: isHovered ? -8 : 0, // 只保留轻微的上浮效果
+            y: isHovered ? -8 : 0, 
             }}
             transition={{
             type: "spring",
@@ -143,9 +193,7 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
                     opacity: isHovered ? 0.85 : 0.75,
                 }}
             />
-            <motion.div
-                className="relative flex flex-col h-full p-8 z-40"
-            >
+            <div className="relative flex flex-col h-full p-8 z-40">
                 <motion.div
                     className="w-12 h-12 rounded-full flex items-center justify-center mb-6"
                     style={{
@@ -167,17 +215,16 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
                     </div>
                 </motion.div>
 
-                {/* 错误修复：添加了 text-center 来居中文本 */}
                 <div className="mb-auto text-center">
                     <h3 className="text-2xl font-medium text-white mb-3">
                         {product.title}
                     </h3>
-
                     <p className="text-sm mb-6 text-gray-300">
                         {product.description}
                     </p>
                 </div>
-            </motion.div>
+                <ProgressBar startDateString={product.startDate} endDateString={product.endDate} />
+            </div>
         </motion.div>
     </div>
   );
@@ -303,13 +350,17 @@ export default function Page() {
       id: 1,
       title: "智能收件箱整理",
       description: "OpenMail通过AI驱动的分类彻底改变了电子邮件管理，提高了生产力和可访问性。",
-      markdownContent: `# 智能收件箱整理\n\n### 工作原理\n我们的AI模型能够实时分析收到的每一封邮件，并根据其内容、发件人、重要性等多个维度进行智能分类。无论是工作邮件、订阅信息、社交通知还是垃圾邮件，都能被精准地放入对应的文件夹。\n\n### 主要特性\n- **自动归档**: 将不重要的邮件自动归档，保持收件箱清爽。\n- **智能提醒**: 对于重要邮件，系统会通过智能提醒功能，确保您不会错过任何关键信息。\n- **自定义规则**: 用户可以根据自己的需求，创建个性化的分类规则，AI将学习并自动执行。`
+      startDate: "2025-06-01T00:00:00",
+      endDate: "2025-07-01T23:59:59",
+      markdownContent: `# 智能收件箱整理\n\n### 工作原理\n我们的AI模型能够实时分析收到的每一封邮件，并根据其内容、发件人、重要性等多个维度进行智能分类。无论是工作邮件、订阅信息、社交通知还是垃圾邮件，都能被精准地放入对应的文件夹。\n\n### 主要特性\n- **自动归档**: 将不重要的邮件自动归档，保持收件箱清爽。\n- **智能提醒**: 对于重要邮件，系统会通过智能提醒功能，确保您不会错过任何关键信息。\n- **自定义规则**: 用户可以根据自己的需求，创建个性化的分类规则，AI将学习并自动执行。\n\n报名截止：2025-07-01`
     },
     {
       id: 2,
       title: "跨平台任务同步",
       description: "在所有设备上无缝同步您的任务和项目，确保您随时随地都能掌握最新进展。",
-      markdownContent: `# 跨平台任务同步\n\n### 无缝体验\n无论您使用的是手机、平板还是桌面电脑，我们的应用都能确保您的任务列表实时同步。您在一个设备上做出的任何更改，都会立即反映在所有其他设备上。\n\n### 主要特性\n- **离线访问**: 即使没有网络连接，您也可以查看和编辑任务，一旦联网将自动同步。\n- **团队协作**: 与团队成员共享任务列表，分配任务，并跟踪项目进度。\n- **日历集成**: 将您的任务与日历应用集成，更好地规划您的时间和日程。`
+      startDate: "2025-06-15T00:00:00",
+      endDate: "2025-08-15T23:59:59",
+      markdownContent: `# 跨平台任务同步\n\n### 无缝体验\n无论您使用的是手机、平板还是桌面电脑，我们的应用都能确保您的任务列表实时同步。您在一个设备上做出的任何更改，都会立即反映在所有其他设备上。\n\n### 主要特性\n- **离线访问**: 即使没有网络连接，您也可以查看和编辑任务，一旦联网将自动同步。\n- **团队协作**: 与团队成员共享任务列表，分配任务，并跟踪项目进度。\n- **日历集成**: 将您的任务与日历应用集成，更好地规划您的时间和日程。\n\n报名截止：2025-08-15`
     }
   ];
 
@@ -328,7 +379,6 @@ export default function Page() {
       <Scene />
       <BackgroundBeamsWithCollision>
         <div className="relative z-20 flex flex-col items-center justify-center gap-12">
-            {/* 保留的双行标题 */}
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-center text-white font-sans tracking-tight">
                 <div>What&apos;s cooler than Beams?</div>
                 <div className="relative mx-auto w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
@@ -341,7 +391,6 @@ export default function Page() {
                 </div>
             </h2>
 
-            {/* 标题下方的并排卡片 */}
             <div className="flex flex-wrap items-center justify-center gap-8">
                 {products.map(product => (
                     <ProductCard key={product.id} product={product} onExpand={handleExpand} />
