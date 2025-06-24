@@ -12,7 +12,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- 动态倒计时及百分比显示组件 ---
+// --- 动态倒计时及百分比显示组件 (无需改动) ---
 const CountdownDisplay = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [percentage, setPercentage] = useState(0);
@@ -54,8 +54,7 @@ const CountdownDisplay = ({ startDateString, endDateString }: { startDateString:
     );
 };
 
-
-// --- 动态进度条组件 ---
+// --- 动态进度条组件 (无需改动) ---
 const ProgressBar = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [progress, setProgress] = useState(0);
     const startDate = useMemo(() => new Date(startDateString), [startDateString]);
@@ -124,8 +123,7 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
     );
 };
 
-
-// --- Markdown 渲染组件 ---
+// --- Markdown 渲染组件 (无需改动) ---
 const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
     const lines = content.split('\n').map(line => line.trim());
     return (
@@ -152,7 +150,7 @@ const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
     );
 };
 
-// --- 活动已截止的提示弹窗 (已修复) ---
+// --- 活动已截止的提示弹窗 (无需改动) ---
 const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
     return (
         <motion.div
@@ -163,10 +161,10 @@ const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
             onClick={onClose}
         >
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                // 移除了 scale 动画来修复UI卡顿和变大问题
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="bg-[#1a1f32] rounded-2xl p-8 text-center shadow-2xl border border-white/10 max-w-sm w-full"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -182,7 +180,6 @@ const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
     );
 };
 
-
 // --- 卡片组件 ---
 interface Product {
   id: number;
@@ -194,7 +191,8 @@ interface Product {
   qrCodeUrl: string;
 }
 
-const ProductCard = ({ product }: { product: Product; }) => {
+// 优化：使用 React.memo 包裹 ProductCard，防止不必要的重新渲染
+const ProductCard = React.memo(({ product, onClick }: { product: Product; onClick: () => void; }) => {
     const [isHovered, setIsHovered] = useState(false);
     
     return (
@@ -205,8 +203,9 @@ const ProductCard = ({ product }: { product: Product; }) => {
         initial={{ y: 0 }}
         animate={{ y: isHovered ? -8 : 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        onClick={onClick} // 使用传入的 onClick 事件
       >
-        <div className="relative w-full h-full flex flex-col p-8 z-30">
+        <div className="relative w-full h-full flex flex-col p-8 z-30 pointer-events-none">
           <div className="w-12 h-12 rounded-full flex items-center justify-center mb-6 bg-gradient-to-tr from-[#171c2c] to-[#121624]"
                style={{ boxShadow: "0 6px 12px -2px rgba(0, 0, 0, 0.25), 0 3px 6px -1px rgba(0, 0, 0, 0.15), inset 1px 1px 3px rgba(255, 255, 255, 0.12), inset -2px -2px 4px rgba(0, 0, 0, 0.5)"}}>
             <svg width="20" height="20" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
@@ -236,25 +235,33 @@ const ProductCard = ({ product }: { product: Product; }) => {
         />
       </motion.div>
     );
-};
+});
+ProductCard.displayName = "ProductCard"; // 添加 displayName
 
 // --- 展开后的卡片组件 ---
+// 优化：这是一个独立的模态框，而不是共享布局动画的一部分
 const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: () => void; }) => {
     return (
       <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
           onClick={onCollapse}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
       >
         <motion.div
-          className="relative rounded-[32px] overflow-hidden w-full max-w-3xl bg-[#0e131f] max-h-[85vh] flex flex-col"
-          layoutId={`card-container-${product.id}`}
+          className="relative rounded-[32px] overflow-hidden w-full max-w-3xl bg-[#0e131f] max-h-[85vh] flex flex-col border border-white/10"
           onClick={(e) => e.stopPropagation()}
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }} // 使用平滑的缓动函数
         >
           <div className="relative flex-shrink-0 p-8 pb-0 z-20">
              <motion.button
                 initial={{opacity: 0, scale: 0.5}}
                 animate={{opacity: 1, scale: 1}}
-                transition={{delay: 0.3}}
+                transition={{delay: 0.2}}
                 onClick={onCollapse}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors w-8 h-8 bg-white/10 rounded-full flex items-center justify-center z-50"
                 aria-label="Close article"
@@ -281,7 +288,7 @@ const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: (
 };
 
 
-// --- 光束和碰撞组件 (已修复) ---
+// --- 光束和碰撞组件 (无需改动) ---
 const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   const spans = Array.from({ length: 20 }, (_, index) => ({ id: index, initialX: 0, initialY: 0, directionX: Math.floor(Math.random() * 80 - 40), directionY: Math.floor(Math.random() * -50 - 10) }));
   return (
@@ -292,21 +299,18 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   );
 };
 
-// 修复：通过 useEffect 在客户端安全地获取 window.innerHeight，避免了服务端渲染错误
 const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.RefObject<HTMLDivElement | null>; beamOptions?: { initialX?: number; translateX?: number; initialY?: number; translateY?: number; rotate?: number; className?: string; duration?: number; delay?: number; repeatDelay?: number; }; }) => {
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{ detected: boolean; coordinates: { x: number; y: number } | null; }>({ detected: false, coordinates: null });
   const [beamKey, setBeamKey] = useState(0);
-  const [targetY, setTargetY] = useState(0); // 为动画目标Y坐标创建 state
+  const [targetY, setTargetY] = useState(0);
 
-  // 该 effect 仅在客户端运行以获取窗口高度
   useEffect(() => {
     setTargetY(window.innerHeight + 200);
-  }, []); // 空依赖数组确保该 effect 仅在挂载时运行一次（客户端）
+  }, []);
 
-  // 该 effect 处理碰撞检测逻辑
   useEffect(() => {
-    if (targetY === 0) return; // 在设置窗口高度前不运行碰撞检测
+    if (targetY === 0) return; 
 
     const checkCollision = () => {
       if (beamRef.current && parentRef.current) {
@@ -327,7 +331,7 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
     };
     const animationInterval = setInterval(checkCollision, 50);
     return () => clearInterval(animationInterval);
-  }, [collision.detected, parentRef, targetY]); // 将 targetY 添加到依赖项
+  }, [collision.detected, parentRef, targetY]);
 
   return (
     <>
@@ -336,7 +340,7 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
         ref={beamRef} 
         animate="animate" 
         initial={{ y: beamOptions.initialY || -200, x: beamOptions.initialX || 0, rotate: beamOptions.rotate || 0 }} 
-        variants={{ animate: { y: targetY, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }} // 使用 state 替代直接访问 window
+        variants={{ animate: { y: targetY, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }}
         transition={{ duration: beamOptions.duration || 8, repeat: Infinity, repeatType: "loop", ease: "linear", delay: beamOptions.delay || 0, repeatDelay: beamOptions.repeatDelay || 0 }} 
         className={cn("absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent", beamOptions.className)} 
       />
@@ -359,7 +363,7 @@ const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) =>
 };
 
 
-// --- 您原有的 3D 场景代码 ---
+// --- 3D 场景代码 ---
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
@@ -377,27 +381,33 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
         </mesh>
     );
 };
-const AnimatedBoxes = () => {
+
+// 优化：当UI有交互时暂停3D动画
+const AnimatedBoxes = React.memo(({ isPaused }: { isPaused: boolean }) => {
     const groupRef = useRef<THREE.Group>(null!);
     useFrame((_, delta) => { 
-        if (!groupRef.current) return;
+        // 如果 isPaused 为 true，则不执行动画，节省性能
+        if (isPaused || !groupRef.current) return;
         groupRef.current.rotation.x += delta * 0.05; 
         groupRef.current.rotation.y += delta * 0.05; 
     });
-    const boxes = Array.from({ length: 50 }, (_, index) => ({ position: [(index - 25) * 0.75, 0, 0] as [number, number, number], rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number], id: index }));
+    const boxes = useMemo(() => Array.from({ length: 50 }, (_, index) => ({ position: [(index - 25) * 0.75, 0, 0] as [number, number, number], rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number], id: index })), []);
     return (<group ref={groupRef}>{boxes.map((box) => (<Box key={box.id} position={box.position} rotation={box.rotation} />))}</group>);
-};
-const Scene = () => {
+});
+AnimatedBoxes.displayName = "AnimatedBoxes";
+
+const Scene = React.memo(({ isPaused }: { isPaused: boolean }) => {
     return (
         <div className="fixed inset-0 w-full h-full z-0">
             <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
                 <ambientLight intensity={15} />
                 <directionalLight position={[10, 10, 5]} intensity={15} />
-                <AnimatedBoxes />
+                <AnimatedBoxes isPaused={isPaused} />
             </Canvas>
         </div>
     );
-};
+});
+Scene.displayName = "Scene";
 
 
 // --- 最终的、合并后的页面组件 ---
@@ -405,20 +415,27 @@ export default function Page() {
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
   const [showExpiredModal, setShowExpiredModal] = useState(false); 
 
+  // 优化：当有弹窗或卡片展开时，isPaused为true
+  const isPaused = expandedCardId !== null || showExpiredModal;
+  const expandedProduct = useMemo(() => {
+      if (!expandedCardId) return null;
+      return products.find(p => p.id === expandedCardId) || null;
+  }, [expandedCardId]);
+
   useEffect(() => {
-    // 修复：添加客户端检查，以安全地操作 document 对象
     if (typeof window !== 'undefined' && document.body) {
-        if (expandedCardId !== null || showExpiredModal) {
+        if (isPaused) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
         }
-        return () => { // 组件卸载时恢复滚动
+        return () => { 
             document.body.style.overflow = 'auto';
         }
     }
-  }, [expandedCardId, showExpiredModal]);
+  }, [isPaused]);
 
+  // 数据保持不变
   const products: Product[] = [
     {
       id: 1,
@@ -440,15 +457,13 @@ export default function Page() {
     }
   ];
 
-  const handleExpand = (id: number) => {
-    const product = products.find(p => p.id === id);
-    if (!product) return;
+  const handleExpand = (product: Product) => {
     const now = new Date();
     const endDate = new Date(product.endDate);
     if (now > endDate) {
         setShowExpiredModal(true);
     } else {
-        setExpandedCardId(id);
+        setExpandedCardId(product.id);
     }
   };
   
@@ -458,12 +473,12 @@ export default function Page() {
 
   return (
     <div className="relative w-full min-h-screen bg-[#000] text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
-      <Scene />
+      <Scene isPaused={isPaused} />
       <div className="fixed inset-0 z-20 pointer-events-none">
         <BackgroundBeamsWithCollision />
       </div>
 
-      <main className="relative z-10 flex flex-col items-center w-full min-h-screen px-4 py-16 sm:py-24">
+      <main className="relative z-30 flex flex-col items-center w-full min-h-screen px-4 py-16 sm:py-24">
         <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 w-full">
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-center text-white font-sans tracking-tight">
                 <div>What&apos;s cooler than Beams?</div>
@@ -479,18 +494,17 @@ export default function Page() {
 
             <div className="flex flex-col md:flex-row flex-wrap items-start justify-center gap-8 md:gap-12 w-full">
                 {products.map(product => (
-                    <motion.div key={product.id} layoutId={`card-container-${product.id}`} onClick={() => handleExpand(product.id)}>
-                        <ProductCard product={product} />
-                    </motion.div>
+                    // 优化：移除了 layoutId，点击事件现在直接调用 handleExpand
+                    <ProductCard key={product.id} product={product} onClick={() => handleExpand(product)} />
                 ))}
             </div>
         </div>
       </main>
 
       <AnimatePresence>
-          {/* 修复：移除了灰色背景遮罩，现在直接在页面上展开 */}
-          {expandedCardId && (
-              <ExpandedCard product={products.find(p => p.id === expandedCardId)!} onCollapse={handleCollapse} />
+          {/* 优化：使用独立的模态框动画，而不是 layoutId */}
+          {expandedProduct && (
+              <ExpandedCard product={expandedProduct} onCollapse={handleCollapse} />
           )}
       </AnimatePresence>
 
