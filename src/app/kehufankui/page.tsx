@@ -390,7 +390,7 @@ function SubmissionForm() {
                     <div className="flex-grow"></div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <Link
-                            href="https://singapore.apex-elite-service.com/"
+                            href="https://www.apex-elite-service.com/"
                             className="w-full sm:w-auto text-center border border-slate-700 text-slate-300 font-semibold py-2 px-6 rounded-lg hover:bg-slate-800/50 transition-colors"
                         >
                             返回官网

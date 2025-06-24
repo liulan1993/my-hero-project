@@ -326,7 +326,7 @@ export default function Page() {
                     {/* [新增] 根据图片要求添加返回主页的按钮 */}
                     <div className="mt-4">
                         <a
-                            href="https://singapore.apex-elite-service.com/"
+                            href="https://www.apex-elite-service.com/"
                             className="inline-block bg-sky-500/80 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-600/80 transition-colors duration-300"
                         >
                             返回主页
