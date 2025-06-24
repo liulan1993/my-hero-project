@@ -1648,10 +1648,10 @@ MemoizedZap.displayName = 'ZapIcon';
 
 // 修改：调整 features 数组中的 description 内容和字体大小
 const features = [
-  { icon: MemoizedCpu, title: "企业服务", description: "公司注册、准证、财税及人力资源的一站式运营方案" },
-  { icon: MemoizedShieldCheck, title: "留学教育", description: "作为您家庭的教育合伙人，规划最优的成长路径" },
-  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，链接中新跨境医疗资源，一站式为您守护健康" }, // 修改文本内容
-  { icon: MemoizedZap, title: "战略发展", description: "链接本地核心资源，为您的事业发展提供战略支持" },
+  { icon: MemoizedCpu, title: "企业服务", description: "公司注册、准证、财税及人力资源的运营方案" },
+  { icon: MemoizedShieldCheck, title: "留学教育", description: "作为您家庭的教育合伙人，规划最优成长路径" },
+  { icon: MemoizedLayers, title: "健康管理", description: "溯源生命数据，中新医疗资源，为您守护健康" }, // 修改文本内容
+  { icon: MemoizedZap, title: "战略发展", description: "链接本地资源，为您事业发展提供战略支持" },
 ];
 
 const timelineData = [
@@ -1762,11 +1762,11 @@ const infoSectionData1 = {
     ),
     description: (
         <>
-            我们相信，健康是承载事业版图与人生品质的终极资产
+            我相信，健康是承载事业版图与人生品质的终极资产
             <br />
-            Apex传承始于“生命管理”的独特基因，我们不提供诊疗
+            Apex传承于“生命管理”的独特基因，我们不提供诊疗
             <br />
-            而是作为您最值得信赖的健康战略家与医疗资源导航员
+            而是您最值得信赖的健康战略家与医疗资源导航员
             <br />
             致力于助您主动掌控健康，预见未来
         </>
@@ -1787,9 +1787,9 @@ const infoSectionData2 = {
         <>
             每年的体检报告，不应只是一份被存档的文件
             <br />
-            唯将历年数据串联起来，才能发现健康趋势的真正秘密
+            唯将历年数据串联，发现健康趋势的真正秘密
             <br />
-            Apex独特有溯源式体检服务，为您解读这些“生命数据”
+            Apex独特有溯源体检服务，为您解读“生命数据”
             <br />
             将未来的不确定性，转化为尽在掌握的主动权
         </>
