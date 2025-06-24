@@ -56,8 +56,9 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
 const CollisionMechanism = React.forwardRef<
   HTMLDivElement,
   {
-    containerRef: React.RefObject<HTMLDivElement>;
-    parentRef: React.RefObject<HTMLDivElement>;
+    // 错误修复：将 RefObject 类型修改为接受 null，以匹配父组件中的 useRef 初始化
+    containerRef: React.RefObject<HTMLDivElement | null>;
+    parentRef: React.RefObject<HTMLDivElement | null>;
     beamOptions?: {
       initialX?: number;
       translateX?: number;
@@ -70,7 +71,8 @@ const CollisionMechanism = React.forwardRef<
       repeatDelay?: number;
     };
   }
->(({ parentRef, containerRef, beamOptions = {} }, ref) => {
+// 错误修复：将未使用的 'ref' 参数重命名为 '_ref' 来消除 ESLint 警告。
+>(({ parentRef, containerRef, beamOptions = {} }, _ref) => {
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{
     detected: boolean;
@@ -136,14 +138,16 @@ const CollisionMechanism = React.forwardRef<
         ref={beamRef}
         animate="animate"
         initial={{
-          translateY: beamOptions.initialY || "-200px",
-          translateX: beamOptions.initialX || "0px",
+          // 错误修复：使用 'y' 和 'x' 替代 'translateY' 和 'translateX'
+          y: beamOptions.initialY || -200,
+          x: beamOptions.initialX || 0,
           rotate: beamOptions.rotate || 0,
         }}
         variants={{
           animate: {
-            translateY: beamOptions.translateY || "1800px",
-            translateX: beamOptions.translateX || "0px",
+            // 错误修复：使用 'y' 和 'x' 替代 'translateY' 和 'translateX'
+            y: beamOptions.translateY || 1800,
+            x: beamOptions.translateX || 0,
             rotate: beamOptions.rotate || 0,
           },
         }}
@@ -203,7 +207,6 @@ export const BackgroundBeamsWithCollision = ({
     <div
       ref={parentRef}
       className={cn(
-        // 为了让底层3D动画可见，这里移除了背景色并使用了绝对定位
         "absolute inset-0 z-10 flex items-center w-full justify-center overflow-hidden",
         className
       )}
