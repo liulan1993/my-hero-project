@@ -77,8 +77,11 @@ const Starfield = ({
   speed = 2,
   particleCount = 1500,
   warpSpeedActive = false,
+  accelerationDuration = 2, // 加速持续时间（秒）
+  maxSpeed = 50, // 最大速度
 }) => {
   const ref = useRef<THREE.Points>(null);
+  const warpStartTime = useRef(0);
 
   const [positions] = useState(() => {
     const particles = new Float32Array(particleCount * 3);
@@ -90,11 +93,27 @@ const Starfield = ({
     return particles;
   });
 
+  // [优化] 当 warpSpeedActive 变化时，记录开始时间
+  useEffect(() => {
+    if (warpSpeedActive) {
+      warpStartTime.current = Date.now();
+    }
+  }, [warpSpeedActive]);
+
   useFrame((state, delta) => {
     if (ref.current) {
       const positions = ref.current.geometry.attributes.position.array as Float32Array;
-      // 修复：将 let 改为 const，因为该变量未被重新赋值
-      const currentSpeed = warpSpeedActive ? speed * 35 : speed; // 穿梭时速度加快
+      
+      let currentSpeed;
+      if (warpSpeedActive) {
+        const elapsedTime = (Date.now() - warpStartTime.current) / 1000;
+        const accelerationProgress = Math.min(elapsedTime / accelerationDuration, 1);
+        // [优化] 使用缓动函数 (easeOut) 来计算速度，实现非线性加速
+        const easedProgress = 1 - Math.pow(1 - accelerationProgress, 3);
+        currentSpeed = speed + (maxSpeed - speed) * easedProgress;
+      } else {
+        currentSpeed = speed;
+      }
 
       for (let i = 0; i < particleCount; i++) {
         positions[i * 3 + 2] += delta * currentSpeed;
@@ -113,7 +132,6 @@ const Starfield = ({
   return (
     <points ref={ref}>
       <bufferGeometry>
-        {/* 修复：使用 `args` 属性来传递构造函数参数，解决ts(2741)错误 */}
         <bufferAttribute
           attach="attributes-position"
           args={[positions, 3]}
@@ -2533,7 +2551,7 @@ export default function HomePage() {
           
           setTimeout(() => {
               setAnimationState('finished'); // 4. 穿梭结束，动画完成
-          }, 1500 + 2000); // 穿梭动画总时长 (1.5s + 5s)
+          }, 1500 + 5000); // 穿梭动画总时长 (1.5s + 5s)
       }
   };
 
@@ -2571,7 +2589,6 @@ export default function HomePage() {
             </motion.div>
             
             {/* 粒子/星空效果 */}
-            {/* 修复：添加 pointer-events-none 以允许点击穿透 Canvas 层 */}
             <motion.div
                 className="absolute inset-0 pointer-events-none"
                 initial={{ opacity: 0 }}
@@ -2592,7 +2609,7 @@ export default function HomePage() {
         key="main-content"
         initial={{ opacity: 0 }}
         animate={{ opacity: mainContentVisible ? 1 : 0 }}
-        transition={{ duration: 2, ease: "easeOut" }}
+        transition={{ duration: 5, ease: "easeOut" }}
         className={cn(animationState !== 'finished' && "pointer-events-none")}
       >
         <AppNavigationBar 
