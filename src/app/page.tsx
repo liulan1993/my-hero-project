@@ -2553,7 +2553,7 @@ export default function HomePage() {
           >
             {/* 初始文本 */}
             <motion.div
-                className="absolute inset-0 flex items-center justify-center"
+                className="absolute inset-0 flex items-center justify-center z-10"
                 animate={{
                     opacity: animationState === 'initial' || animationState === 'textFading' ? 1 : 0,
                     scale: animationState === 'textFading' ? 0.8 : 1,
