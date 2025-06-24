@@ -834,7 +834,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   return (
     <div className="w-full bg-transparent font-[Helvetica] md:px-10" ref={containerRef}>
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">企业服务 Corporate Services</h2>
+        <h2 className="mb-4 text-white max-w-4xl text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">企业服务<br />Corporate Services</h2>
         <p className="text-neutral-300 max-w-sm text-base md:text-lg">我们深知，在新加坡设立公司，是您全球战略的关键一步，而非一次简单的流程代办。Apex提供的，是从顶层视角出发，为您的商业大厦搭建最稳固、合规且具前瞻性的战略基石，并为后续的持续运营保驾护航。</p>
       </div>
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
@@ -1095,8 +1095,8 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                              style={{
                                 top: reverseLayout ? 'auto' : '10%',
                                 bottom: reverseLayout ? '10%' : 'auto',
-                                left: reverseLayout ? 'auto' : '-20%',
-                                right: reverseLayout ? '-20%' : 'auto',
+                                left: reverseLayout ? 'auto' : '0',
+                                right: reverseLayout ? '0' : 'auto',
                                 transform: reverseLayout ? 'translate(0, 0)' : 'translateY(10%)',
                                 filter: 'blur(2px)'
                             }}
