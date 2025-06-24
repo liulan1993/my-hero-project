@@ -136,7 +136,6 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
 
   return (
     <div onClick={() => onExpand(product.id)} className="cursor-pointer w-full">
-        {/* 响应式优化：移除固定宽高，使用 Tailwind 类 */}
         <motion.div
             className="relative rounded-[32px] overflow-hidden flex flex-col w-full max-w-[360px] h-[450px] mx-auto"
             style={{
@@ -156,7 +155,7 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
             onMouseLeave={() => setIsHovered(false)}
         >
             <motion.div
-                className="absolute inset-0 z-35 pointer-events-none"
+                className="absolute inset-0 z-30 pointer-events-none"
                 style={{
                     background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 80%, rgba(255,255,255,0.05) 100%)",
                     backdropFilter: "blur(2px)",
@@ -182,7 +181,7 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
                 }}
             />
             <motion.div
-                className="absolute bottom-0 left-0 right-0 h-2/3 z-21"
+                className="absolute bottom-0 left-0 right-0 h-2/3 z-20" // z-index was 21, now 20
                 style={{
                     background: `
                     radial-gradient(circle at bottom center, rgba(161, 58, 229, 0.7) -20%, rgba(79, 70, 229, 0) 60%)
@@ -285,7 +284,6 @@ const CollisionMechanism = ({ parentRef, containerRef, beamOptions = {} }: { con
   );
 };
 
-// 响应式优化：移除 children prop，此组件现在只作为背景
 const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -293,7 +291,8 @@ const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) =>
     { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" },
   ];
   return (
-    <div ref={parentRef} className={cn("absolute inset-0 z-10 w-full h-full overflow-hidden", className)}>
+    // z-index is now controlled by the parent wrapper
+    <div ref={parentRef} className={cn("absolute inset-0 w-full h-full overflow-hidden", className)}>
       {beams.map((beam) => (<CollisionMechanism key={beam.initialX + "beam-idx"} beamOptions={beam} containerRef={containerRef} parentRef={parentRef} />))}
       <div ref={containerRef} className="absolute bottom-0 bg-neutral-100 w-full inset-x-0 pointer-events-none" style={{ boxShadow: "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset" }} />
     </div>
@@ -375,14 +374,12 @@ export default function Page() {
   const expandedProduct = products.find(p => p.id === expandedCardId) || null;
 
   return (
-    // 响应式优化：移除 flex 相关类，让其成为一个标准的、可滚动的容器
     <div className="relative w-full min-h-screen bg-[#000] text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
-      {/* 背景元素保持 fixed/absolute 定位 */}
+      {/* 1. 3D盒子背景 (z-0) */}
       <Scene />
-      <BackgroundBeamsWithCollision />
 
-      {/* 响应式优化：创建一个可滚动的内容区域 */}
-      <main className="relative z-20 flex flex-col items-center w-full px-4 py-16 sm:py-24">
+      {/* 2. 可滚动的内容区域 (z-10) */}
+      <main className="relative z-10 flex flex-col items-center w-full px-4 py-16 sm:py-24">
         <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 w-full">
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-center text-white font-sans tracking-tight">
                 <div>What&apos;s cooler than Beams?</div>
@@ -396,7 +393,6 @@ export default function Page() {
                 </div>
             </h2>
 
-            {/* 响应式优化：在手机上卡片将垂直排列，在更大屏幕上水平排列 */}
             <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-8 md:gap-12 w-full">
                 {products.map(product => (
                     <ProductCard key={product.id} product={product} onExpand={handleExpand} />
@@ -405,6 +401,12 @@ export default function Page() {
         </div>
       </main>
 
+      {/* 3. 雨滴效果，位于顶层 (z-20) 且不拦截鼠标事件 */}
+      <div className="fixed inset-0 z-20 pointer-events-none">
+        <BackgroundBeamsWithCollision />
+      </div>
+
+      {/* 4. 模态窗口，位于最顶层 (z-50) */}
       <AnimatePresence>
         {expandedProduct && <ArticleModal product={expandedProduct} onClose={handleClose} />}
       </AnimatePresence>
