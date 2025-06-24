@@ -1095,8 +1095,8 @@ const InfoSectionWithMockup: React.FC<InfoSectionProps> = ({
                              style={{
                                 top: reverseLayout ? 'auto' : '10%',
                                 bottom: reverseLayout ? '10%' : 'auto',
-                                left: reverseLayout ? 'auto' : '0',
-                                right: reverseLayout ? '0' : 'auto',
+                                left: reverseLayout ? 'auto' : '-5%',
+                                right: reverseLayout ? '-5%' : 'auto',
                                 transform: reverseLayout ? 'translate(0, 0)' : 'translateY(10%)',
                                 filter: 'blur(2px)'
                             }}
