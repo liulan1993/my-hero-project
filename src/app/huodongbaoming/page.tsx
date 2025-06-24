@@ -12,7 +12,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- 新增：动态倒计时及百分比显示组件 ---
+// --- 动态倒计时及百分比显示组件 ---
 const CountdownDisplay = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [percentage, setPercentage] = useState(0);
@@ -55,7 +55,7 @@ const CountdownDisplay = ({ startDateString, endDateString }: { startDateString:
 };
 
 
-// --- 新增：动态进度条组件 ---
+// --- 动态进度条组件 ---
 const ProgressBar = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [progress, setProgress] = useState(0);
     const startDate = useMemo(() => new Date(startDateString), [startDateString]);
@@ -180,6 +180,48 @@ const ArticleModal = ({ product, onClose }: { product: Product | null; onClose: 
                     ✕
                 </button>
                 <SimpleMarkdownRenderer content={product.markdownContent} />
+                <div className="mt-8 pt-8 border-t border-gray-500/30 flex flex-col items-center">
+                    <p className="text-sm text-gray-400 mb-4">扫码报名或了解详情</p>
+                    <img
+                        src={product.qrCodeUrl}
+                        alt="二维码"
+                        className="w-[200px] h-[200px] rounded-lg bg-white p-2"
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null; 
+                            target.src = "https://placehold.co/200x200/ffffff/000000?text=QR+Code";
+                        }}
+                    />
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+// --- 新增：活动已截止的提示弹窗 ---
+const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-[#121624] rounded-2xl p-8 text-center shadow-2xl border border-white/10"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <p className="text-white text-lg">很遗憾我们没有等到您，期待下次相遇。</p>
+                <button
+                    onClick={onClose}
+                    className="mt-6 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                >
+                    关闭
+                </button>
             </motion.div>
         </motion.div>
     );
@@ -194,6 +236,7 @@ interface Product {
   markdownContent: string;
   startDate: string;
   endDate: string;
+  qrCodeUrl: string;
 }
 
 const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: number) => void }) => {
@@ -388,20 +431,26 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
     );
 };
 
-const AnimatedBoxes = () => {
+const AnimatedBoxes = ({ isPaused }: { isPaused: boolean }) => {
     const groupRef = useRef<THREE.Group>(null!);
-    useFrame((_, delta) => { if (groupRef.current) { groupRef.current.rotation.x += delta * 0.05; groupRef.current.rotation.y += delta * 0.05; } });
+    useFrame((_, delta) => { 
+        if (isPaused || !groupRef.current) {
+            return;
+        }
+        groupRef.current.rotation.x += delta * 0.05; 
+        groupRef.current.rotation.y += delta * 0.05; 
+    });
     const boxes = Array.from({ length: 50 }, (_, index) => ({ position: [(index - 25) * 0.75, 0, 0] as [number, number, number], rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number], id: index }));
     return (<group ref={groupRef}>{boxes.map((box) => (<Box key={box.id} position={box.position} rotation={box.rotation} />))}</group>);
 };
 
-const Scene = () => {
+const Scene = ({ isPaused }: { isPaused: boolean }) => {
     return (
         <div className="fixed inset-0 w-full h-full z-0">
             <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
                 <ambientLight intensity={15} />
                 <directionalLight position={[10, 10, 5]} intensity={15} />
-                <AnimatedBoxes />
+                <AnimatedBoxes isPaused={isPaused} />
             </Canvas>
         </div>
     );
@@ -411,6 +460,7 @@ const Scene = () => {
 // --- 最终的、合并后的页面组件 ---
 export default function Page() {
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  const [showExpiredModal, setShowExpiredModal] = useState(false); // 新增状态
 
   const products: Product[] = [
     {
@@ -418,8 +468,9 @@ export default function Page() {
       title: "音乐节的号角吹响啦！",
       description: "One Love Asia Festival 新加坡 2025 正式开票啦！加入这场超燃音乐盛事！ 9月，我们等你来躁！",
       startDate: "2025-03-01T00:00:00",
-      endDate: "2025-09-12T23:59:59",
-      markdownContent: `# 音乐节的征集令正式响起！\n\n### 立即购票\n2025 年新加坡 One Love Asia 音乐节门票正式开售！\n\n赶紧抢票，开启一段史诗般的音乐之旅！九月，我们等你来！\n\n1日通票：198 新加坡元；\n\n2日日通票：338 新加坡元。\n\n2025年9月13日至14日|⏰下午3点开门|📍海湾活动空间\n\n报名截止：2025-09-12T23:59:59`
+      endDate: "2025-06-24T23:59:59",
+      qrCodeUrl: "https://zh.apex-elite-service.com/wenjian/sara.png",
+      markdownContent: `# 音乐节的征集令正式响起！\n\n### 立即购票\n2025 年新加坡 One Love Asia 音乐节门票正式开售！\n\n赶紧抢票，开启一段史诗般的音乐之旅！九月，我们等你来！\n\n1日通票：198 新加坡元；\n\n2日日通票：338 新加坡元。\n\n2025年9月13日至14日|⏰下午3点开门|📍海湾活动空间\n\n报名截止：2025-06-24T23:59:59`
     },
     {
       id: 2,
@@ -427,12 +478,24 @@ export default function Page() {
       description: "非洲行结束后，Yellow Zero坠入了一场奇幻的梦境，在梦里一切稀奇古怪的事情皆在发生…",
       startDate: "2025-03-01T00:00:00",
       endDate: "2025-07-18T23:59:59",
+      qrCodeUrl: "https://zh.apex-elite-service.com/wenjian/sara.png",
       markdownContent: `# 一场关于莫名其妙的巡演即将开启\n\n### 一起进入黄龄的Live异世界！\n一月一城，跟随「莫名其妙」度过有趣的2025！\n\n### 【北京站】\n演出时间：7月19日（周六）20:00\n演出地点：东三 LIVE\n- 票价 -\n\n预售票 360 | 正价票 420 | VIP票 560\n\n- VIP权益 -\n\n提前30min入场+精美礼包+演出后小组合影（10人/组）\n\n报名截止：2025-07-18T23:59:59`
     }
   ];
 
+  // 修改 handleExpand 函数以处理过期逻辑
   const handleExpand = (id: number) => {
-    setExpandedCardId(id);
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+
+    const now = new Date();
+    const endDate = new Date(product.endDate);
+
+    if (now > endDate) {
+        setShowExpiredModal(true);
+    } else {
+        setExpandedCardId(id);
+    }
   };
 
   const handleClose = () => {
@@ -440,23 +503,22 @@ export default function Page() {
   };
 
   const expandedProduct = products.find(p => p.id === expandedCardId) || null;
+  const isAnimationPaused = expandedCardId !== null || showExpiredModal;
 
   return (
     <div className="relative w-full min-h-screen bg-[#000] text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
-      {/* 1. 3D盒子背景 (z-0) */}
-      <Scene />
+      <Scene isPaused={isAnimationPaused} />
 
-      {/* 2. 可滚动的内容区域 (z-10) */}
       <main className="relative z-10 flex flex-col items-center w-full px-4 py-16 sm:py-24">
         <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 w-full">
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-center text-white font-sans tracking-tight">
-                <div>很高兴你的加入！</div>
+                <div>What&apos;s cooler than Beams?</div>
                 <div className="relative mx-auto w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
                     <div className="absolute left-0 top-[1px] bg-clip-text bg-no-repeat text-transparent bg-gradient-to-r py-4 from-purple-500 via-violet-500 to-pink-500 [text-shadow:0_0_rgba(0,0,0,0.1)]">
-                        <span>与Apex一起</span>
+                        <span>Exploding beams.</span>
                     </div>
                     <div className="relative bg-clip-text text-transparent bg-no-repeat bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 py-4">
-                        <span>与Apex一起</span>
+                        <span>Exploding beams.</span>
                     </div>
                 </div>
             </h2>
@@ -469,14 +531,13 @@ export default function Page() {
         </div>
       </main>
 
-      {/* 3. 雨滴效果，位于顶层 (z-20) 且不拦截鼠标事件 */}
       <div className="fixed inset-0 z-20 pointer-events-none">
         <BackgroundBeamsWithCollision />
       </div>
 
-      {/* 4. 模态窗口，位于最顶层 (z-50) */}
       <AnimatePresence>
         {expandedProduct && <ArticleModal product={expandedProduct} onClose={handleClose} />}
+        {showExpiredModal && <ExpiredModal onClose={() => setShowExpiredModal(false)} />}
       </AnimatePresence>
     </div>
   );
