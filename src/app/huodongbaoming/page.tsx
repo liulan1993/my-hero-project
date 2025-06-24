@@ -1,0 +1,356 @@
+"use client";
+
+import React, { useRef, useState, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+import { motion, AnimatePresence } from "framer-motion";
+
+// 这是一个常用的工具函数，用于合并Tailwind CSS类名。
+// 根据您的要求，我假设路径和配置都是正确的。
+import { cn } from "@/lib/utils";
+
+
+// --- 从 background-beams-with-Collision.tsx 合并进来的组件 ---
+// --- 这些组件共同构成了“雨滴”和碰撞爆炸效果 ---
+
+const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
+  const spans = Array.from({ length: 20 }, (_, index) => ({
+    id: index,
+    initialX: 0,
+    initialY: 0,
+    directionX: Math.floor(Math.random() * 80 - 40),
+    directionY: Math.floor(Math.random() * -50 - 10),
+  }));
+
+  return (
+    <div {...props} className={cn("absolute z-50 h-2 w-2", props.className)}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm"
+      ></motion.div>
+      {spans.map((span) => (
+        <motion.span
+          key={span.id}
+          initial={{ x: span.initialX, y: span.initialY, opacity: 1 }}
+          animate={{
+            x: span.directionX,
+            y: span.directionY,
+            opacity: 0,
+          }}
+          transition={{ duration: Math.random() * 1.5 + 0.5, ease: "easeOut" }}
+          className="absolute h-1 w-1 rounded-full bg-gradient-to-b from-indigo-500 to-purple-500"
+        />
+      ))}
+    </div>
+  );
+};
+
+const CollisionMechanism = React.forwardRef<
+  HTMLDivElement,
+  {
+    containerRef: React.RefObject<HTMLDivElement>;
+    parentRef: React.RefObject<HTMLDivElement>;
+    beamOptions?: {
+      initialX?: number;
+      translateX?: number;
+      initialY?: number;
+      translateY?: number;
+      rotate?: number;
+      className?: string;
+      duration?: number;
+      delay?: number;
+      repeatDelay?: number;
+    };
+  }
+>(({ parentRef, containerRef, beamOptions = {} }, ref) => {
+  const beamRef = useRef<HTMLDivElement>(null);
+  const [collision, setCollision] = useState<{
+    detected: boolean;
+    coordinates: { x: number; y: number } | null;
+  }>({
+    detected: false,
+    coordinates: null,
+  });
+  const [beamKey, setBeamKey] = useState(0);
+  const [cycleCollisionDetected, setCycleCollisionDetected] = useState(false);
+
+  useEffect(() => {
+    const checkCollision = () => {
+      if (
+        beamRef.current &&
+        containerRef.current &&
+        parentRef.current &&
+        !cycleCollisionDetected
+      ) {
+        const beamRect = beamRef.current.getBoundingClientRect();
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const parentRect = parentRef.current.getBoundingClientRect();
+
+        if (beamRect.bottom >= containerRect.top) {
+          const relativeX =
+            beamRect.left - parentRect.left + beamRect.width / 2;
+          const relativeY = beamRect.bottom - parentRect.top;
+
+          setCollision({
+            detected: true,
+            coordinates: {
+              x: relativeX,
+              y: relativeY,
+            },
+          });
+          setCycleCollisionDetected(true);
+        }
+      }
+    };
+
+    const animationInterval = setInterval(checkCollision, 50);
+
+    return () => clearInterval(animationInterval);
+  }, [cycleCollisionDetected, containerRef, parentRef]);
+
+  useEffect(() => {
+    if (collision.detected && collision.coordinates) {
+      setTimeout(() => {
+        setCollision({ detected: false, coordinates: null });
+        setCycleCollisionDetected(false);
+      }, 2000);
+
+      setTimeout(() => {
+        setBeamKey((prevKey) => prevKey + 1);
+      }, 2000);
+    }
+  }, [collision]);
+
+  return (
+    <>
+      <motion.div
+        key={beamKey}
+        ref={beamRef}
+        animate="animate"
+        initial={{
+          translateY: beamOptions.initialY || "-200px",
+          translateX: beamOptions.initialX || "0px",
+          rotate: beamOptions.rotate || 0,
+        }}
+        variants={{
+          animate: {
+            translateY: beamOptions.translateY || "1800px",
+            translateX: beamOptions.translateX || "0px",
+            rotate: beamOptions.rotate || 0,
+          },
+        }}
+        transition={{
+          duration: beamOptions.duration || 8,
+          repeat: Infinity,
+          repeatType: "loop",
+          ease: "linear",
+          delay: beamOptions.delay || 0,
+          repeatDelay: beamOptions.repeatDelay || 0,
+        }}
+        className={cn(
+          "absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent",
+          beamOptions.className
+        )}
+      />
+      <AnimatePresence>
+        {collision.detected && collision.coordinates && (
+          <Explosion
+            key={`${collision.coordinates.x}-${collision.coordinates.y}`}
+            className=""
+            style={{
+              left: `${collision.coordinates.x}px`,
+              top: `${collision.coordinates.y}px`,
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+});
+
+CollisionMechanism.displayName = "CollisionMechanism";
+
+export const BackgroundBeamsWithCollision = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const beams = [
+    { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 },
+    { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 },
+    { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" },
+    { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 },
+    { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" },
+    { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" },
+    { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" },
+  ];
+
+  return (
+    <div
+      ref={parentRef}
+      className={cn(
+        // 为了让底层3D动画可见，这里移除了背景色并使用了绝对定位
+        "absolute inset-0 z-10 flex items-center w-full justify-center overflow-hidden",
+        className
+      )}
+    >
+      {beams.map((beam) => (
+        <CollisionMechanism
+          key={beam.initialX + "beam-idx"}
+          beamOptions={beam}
+          containerRef={containerRef}
+          parentRef={parentRef}
+        />
+      ))}
+
+      {children}
+      <div
+        ref={containerRef}
+        className="absolute bottom-0 bg-neutral-100 w-full inset-x-0 pointer-events-none"
+        style={{
+          boxShadow:
+            "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset",
+        }}
+      ></div>
+    </div>
+  );
+};
+
+
+// --- 您原有的 page.tsx 代码 ---
+// --- 这部分是3D旋转盒子背景动画 ---
+
+const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
+    const shape = new THREE.Shape();
+    const angleStep = Math.PI * 0.5;
+    const radius = 1;
+
+    shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
+    shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
+    shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
+    shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
+
+    const extrudeSettings = {
+        depth: 0.3,
+        bevelEnabled: true,
+        bevelThickness: 0.05,
+        bevelSize: 0.05,
+        bevelSegments: 20,
+        curveSegments: 20
+    };
+
+    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    geometry.center();
+
+    return (
+        <mesh
+            geometry={geometry}
+            position={position}
+            rotation={rotation}
+        >
+            <meshPhysicalMaterial 
+                color="#232323"
+                metalness={1}
+                roughness={0.3}
+                reflectivity={0.5}
+                ior={1.5}
+                emissive="#000000"
+                emissiveIntensity={0}
+                transparent={false}
+                opacity={1.0}
+                transmission={0.0}
+                thickness={0.5}
+                clearcoat={0.0}
+                clearcoatRoughness={0.0}
+                sheen={0}
+                sheenRoughness={1.0}
+                sheenColor="#ffffff"
+                specularIntensity={1.0}
+                specularColor="#ffffff"
+                iridescence={1}
+                iridescenceIOR={1.3}
+                iridescenceThicknessRange={[100, 400]}
+                flatShading={false}
+            />
+        </mesh>
+    );
+};
+
+const AnimatedBoxes = () => {
+    const groupRef = useRef<THREE.Group>(null!);
+
+    useFrame((state, delta) => {
+        if (groupRef.current) {
+            groupRef.current.rotation.x += delta * 0.05;
+            groupRef.current.rotation.y += delta * 0.05;
+        }
+    });
+
+    const boxes = Array.from({ length: 50 }, (_, index) => ({
+        position: [(index - 25) * 0.75, 0, 0] as [number, number, number],
+        rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number],
+        id: index
+    }));
+
+    return (
+        <group ref={groupRef}>
+            {boxes.map((box) => (
+                <Box
+                    key={box.id}
+                    position={box.position}
+                    rotation={box.rotation}
+                />
+            ))}
+        </group>
+    );
+};
+
+const Scene = () => {
+    return (
+        <div className="absolute inset-0 w-full h-full z-0">
+            <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
+                <ambientLight intensity={15} />
+                <directionalLight position={[10, 10, 5]} intensity={15} />
+                <AnimatedBoxes />
+            </Canvas>
+        </div>
+    );
+};
+
+
+// --- 最终的、合并后的页面组件 ---
+export default function Page() {
+  return (
+    // 主容器，设置背景渐变和全屏样式。`relative`定位是子元素绝对定位的关键
+    <div className="relative min-h-screen w-full bg-[#000] text-white flex flex-col items-center justify-center p-8 overflow-hidden" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
+      
+      {/* 渲染层级 1: 3D旋转盒子背景 (z-0) */}
+      <Scene />
+
+      {/* 渲染层级 2: “雨滴”光束动画和标题 (z-10) */}
+      <BackgroundBeamsWithCollision>
+        {/* 这是从 demo.tsx 合并过来的标题内容 */}
+        <h2 className="text-2xl relative z-20 md:text-4xl lg:text-7xl font-bold text-center text-black dark:text-white font-sans tracking-tight">
+          What&apos;s cooler than Beams?{" "}
+          <div className="relative mx-auto inline-block w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
+            <div className="absolute left-0 top-[1px] bg-clip-text bg-no-repeat text-transparent bg-gradient-to-r py-4 from-purple-500 via-violet-500 to-pink-500 [text-shadow:0_0_rgba(0,0,0,0.1)]">
+              <span className="">Exploding beams.</span>
+            </div>
+            <div className="relative bg-clip-text text-transparent bg-no-repeat bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 py-4">
+              <span className="">Exploding beams.</span>
+            </div>
+          </div>
+        </h2>
+      </BackgroundBeamsWithCollision>
+    </div>
+  );
+};
