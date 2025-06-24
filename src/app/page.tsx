@@ -2348,7 +2348,7 @@ interface ParticleShowcaseProps {
 const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const animationFrameId = useRef<number>();
+    const animationFrameId = useRef<number | undefined>();
     const particles = useRef<Particle[]>([]);
     const itemIndex = useRef(0);
     const frameCount = useRef(0);
