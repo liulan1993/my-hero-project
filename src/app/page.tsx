@@ -1209,95 +1209,108 @@ const CtaWithGallerySection = () => {
                              gradient='linear-gradient(to right, #603dec, #a123f4)'
                            />
                         </DialogTrigger>
+                        {/* BUG修复: 对话框UI优化 */}
                         <DialogContent
                             className={cn(
-                            "max-w-3xl p-0 overflow-hidden rounded-xl border-neutral-800 shadow-2xl",
-                            "bg-black text-white",
-                            "data-[state=open]:animate-none data-[state=closed]:animate-none"
+                                "w-[95vw] sm:w-full max-w-3xl", // 在小屏幕上设置宽度为95vw，避免占满全屏
+                                "max-h-[90vh]", // 限制最大高度为视口的90%
+                                "p-0 overflow-hidden rounded-xl border-neutral-800 shadow-2xl",
+                                "bg-black text-white",
+                                "flex flex-col", // 使用flex布局来安放可滚动内容和固定的页脚
+                                "data-[state=open]:animate-none data-[state=closed]:animate-none"
                             )}
                         >
-                            <div className="flex flex-col md:flex-row w-full h-full">
-                                <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
-                                    <div className="flex flex-col gap-3">
-                                    <Image
-                                        src="https://zh.apex-elite-service.com/wenjian/logo.png"
-                                        alt="Logo"
-                                        width={48}
-                                        height={48}
-                                        className="w-12 h-12 rounded-full border-4 border-neutral-800"
-                                        unoptimized
-                                    />
-                                    <h2 className="text-lg font-medium">我们如何与您同行</h2>
-                                    <p className="text-sm text-neutral-400">
-                                        我们提供的，是一种超越传统服务的、专为顶尖人士设计的全新解决方案。
-                                    </p>
-                                    <div className="flex flex-col gap-3 mt-6">
-                                        {steps.map((s, index) => (
-                                        <div
-                                            key={index}
-                                            className={cn(
-                                            "flex items-center gap-2 text-sm transition-opacity",
-                                            index === step
-                                                ? "font-semibold text-white"
-                                                : "opacity-60 hover:opacity-100"
-                                            )}
-                                        >
-                                            {index < step ? (
-                                            <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                            ) : (
-                                            <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
-                                            )}
-                                            <span className="font-normal">{s.title}</span>
+                            {/* 可滚动的主要内容区域 */}
+                            <div className="flex-grow overflow-y-auto">
+                                <div className="flex flex-col md:flex-row w-full">
+                                    {/* 左侧面板 */}
+                                    <div className="w-full md:w-1/3 p-6 border-b md:border-b-0 md:border-r border-neutral-800">
+                                        <div className="flex flex-col gap-3">
+                                            <Image
+                                                src="https://zh.apex-elite-service.com/wenjian/logo.png"
+                                                alt="Logo"
+                                                width={48}
+                                                height={48}
+                                                className="w-12 h-12 rounded-full border-4 border-neutral-800"
+                                                unoptimized
+                                            />
+                                            <h2 className="text-lg font-medium">我们如何与您同行</h2>
+                                            <p className="text-sm text-neutral-400">
+                                                我们提供的，是一种超越传统服务的、专为顶尖人士设计的全新解决方案。
+                                            </p>
+                                            <div className="flex flex-col gap-3 mt-6">
+                                                {steps.map((s, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={cn(
+                                                    "flex items-center gap-2 text-sm transition-opacity",
+                                                    index === step
+                                                        ? "font-semibold text-white"
+                                                        : "opacity-60 hover:opacity-100"
+                                                    )}
+                                                >
+                                                    {index < step ? (
+                                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                                    ) : (
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
+                                                    )}
+                                                    <span className="font-normal">{s.title}</span>
+                                                </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                        ))}
                                     </div>
+
+                                    {/* 右侧面板 (仅内容部分) */}
+                                    <div className="w-full md:w-2/3 p-8">
+                                        <div className="space-y-4">
+                                            <DialogHeader>
+                                                <AnimatePresence mode="wait">
+                                                <motion.h2
+                                                    key={steps[step].title}
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -10 }}
+                                                    transition={{ duration: 0.25 }}
+                                                    className="text-2xl font-medium"
+                                                >
+                                                    {steps[step].title}
+                                                </motion.h2>
+                                                </AnimatePresence>
+
+                                                <div className="min-h-[60px]">
+                                                    <AnimatePresence mode="wait">
+                                                        <motion.p
+                                                        key={steps[step].description}
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, y: -10 }}
+                                                        transition={{ duration: 0.25 }}
+                                                        className="text-neutral-400 text-base"
+                                                        >
+                                                        {steps[step].description}
+                                                        </motion.p>
+                                                    </AnimatePresence>
+                                                </div>
+                                            </DialogHeader>
+
+                                            <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
+                                                <Image
+                                                src="https://zh.apex-elite-service.com/wenjian/12-1.jpg"
+                                                alt="Step Visual"
+                                                width={200}
+                                                height={200}
+                                                className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="w-full md:w-2/3 p-8 flex flex-col justify-between">
-                                    <div className="space-y-4">
-                                    <DialogHeader>
-                                        <AnimatePresence mode="wait">
-                                        <motion.h2
-                                            key={steps[step].title}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            transition={{ duration: 0.25 }}
-                                            className="text-2xl font-medium"
-                                        >
-                                            {steps[step].title}
-                                        </motion.h2>
-                                        </AnimatePresence>
-
-                                        <div className="min-h-[60px]">
-                                        <AnimatePresence mode="wait">
-                                            <motion.p
-                                            key={steps[step].description}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            transition={{ duration: 0.25 }}
-                                            className="text-neutral-400 text-base"
-                                            >
-                                            {steps[step].description}
-                                            </motion.p>
-                                        </AnimatePresence>
-                                        </div>
-                                    </DialogHeader>
-
-                                    <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
-                                        <Image
-                                        src="https://zh.apex-elite-service.com/wenjian/12-1.jpg"
-                                        alt="Step Visual"
-                                        width={200}
-                                        height={200}
-                                        className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    </div>
-
-                                    <div className="mt-6 flex justify-between items-center">
+                            {/* 不可滚动的页脚，放置操作按钮 */}
+                            <div className="flex-shrink-0 p-6 border-t border-neutral-800 bg-black">
+                                <div className="flex justify-between items-center">
                                     <DialogClose asChild>
                                         <Button variant="outline">返回</Button>
                                     </DialogClose>
@@ -1312,7 +1325,6 @@ const CtaWithGallerySection = () => {
                                         <Button variant="outline">主页</Button>
                                         </DialogClose>
                                     )}
-                                    </div>
                                 </div>
                             </div>
                         </DialogContent>
