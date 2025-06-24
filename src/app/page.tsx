@@ -450,18 +450,18 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
         {
             title: "客户支持", description: "拥抱数字化转型，提升客户体验。",
             items: [
-                { title: "问卷调查", href: "https://singapore.apex-elite-service.com/wenjuandiaocha" },
+                { title: "问卷调查", href: "https://www.apex-elite-service.com/wenjuandiaocha" },
                 { title: "资料上传", href: "https://zl.apex-elite-service.com/" },
-                { title: "客户反馈", href: "https://singapore.apex-elite-service.com/kehufankui" },
+                { title: "客户反馈", href: "https://www.apex-elite-service.com/kehufankui" },
                 { title: "敬请期待", href: "#" },
             ],
         },
         {
             title: "AI赋能", description: "AI驱动的智能，提升业务效率。",
             items: [
-                { title: "实时汇率", href: "https://singapore.apex-elite-service.com/shishihuilv" },
-                { title: "个税计算器", href: "https://singapore.apex-elite-service.com/geshuijisuanqi" },
-                { title: "专属AI", href: "https://singapore.apex-elite-service.com/zhuanshuAI" },
+                { title: "实时汇率", href: "https://www.apex-elite-service.com/shishihuilv" },
+                { title: "个税计算器", href: "https://www.apex-elite-service.com/geshuijisuanqi" },
+                { title: "专属AI", href: "https://www.apex-elite-service.com/zhuanshuAI" },
                 { title: "敬请期待", href: "#" },
             ],
         },
