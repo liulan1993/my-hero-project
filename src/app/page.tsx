@@ -71,67 +71,6 @@ const Link = ({ href, children, legacyBehavior, ...props }: CustomLinkProps) => 
 Link.displayName = "Link";
 
 // ============================================================================
-// 新增：星场/粒子穿梭动画组件
-// ============================================================================
-const Starfield = ({
-  speed = 2,
-  particleCount = 1500,
-  warpSpeedActive = false,
-}) => {
-  const ref = useRef<THREE.Points>(null);
-
-  const [positions] = useState(() => {
-    const particles = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount; i++) {
-      particles[i * 3] = (Math.random() - 0.5) * 10;
-      particles[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      particles[i * 3 + 2] = (Math.random() - 0.5) * 10;
-    }
-    return particles;
-  });
-
-  useFrame((state, delta) => {
-    if (ref.current) {
-      const positions = ref.current.geometry.attributes.position.array as Float32Array;
-      let currentSpeed = warpSpeedActive ? speed * 35 : speed; // 穿梭时速度加快
-
-      for (let i = 0; i < particleCount; i++) {
-        positions[i * 3 + 2] += delta * currentSpeed;
-
-        // 当粒子超出视野时重置位置
-        if (positions[i * 3 + 2] > 5) {
-          positions[i * 3] = (Math.random() - 0.5) * 10;
-          positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-          positions[i * 3 + 2] = -5;
-        }
-      }
-      ref.current.geometry.attributes.position.needsUpdate = true;
-    }
-  });
-
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleCount}
-          args={[positions, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.015}
-        color="#ffffff"
-        transparent
-        opacity={0.7}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-};
-Starfield.displayName = "Starfield";
-
-
-// ============================================================================
 // “开场动画/门” - SVG 自动扫描光效文字组件 (已修改为实体样式)
 // ============================================================================
 const TextShineEffect = ({
@@ -1923,12 +1862,15 @@ function ScrollAdventure() {
   }, [handleScroll]);
 
   return (
-    // [要求 2 已修改] 
-    // 边框和阴影已被移除: `border border-neutral-700 shadow-2xl` -> `border-none`
-    // 背景已设为透明: `bg-black` -> `bg-transparent`
+    // [要求 1 & 2 已修改] 
+    // 1. 响应式比例：移除了固定的视口高度(h-[80vh])，改用 aspect-ratio 确保面板在不同屏幕尺寸下始终为正方形。
+    //    - `aspect-[1/2]` 用于移动端竖向布局（一个宽度，两个高度单位），确保每个 h-1/2 的面板是正方形。
+    //    - `lg:aspect-[2/1]` 用于桌面端横向布局（两个宽度，一个高度单位），确保每个 w-1/2 的面板是正方形。
+    // 2. 透明背景：将 `bg-black` 改为 `bg-transparent`，让父组件的动画背景可以透视。
+    // 3. 居中：添加 `mx-auto` 以便在超宽屏幕上居中显示。
     <div 
       ref={componentRef} 
-      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl border-none aspect-[1/2] lg:aspect-[2/1]"
+      className="relative overflow-hidden w-full max-w-6xl mx-auto bg-transparent font-[Helvetica] rounded-2xl border border-neutral-700 shadow-2xl aspect-[1/2] lg:aspect-[2/1]"
     >
       {scrollAnimationPages.map((page, i) => {
         const idx = i + 1;
@@ -1946,6 +1888,7 @@ function ScrollAdventure() {
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
+                // [要求 2 已修改] 将背景色从 #111 改为 transparent
                 style={{ 
                   backgroundImage: page.leftBgImage ? `url(${page.leftBgImage})` : 'none', 
                   backgroundColor: 'transparent' 
@@ -1976,6 +1919,7 @@ function ScrollAdventure() {
             >
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat"
+                // [要求 2 已修改] 将背景色从 #111 改为 transparent
                 style={{ 
                   backgroundImage: page.rightBgImage ? `url(${page.rightBgImage})` : 'none', 
                   backgroundColor: 'transparent' 
@@ -2480,27 +2424,28 @@ export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // [动画状态修改]
-  const [animationState, setAnimationState] = useState('initial'); // 'initial', 'textFading', 'warping', 'finished'
-  const [mainContentVisible, setMainContentVisible] = useState(false);
-
+  const [isEntered, setIsEntered] = useState(false);
 
   useEffect(() => {
+    // 检查是否已经提交过表单
     const submittedFlag = localStorage.getItem('hasSubmittedForm');
     if (submittedFlag === 'true') {
       setHasSubmitted(true);
     }
 
+    // [新增] 检查是否是首次访问，用于控制开门动画
     const hasVisited = sessionStorage.getItem('hasVisitedHomePage');
     if (hasVisited) {
-      setAnimationState('finished');
-      setMainContentVisible(true);
+      // 如果不是首次访问，直接“进入”主页
+      setIsEntered(true);
+    } else {
+      // 如果是首次访问，设置标记，但动画仍然显示
+      // 点击动画后才会标记为“已访问”
     }
-    
+    // 客户端检查完成，结束加载状态
     setIsLoading(false);
-  }, []);
-
+  }, []); // 空依赖数组，确保只在组件挂载时运行一次
+  
   const handleSuccess = () => {
     localStorage.setItem('hasSubmittedForm', 'true');
     setHasSubmitted(true);
@@ -2521,21 +2466,12 @@ export default function HomePage() {
   };
 
   const handleEnter = () => {
-      if (animationState === 'initial') {
-          sessionStorage.setItem('hasVisitedHomePage', 'true');
-          setAnimationState('textFading'); // 1. 开始文本消失
-          
-          setTimeout(() => {
-              setAnimationState('warping'); // 2. 开始穿梭
-              setMainContentVisible(true);  // 3. 主内容开始渐显
-          }, 1500); // 文本消失动画时长
-          
-          setTimeout(() => {
-              setAnimationState('finished'); // 4. 穿梭结束，动画完成
-          }, 1500 + 5000); // 穿梭动画总时长 (1.5s + 5s)
-      }
+      // [新增] 点击后，设置访问标记并触发进入动画
+      sessionStorage.setItem('hasVisitedHomePage', 'true');
+      setIsEntered(true);
   };
 
+  // 在客户端检查完成前，返回一个空的黑色屏幕，防止内容闪烁
   if (isLoading) {
       return <div className="fixed inset-0 bg-black z-[200]" />;
   }
@@ -2544,44 +2480,21 @@ export default function HomePage() {
     <div className="relative isolate bg-black text-white">
       
       <AnimatePresence>
-        {animationState !== 'finished' && (
+        {!isEntered && (
           <motion.div
-            key="animation-wrapper"
-            className="fixed inset-0 z-[100] bg-black"
-            exit={{ opacity: 0, transition: { duration: 1.0, delay: 0.5 } }}
+            key="splash-screen"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.8, ease: "easeInOut" } }}
           >
-            {/* 初始文本 */}
-            <motion.div
-                className="absolute inset-0 flex items-center justify-center"
-                animate={{
-                    opacity: animationState === 'initial' || animationState === 'textFading' ? 1 : 0,
-                    scale: animationState === 'textFading' ? 0.8 : 1,
-                }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
-            >
-               <div className="w-full max-w-2xl px-4">
-                  <TextShineEffect 
-                    text="Apex" 
-                    subtitle="轻触，开启非凡。"
-                    scanDuration={4} 
-                    onClick={handleEnter} 
-                  />
-                </div>
-            </motion.div>
-            
-            {/* 粒子/星空效果 */}
-            <motion.div
-                className="absolute inset-0"
-                initial={{ opacity: 0 }}
-                animate={{
-                    opacity: animationState === 'warping' || animationState === 'textFading' ? 1 : 0,
-                }}
-                transition={{ duration: 2.0, ease: "easeIn" }}
-            >
-                <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-                    <Starfield warpSpeedActive={animationState === 'warping'} />
-                </Canvas>
-            </motion.div>
+            <div className="w-full max-w-2xl px-4">
+              {/* 修改：传入副标题 */}
+              <TextShineEffect 
+                text="Apex" 
+                subtitle="轻触，开启非凡。"
+                scanDuration={4} 
+                onClick={handleEnter} 
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -2589,9 +2502,9 @@ export default function HomePage() {
       <motion.div
         key="main-content"
         initial={{ opacity: 0 }}
-        animate={{ opacity: mainContentVisible ? 1 : 0 }}
-        transition={{ duration: 2.5, delay: mainContentVisible && animationState === 'warping' ? 2.5 : 0, ease: "easeInOut" }}
-        className={cn(animationState !== 'finished' && "pointer-events-none")}
+        animate={{ opacity: isEntered ? 1 : 0 }}
+        transition={{ duration: 0.5, delay: isEntered ? 0.5 : 0 }}
+        className={cn(!isEntered && "pointer-events-none", "transition-opacity duration-500")}
       >
         <AppNavigationBar 
             onLoginClick={() => setIsModalOpen(true)}
