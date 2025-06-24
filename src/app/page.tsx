@@ -113,10 +113,10 @@ const Starfield = ({
   return (
     <points ref={ref}>
       <bufferGeometry>
+        {/* 修复：使用 `args` 属性来传递构造函数参数，解决ts(2741)错误 */}
         <bufferAttribute
           attach="attributes-position"
-          args={[positions, 3]} 
-          itemSize={3}
+          args={[positions, 3]}
         />
       </bufferGeometry>
       <pointsMaterial
@@ -2571,8 +2571,9 @@ export default function HomePage() {
             </motion.div>
             
             {/* 粒子/星空效果 */}
+            {/* 修复：添加 pointer-events-none 以允许点击穿透 Canvas 层 */}
             <motion.div
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-events-none"
                 initial={{ opacity: 0 }}
                 animate={{
                     opacity: animationState === 'warping' || animationState === 'textFading' ? 1 : 0,
