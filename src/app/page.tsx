@@ -1737,7 +1737,7 @@ const projectShowcaseData = [
   {
     name: "学校申请支持",
     buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
-    quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
+    quote: "精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
     src: "https://zh.apex-elite-service.com/wenjian/6-1.jpg",
     link: "https://namer-ui.netlify.app/",
@@ -1745,7 +1745,7 @@ const projectShowcaseData = [
   {
     name: "长期成长陪伴",
     buttonLabel: "全程护航", // <-- 新增：按钮上显示的文字
-    quote: "我们提供超越申请的长期陪伴服务。作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
+    quote: "作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
     designation: "Vue 项目",
     src: "https://zh.apex-elite-service.com/wenjian/7.jpg",
     link: "https://namer-ui-for-vue.netlify.app/",
