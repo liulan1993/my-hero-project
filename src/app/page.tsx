@@ -2230,314 +2230,6 @@ const TextRevealCard = ({
 TextRevealCard.displayName = "TextRevealCard";
 
 // ============================================================================
-// 10. 全新升级的粒子特效组件
-// ============================================================================
-interface Vector2D {
-    x: number;
-    y: number;
-}
-
-// 帮助函数：将十六进制颜色转换为RGB对象
-const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-        ? {
-              r: parseInt(result[1], 16),
-              g: parseInt(result[2], 16),
-              b: parseInt(result[3], 16),
-          }
-        : null;
-};
-
-class Particle {
-    pos: Vector2D = { x: 0, y: 0 };
-    vel: Vector2D = { x: 0, y: 0 };
-    acc: Vector2D = { x: 0, y: 0 };
-    target: Vector2D = { x: 0, y: 0 };
-    closeEnoughTarget = 50;
-    maxSpeed = 4.0;
-    maxForce = 0.4;
-    particleSize = 1.5;
-    isKilled = false;
-    startColor = { r: 0, g: 0, b: 0 };
-    targetColor = { r: 0, g: 0, b: 0 };
-    colorWeight = 0;
-    colorBlendRate = 0.05;
-
-    move() {
-        let proximityMult = 1;
-        const distance = Math.sqrt(
-            Math.pow(this.pos.x - this.target.x, 2) +
-            Math.pow(this.pos.y - this.target.y, 2)
-        );
-
-        if (distance < this.closeEnoughTarget) {
-            proximityMult = distance / this.closeEnoughTarget;
-        }
-
-        const towardsTarget = {
-            x: this.target.x - this.pos.x,
-            y: this.target.y - this.pos.y,
-        };
-
-        const mag = Math.sqrt(towardsTarget.x ** 2 + towardsTarget.y ** 2);
-        if (mag > 0) {
-            towardsTarget.x = (towardsTarget.x / mag) * this.maxSpeed * proximityMult;
-            towardsTarget.y = (towardsTarget.y / mag) * this.maxSpeed * proximityMult;
-        }
-
-        const steer = {
-            x: towardsTarget.x - this.vel.x,
-            y: towardsTarget.y - this.vel.y,
-        };
-
-        const steerMag = Math.sqrt(steer.x ** 2 + steer.y ** 2);
-        if (steerMag > this.maxForce) {
-            steer.x = (steer.x / steerMag) * this.maxForce;
-            steer.y = (steer.y / steerMag) * this.maxForce;
-        }
-        
-        this.acc.x += steer.x;
-        this.acc.y += steer.y;
-
-        this.vel.x += this.acc.x;
-        this.vel.y += this.acc.y;
-        this.pos.x += this.vel.x;
-        this.pos.y += this.vel.y;
-        this.acc.x = 0;
-        this.acc.y = 0;
-    }
-
-    draw(ctx: CanvasRenderingContext2D) {
-        if (this.colorWeight < 1.0) {
-            this.colorWeight = Math.min(this.colorWeight + this.colorBlendRate, 1.0);
-        }
-
-        const r = Math.round(this.startColor.r + (this.targetColor.r - this.startColor.r) * this.colorWeight);
-        const g = Math.round(this.startColor.g + (this.targetColor.g - this.startColor.g) * this.colorWeight);
-        const b = Math.round(this.startColor.b + (this.targetColor.b - this.startColor.b) * this.colorWeight);
-
-        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-        ctx.fillRect(this.pos.x, this.pos.y, this.particleSize, this.particleSize);
-    }
-
-    // 修复: 移除未使用的 width 和 height 参数
-    kill() {
-        if (!this.isKilled) {
-            const angle = Math.random() * Math.PI * 2;
-            const force = Math.random() * 20 + 20;
-            this.target.x = this.pos.x + Math.cos(angle) * force;
-            this.target.y = this.pos.y + Math.sin(angle) * force;
-            this.isKilled = true;
-        }
-    }
-}
-
-
-interface ShowcaseItem {
-    type: 'text' | 'image';
-    content: string;
-    color?: string;
-}
-
-interface ParticleShowcaseProps {
-    data: ShowcaseItem[];
-    className?: string;
-}
-
-const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-    // 正确代码
-const animationFrameId = useRef<number | undefined>(undefined);
-    const particles = useRef<Particle[]>([]);
-    const itemIndex = useRef(0);
-    const frameCount = useRef(0);
-
-    const getPixelData = useCallback((item: ShowcaseItem, canvas: HTMLCanvasElement): ImageData | null => {
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        if (!ctx) return null;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        if (item.type === 'text') {
-            const fontSize = Math.min(canvas.width / 10, 50); // 响应式字体
-            ctx.fillStyle = "white";
-            ctx.font = `bold ${fontSize}px "Helvetica", "Arial", sans-serif`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(item.content, canvas.width / 2, canvas.height / 2);
-        } else { // type is 'image'
-            return null; // 图片处理将在加载后进行
-        }
-        
-        return ctx.getImageData(0, 0, canvas.width, canvas.height);
-    }, []);
-
-    const setupParticles = useCallback((imageData: ImageData, color: string, canvasWidth: number) => {
-        const rgbColor = hexToRgb(color) || { r: 255, g: 255, b: 255 };
-        const pixels = imageData.data;
-        const newParticleTargets: Vector2D[] = [];
-        const pixelStep = Math.max(1, Math.floor(canvasWidth / 250)); // 响应式密度
-
-        for (let y = 0; y < imageData.height; y += pixelStep) {
-            for (let x = 0; x < imageData.width; x += pixelStep) {
-                const index = (y * imageData.width + x) * 4;
-                if (pixels[index + 3] > 128) { // 检查透明度
-                    newParticleTargets.push({ x, y });
-                }
-            }
-        }
-
-        // 打乱目标点，让汇聚动画更自然
-        for (let i = newParticleTargets.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [newParticleTargets[i], newParticleTargets[j]] = [newParticleTargets[j], newParticleTargets[i]];
-        }
-        
-        for (let i = 0; i < newParticleTargets.length; i++) {
-            const target = newParticleTargets[i];
-            let p: Particle;
-
-            if (i < particles.current.length) {
-                p = particles.current[i];
-                p.isKilled = false;
-            } else {
-                p = new Particle();
-                p.pos = { x: Math.random() * canvasWidth, y: Math.random() * -50 };
-                particles.current.push(p);
-            }
-
-            // 更新颜色
-            const currentRgb = p.isKilled || p.colorWeight === 0 ? {r:0,g:0,b:0} : hexToRgb(p.targetColor.toString());
-            p.startColor = { r: currentRgb?.r || 0, g: currentRgb?.g || 0, b: currentRgb?.b || 0 };
-            p.targetColor = rgbColor;
-            p.colorWeight = 0;
-            
-            p.target = target;
-        }
-
-        // "杀死"多余的粒子
-        for (let i = newParticleTargets.length; i < particles.current.length; i++) {
-            particles.current[i].kill();
-        }
-    }, []);
-
-    const nextItem = useCallback(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const currentItem = data[itemIndex.current];
-
-        if (currentItem.type === 'text') {
-            const imageData = getPixelData(currentItem, canvas);
-            if(imageData) {
-                setupParticles(imageData, currentItem.color || '#FFFFFF', canvas.width);
-            }
-        } else { // type is 'image'
-            const img = new window.Image();
-            img.crossOrigin = "Anonymous"; // 处理跨域问题
-            img.src = currentItem.content;
-            img.onload = () => {
-                const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                if (!ctx) return;
-                
-                // 保持图片原始比例的同时适应画布
-                const canvasAspectRatio = canvas.width / canvas.height;
-                const imgAspectRatio = img.width / img.height;
-                let drawWidth, drawHeight;
-
-                if (canvasAspectRatio > imgAspectRatio) {
-                    drawHeight = canvas.height * 0.8; // 使用80%的高度以留出边距
-                    drawWidth = drawHeight * imgAspectRatio;
-                } else {
-                    drawWidth = canvas.width * 0.8; // 使用80%的宽度以留出边距
-                    drawHeight = drawWidth / imgAspectRatio;
-                }
-
-                const x = (canvas.width - drawWidth) / 2;
-                const y = (canvas.height - drawHeight) / 2;
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, x, y, drawWidth, drawHeight);
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                
-                // 对二维码使用白色粒子
-                setupParticles(imageData, '#FFFFFF', canvas.width);
-            };
-            img.onerror = () => {
-                console.error("Failed to load image:", currentItem.content);
-            }
-        }
-        
-        itemIndex.current = (itemIndex.current + 1) % data.length;
-    }, [data, getPixelData, setupParticles]);
-
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const container = containerRef.current;
-        if (!canvas || !container) return;
-        
-        const ctx = canvas.getContext('2d');
-        if(!ctx) return;
-
-        const resizeCanvas = () => {
-            const { width } = container.getBoundingClientRect();
-            // 维持一个固定的宽高比，例如 2:1
-            const height = width / 2;
-            container.style.height = `${height}px`;
-
-            canvas.width = width;
-            canvas.height = height;
-            // 不需要再手动设置style.width/height，因为父容器已经有了
-            // 立即触发一次，避免首次渲染空白
-            itemIndex.current = 0;
-            particles.current = [];
-            nextItem();
-        };
-
-        const animate = () => {
-            animationFrameId.current = requestAnimationFrame(animate);
-            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            particles.current.forEach(p => {
-                p.move();
-                p.draw(ctx);
-            });
-            
-            frameCount.current++;
-            if (frameCount.current % 300 === 0) { // 每5秒切换一次 (300 / 60fps)
-                nextItem();
-            }
-
-        };
-        
-        const resizeObserver = new ResizeObserver(resizeCanvas);
-        resizeObserver.observe(container);
-
-        // 首次加载和动画启动
-        resizeCanvas();
-        animate();
-
-        return () => {
-            resizeObserver.disconnect();
-            if(animationFrameId.current) {
-                cancelAnimationFrame(animationFrameId.current);
-            }
-        };
-    }, [nextItem]);
-
-    return (
-        <div ref={containerRef} className={cn("w-full", className)}>
-            <canvas ref={canvasRef} />
-        </div>
-    );
-};
-ParticleShowcase.displayName = "ParticleShowcase";
-
-// ============================================================================
 // 10. 页脚组件
 // ============================================================================
 
@@ -2568,17 +2260,6 @@ const BilibiliIcon = (props: IconProps) => (
   </svg>
 );
 BilibiliIcon.displayName = "BilibiliIcon";
-
-const particleShowcaseData: ShowcaseItem[] = [
-    { type: 'text', content: '官方公众号', color: '#8b5cf6' },
-    { type: 'image', content: 'https://zh.apex-elite-service.com/wenjian/weixingongzhonghao.png' },
-    { type: 'text', content: 'sara公众号', color: '#3b82f6' },
-    { type: 'image', content: 'https://zh.apex-elite-service.com/wenjian/sara.png' },
-    { type: 'text', content: 'wenjing公众号', color: '#8b5cf6' },
-    { type: 'image', content: 'https://zh.apex-elite-service.com/wenjian/wenjing.png' },
-    { type: 'text', content: 'mengchen公众号', color: '#3b82f6' },
-    { type: 'image', content: 'https://zh.apex-elite-service.com/wenjian/mengchen.png' },
-];
 
 
 const CustomFooter = () => {
@@ -2614,16 +2295,23 @@ const CustomFooter = () => {
       <footer className="bg-transparent text-white py-12 mt-20">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center">
-            {/* START: 粒子特效替换区域 */}
-            <div className="mb-8 w-full max-w-lg">
-                <ParticleShowcase data={particleShowcaseData} />
+            <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
+            <div className="mb-8 w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center p-2">
+              <Image
+                src="https://zh.apex-elite-service.com/wenjian/weixingongzhonghao.png"
+                alt="官方公众号二维码"
+                width={280}
+                height={280}
+                className="w-full h-full object-contain rounded-lg"
+              />
             </div>
-            {/* END: 粒子特效替换区域 */}
-            
             <nav className="mb-8 flex flex-wrap justify-center gap-6 text-neutral-300 text-base md:text-lg">
               <Link href="#" className="hover:text-white">Apex</Link>
+              {/* 点击“留学”跳转到留学教育板块 */}
               <Link href="#study-abroad" className="hover:text-white">留学</Link>
+               {/* 点击“医疗”跳转到健康管理板块 */}
               <Link href="#health-management" className="hover:text-white">医疗</Link>
+              {/* 点击“企业服务”跳转到企业服务板块 */}
               <Link href="#corporate-services" className="hover:text-white">企业服务</Link>
               <Link href="#" className="hover:text-white">敬请期待</Link>
             </nav>
@@ -2706,7 +2394,7 @@ const FaqItem = React.forwardRef<
       className={cn(
         "group rounded-lg",
         "transition-all duration-200 ease-in-out",
-        "border border-white/10"
+        "border border-white/10" // 使用页面已有的边框颜色
       )}
     >
       <Button
@@ -2717,7 +2405,7 @@ const FaqItem = React.forwardRef<
         <h3
           className={cn(
             "text-base md:text-lg font-medium transition-colors duration-200 text-left",
-            "text-white",
+            "text-white", // <-- 修改这里
             isOpen && "text-white"
           )}
         >
@@ -2732,6 +2420,7 @@ const FaqItem = React.forwardRef<
             isOpen ? "text-white" : "text-neutral-400"
           )}
         >
+          {/* 复用已导入的图标 */}
           <ChevronDownIcon className="h-4 w-4" /> 
         </motion.div>
       </Button>
@@ -2755,6 +2444,7 @@ const FaqItem = React.forwardRef<
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -10, opacity: 0 }}
+                // 需求 5: 字体大小和格式与“我们深知...”一致
                 className="text-base md:text-lg text-neutral-400 leading-relaxed"
               >
                 {answer}
@@ -2838,6 +2528,7 @@ export default function HomePage() {
   
   const handleProtectedLinkClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, href: string) => {
     if (href === '#') {
+        e.preventDefault();
         alert("此功能正在开发中，敬请期待！");
         return;
     }
@@ -2929,27 +2620,31 @@ export default function HomePage() {
         <Scene />
 
         <main className="relative z-10 pt-20">
-            {/* HERO SECTION with Particle Text */}
             <div className="min-h-screen w-full flex flex-col items-center justify-center py-24">
                 <div className="w-full max-w-6xl px-8 space-y-16 flex flex-col items-center justify-center">
-                    <div className="w-full h-48">
-                        <ParticleShowcase data={[{ type: 'text', content: '为您而来，不止于此', color: '#8b5cf6' }]} />
-                    </div>
-                    <p className="text-neutral-300 max-w-2xl text-base md:text-lg text-center">
+                <div className="flex flex-col items-center text-center space-y-8">
+                    <div className="space-y-6 flex items-center justify-center flex-col">
+                    <h1 className="text-3xl md:text-6xl font-semibold tracking-tight max-w-3xl text-white">
+                        为您而来，不止于此
+                    </h1>
+                    <p className="text-neutral-300 max-w-2xl text-base md:text-lg">
                         Apex是一家总部位于新加坡的综合性专业服务机构。我们深刻理解全球高净值人士与出海企业所面临的机遇与挑战，矢志成为您在新加坡的首席合作伙伴，提供从商业顶层设计、子女教育规划到主动式健康管理的无缝衔接解决方案。
                     </p>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
-                        {features.map((feature, idx) => (
-                        <div
-                            key={idx}
-                            className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
-                        >
-                            <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
-                            <h3 className="text-base font-bold text-white">{feature.title}</h3>
-                            <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
-                        </div>
-                        ))}
                     </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+                    {features.map((feature, idx) => (
+                    <div
+                        key={idx}
+                        className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
+                    >
+                        <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
+                        <h3 className="text-base font-bold text-white">{feature.title}</h3>
+                        {/* 修改：调整字体大小 */}
+                        <p className="text-neutral-400 text-base md:text-lg">{feature.description}</p>
+                    </div>
+                    ))}
+                </div>
                 </div>
             </div>
             
@@ -2976,10 +2671,11 @@ export default function HomePage() {
                 <InfoSectionWithMockup
                     {...infoSectionData2}
                     reverseLayout={true}
-                    className="pt-24 md:pt-32 pb-0"
+                    className="pt-24 md:pt-32 pb-0" // 保留顶部padding，移除底部padding
                 />
             </div>
 
+            {/* 需求 1: 插入定价方案板块 */}
             <div className="pt-0 px-8 flex flex-col items-center">
               <PricingSection />
             </div>
