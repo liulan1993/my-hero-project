@@ -31,12 +31,11 @@ const CountdownDisplay = React.memo(({ startDateString, endDateString }: { start
                 const minutes = Math.floor((remainingTimeMs % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((remainingTimeMs % (1000 * 60)) / 1000);
                 setTimeLeft({ days, hours, minutes, seconds });
-
-                const currentPercentage = (1 - remainingTimeMs / totalDuration) * 100;
-                setPercentage(100 - (remainingTimeMs / totalDuration) * 100);
+                // 修复: 移除未使用的变量并修正百分比计算逻辑
+                setPercentage((remainingTimeMs / totalDuration) * 100);
             } else {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-                setPercentage(100);
+                setPercentage(0); // 修复: 倒计时结束时，剩余百分比应为0
                 clearInterval(interval);
             }
         }, 1000);
