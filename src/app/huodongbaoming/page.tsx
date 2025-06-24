@@ -170,7 +170,7 @@ const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
                 className="bg-[#1a1f32] rounded-2xl p-8 text-center shadow-2xl border border-white/10 max-w-sm w-full"
                 onClick={(e) => e.stopPropagation()}
             >
-                <p className="text-white text-lg">很遗憾我们没有等到您，期待下次相遇。</p>
+                <p className="text-white text-lg">很遗憾没有等到您，期待下次相遇。</p>
                 <button
                     onClick={onClose}
                     className="mt-6 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
@@ -466,13 +466,13 @@ export default function Page() {
       <main className="relative z-10 flex flex-col items-center w-full min-h-screen px-4 py-16 sm:py-24">
         <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 w-full">
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-center text-white font-sans tracking-tight">
-                <div>What&apos;s cooler than Beams?</div>
+                <div>很期待您的加入！</div>
                 <div className="relative mx-auto w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
                     <div className="absolute left-0 top-[1px] bg-clip-text bg-no-repeat text-transparent bg-gradient-to-r py-4 from-purple-500 via-violet-500 to-pink-500 [text-shadow:0_0_rgba(0,0,0,0.1)]">
-                        <span>Exploding beams.</span>
+                        <span>与Apex一起</span>
                     </div>
                     <div className="relative bg-clip-text text-transparent bg-no-repeat bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 py-4">
-                        <span>Exploding beams.</span>
+                        <span>与Apex一起</span>
                     </div>
                 </div>
             </h2>
