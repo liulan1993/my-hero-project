@@ -155,11 +155,12 @@ const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
 // --- 活动已截止的提示弹窗 ---
 const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
     return (
+        // 错误修复：移除 backdrop-blur-sm, 使用半透明背景色
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
             onClick={onClose}
         >
             <motion.div
@@ -198,30 +199,17 @@ const ProductCard = ({ product, isExpanded, onExpand }: { product: Product; isEx
 
   return (
     <motion.div 
-        layout 
+        layout="position"
         onClick={() => !isExpanded && onExpand(product.id)} 
         className={cn(
-            "rounded-[32px] overflow-hidden cursor-pointer", 
-            isExpanded ? "w-full max-w-3xl h-auto fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40" : "relative w-full max-w-[360px] h-[450px]"
+            "rounded-[32px] overflow-hidden cursor-pointer bg-[#0e131f]", 
+            isExpanded ? "w-full max-w-3xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 max-h-[85vh]" : "relative w-full max-w-[360px] h-[450px]"
         )}
-        style={{
-            backgroundColor: "#0e131f",
-        }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 40 }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
     >
         <motion.div className="relative w-full h-full flex flex-col">
-            {/* 卡片背景和辉光效果 */}
-            {!isExpanded && (
-                 <motion.div
-                    className="absolute inset-0 z-30 pointer-events-none"
-                    style={{
-                        background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 80%, rgba(255,255,255,0.05) 100%)",
-                        backdropFilter: "blur(2px)",
-                    }}
-                />
-            )}
             <motion.div
                 className="absolute inset-0 opacity-30 mix-blend-overlay z-10"
                 style={{
@@ -240,16 +228,14 @@ const ProductCard = ({ product, isExpanded, onExpand }: { product: Product; isEx
                 animate={{ opacity: isHovered || isExpanded ? 0.9 : 0.8 }}
             />
 
-            {/* 内容区 */}
-            <div className={cn("relative flex flex-col z-40", isExpanded ? "h-auto" : "h-full")}>
-                {/* 展开后的关闭按钮 */}
+            <div className={cn("relative flex flex-col z-40 h-full")}>
                 {isExpanded && (
                     <motion.button
                         initial={{opacity: 0, scale: 0.5}}
                         animate={{opacity: 1, scale: 1}}
                         transition={{delay: 0.3}}
                         onClick={(e) => {
-                            e.stopPropagation(); // 防止事件冒泡到父级 div
+                            e.stopPropagation();
                             onExpand(null);
                         }}
                         className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors w-8 h-8 bg-white/10 rounded-full flex items-center justify-center z-50"
@@ -258,8 +244,7 @@ const ProductCard = ({ product, isExpanded, onExpand }: { product: Product; isEx
                         ✕
                     </motion.button>
                 )}
-
-                {/* 卡片顶部图标和标题 */}
+                
                 <div className="p-8 pb-0">
                     <motion.div
                         className="w-12 h-12 rounded-full flex items-center justify-center mb-6"
@@ -274,8 +259,7 @@ const ProductCard = ({ product, isExpanded, onExpand }: { product: Product; isEx
                     </motion.div>
                 </div>
 
-                {/* 条件渲染内容 */}
-                <div className="flex-grow flex flex-col">
+                <div className="flex-grow flex flex-col overflow-hidden">
                     <AnimatePresence mode="wait">
                     {isExpanded ? (
                         <motion.div
@@ -303,9 +287,6 @@ const ProductCard = ({ product, isExpanded, onExpand }: { product: Product; isEx
                     ) : (
                         <motion.div
                             key="summary"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
                             className="flex-grow flex flex-col p-8 pt-0"
                         >
                              <div className="text-center">
