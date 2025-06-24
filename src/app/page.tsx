@@ -497,7 +497,7 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                                                                 {item.description}
                                                             </p>
                                                         </div>
-                                                        <Link href="https://singapore.apex-elite-service.com/shangyedongcha">
+                                                        <Link href="#">
                                                             <Button size="sm" className="mt-10 text-base md:text-lg" variant="outline">
                                                                 商业洞察
                                                             </Button>
@@ -537,7 +537,7 @@ const AppNavigationBar = ({ onLoginClick, onProtectedLinkClick }: { onLoginClick
                     </Button>
                     <div className="border-r border-slate-700 hidden md:inline"></div>
                     <Button variant="outline" onClick={onLoginClick} className="text-base md:text-lg">提交</Button>
-                    <Link href="https://singapore.apex-elite-service.com/shangyedongcha">
+                    <Link href="#">
                         <Button variant="default" className="text-base md:text-lg">商业洞察</Button>
                     </Link>
                 </div>
@@ -993,7 +993,7 @@ const ProjectShowcase = ({ testimonials, onProtectedLinkClick }: { testimonials:
             ))}
             <HalomotButton 
               inscription="了解更多" 
-              onClick={(e) => onProtectedLinkClick(e, testimonials[active].link || '#')} 
+              onClick={(e) => onProtectedLinkClick(e, testimonials[active].link || 'https://www.apex-elite-service.com/')} 
               href={testimonials[active].link || '#'}
               padding="0.6rem 1.2rem" // 调整内边距使按钮变小
               backgroundColor='#161616' 
