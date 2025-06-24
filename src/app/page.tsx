@@ -2281,8 +2281,10 @@ class Particle {
         };
 
         const mag = Math.sqrt(towardsTarget.x ** 2 + towardsTarget.y ** 2);
-        towardsTarget.x = (towardsTarget.x / mag) * this.maxSpeed * proximityMult;
-        towardsTarget.y = (towardsTarget.y / mag) * this.maxSpeed * proximityMult;
+        if (mag > 0) {
+            towardsTarget.x = (towardsTarget.x / mag) * this.maxSpeed * proximityMult;
+            towardsTarget.y = (towardsTarget.y / mag) * this.maxSpeed * proximityMult;
+        }
 
         const steer = {
             x: towardsTarget.x - this.vel.x,
@@ -2319,7 +2321,8 @@ class Particle {
         ctx.fillRect(this.pos.x, this.pos.y, this.particleSize, this.particleSize);
     }
 
-    kill(width: number, height: number) {
+    // 修复: 移除未使用的 width 和 height 参数
+    kill() {
         if (!this.isKilled) {
             const angle = Math.random() * Math.PI * 2;
             const force = Math.random() * 20 + 20;
@@ -2357,9 +2360,9 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (item.type === 'text') {
-            const fontSize = Math.min(canvas.width / 8, 48); // 响应式字体
+            const fontSize = Math.min(canvas.width / 10, 50); // 响应式字体
             ctx.fillStyle = "white";
-            ctx.font = `bold ${fontSize}px "Helvetica", sans-serif`;
+            ctx.font = `bold ${fontSize}px "Helvetica", "Arial", sans-serif`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(item.content, canvas.width / 2, canvas.height / 2);
@@ -2374,7 +2377,7 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
         const rgbColor = hexToRgb(color) || { r: 255, g: 255, b: 255 };
         const pixels = imageData.data;
         const newParticleTargets: Vector2D[] = [];
-        const pixelStep = 4; // 密度
+        const pixelStep = Math.max(1, Math.floor(canvasWidth / 250)); // 响应式密度
 
         for (let y = 0; y < imageData.height; y += pixelStep) {
             for (let x = 0; x < imageData.width; x += pixelStep) {
@@ -2400,12 +2403,13 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
                 p.isKilled = false;
             } else {
                 p = new Particle();
-                p.pos = { x: Math.random() * canvasWidth, y: -20 };
+                p.pos = { x: Math.random() * canvasWidth, y: Math.random() * -50 };
                 particles.current.push(p);
             }
 
             // 更新颜色
-            p.startColor = { r: p.targetColor.r, g: p.targetColor.g, b: p.targetColor.b };
+            const currentRgb = p.isKilled || p.colorWeight === 0 ? {r:0,g:0,b:0} : hexToRgb(p.targetColor.toString());
+            p.startColor = { r: currentRgb?.r || 0, g: currentRgb?.g || 0, b: currentRgb?.b || 0 };
             p.targetColor = rgbColor;
             p.colorWeight = 0;
             
@@ -2414,7 +2418,7 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
 
         // "杀死"多余的粒子
         for (let i = newParticleTargets.length; i < particles.current.length; i++) {
-            particles.current[i].kill(canvasWidth, 0);
+            particles.current[i].kill();
         }
     }, []);
 
@@ -2437,13 +2441,17 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
                 const ctx = canvas.getContext('2d', { willReadFrequently: true });
                 if (!ctx) return;
                 
+                // 保持图片原始比例的同时适应画布
+                const canvasAspectRatio = canvas.width / canvas.height;
                 const imgAspectRatio = img.width / img.height;
-                let drawWidth = canvas.width;
-                let drawHeight = drawWidth / imgAspectRatio;
+                let drawWidth, drawHeight;
 
-                if (drawHeight > canvas.height) {
-                    drawHeight = canvas.height;
+                if (canvasAspectRatio > imgAspectRatio) {
+                    drawHeight = canvas.height * 0.8; // 使用80%的高度以留出边距
                     drawWidth = drawHeight * imgAspectRatio;
+                } else {
+                    drawWidth = canvas.width * 0.8; // 使用80%的宽度以留出边距
+                    drawHeight = drawWidth / imgAspectRatio;
                 }
 
                 const x = (canvas.width - drawWidth) / 2;
@@ -2453,9 +2461,7 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
                 ctx.drawImage(img, x, y, drawWidth, drawHeight);
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 
-                // Для QR-кодов, мы можем использовать их собственный цвет (черно-белый)
-                // To do this, we need to read the color of each pixel.
-                // For simplicity, let's make them a neutral white for now.
+                // 对二维码使用白色粒子
                 setupParticles(imageData, '#FFFFFF', canvas.width);
             };
             img.onerror = () => {
@@ -2476,12 +2482,14 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
         if(!ctx) return;
 
         const resizeCanvas = () => {
-            const { width, height } = container.getBoundingClientRect();
-            canvas.width = width * window.devicePixelRatio;
-            canvas.height = height * window.devicePixelRatio;
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            const { width } = container.getBoundingClientRect();
+            // 维持一个固定的宽高比，例如 2:1
+            const height = width / 2;
+            container.style.height = `${height}px`;
+
+            canvas.width = width;
+            canvas.height = height;
+            // 不需要再手动设置style.width/height，因为父容器已经有了
             // 立即触发一次，避免首次渲染空白
             itemIndex.current = 0;
             particles.current = [];
@@ -2489,7 +2497,8 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
         };
 
         const animate = () => {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+            animationFrameId.current = requestAnimationFrame(animate);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             particles.current.forEach(p => {
@@ -2502,7 +2511,6 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
                 nextItem();
             }
 
-            animationFrameId.current = requestAnimationFrame(animate);
         };
         
         const resizeObserver = new ResizeObserver(resizeCanvas);
@@ -2521,7 +2529,7 @@ const ParticleShowcase = ({ data, className }: ParticleShowcaseProps) => {
     }, [nextItem]);
 
     return (
-        <div ref={containerRef} className={cn("w-full h-full", className)}>
+        <div ref={containerRef} className={cn("w-full", className)}>
             <canvas ref={canvasRef} />
         </div>
     );
@@ -2606,7 +2614,7 @@ const CustomFooter = () => {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center">
             {/* START: 粒子特效替换区域 */}
-            <div className="mb-8 w-full max-w-lg h-48 md:h-64">
+            <div className="mb-8 w-full max-w-lg">
                 <ParticleShowcase data={particleShowcaseData} />
             </div>
             {/* END: 粒子特效替换区域 */}
