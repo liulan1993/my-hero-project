@@ -93,7 +93,8 @@ const Starfield = ({
   useFrame((state, delta) => {
     if (ref.current) {
       const positions = ref.current.geometry.attributes.position.array as Float32Array;
-      let currentSpeed = warpSpeedActive ? speed * 35 : speed; // 穿梭时速度加快
+      // 修复：将 let 改为 const，因为该变量未被重新赋值
+      const currentSpeed = warpSpeedActive ? speed * 35 : speed; // 穿梭时速度加快
 
       for (let i = 0; i < particleCount; i++) {
         positions[i * 3 + 2] += delta * currentSpeed;
@@ -114,8 +115,7 @@ const Starfield = ({
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={particleCount}
-          array={positions}
+          args={[positions, 3]} 
           itemSize={3}
         />
       </bufferGeometry>
