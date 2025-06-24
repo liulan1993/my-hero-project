@@ -1288,7 +1288,7 @@ const CtaWithGallerySection = () => {
 
                                     <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
                                         <Image
-                                        src="https://zh.apex-elite-service.com/wenjian/12.jpg"
+                                        src="https://zh.apex-elite-service.com/wenjian/12-1.jpg"
                                         alt="Step Visual"
                                         width={200}
                                         height={200}
@@ -1662,7 +1662,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/wenjian/1.jpg" 
+              src="https://zh.apex-elite-service.com/wenjian/1-1.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1679,7 +1679,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">为创始人、高管及家人量身定制整体准证方案（EP、DP等），通过深度评估与战略规划，极大化成功率，提供核心身份保障。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/wenjian/2.jpg" 
+              src="https://zh.apex-elite-service.com/wenjian/2-1.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1731,7 +1731,7 @@ const projectShowcaseData = [
     buttonLabel: "教育蓝图", // <-- 新增：按钮上显示的文字
     quote: '我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。',
     designation: "Next.js 项目",
-    src: "https://zh.apex-elite-service.com/wenjian/5.jpg",
+    src: "https://zh.apex-elite-service.com/wenjian/5-1.jpg",
     link: "https://plum-cave.netlify.app/",
   },
   {
@@ -1739,7 +1739,7 @@ const projectShowcaseData = [
     buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
     quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
-    src: "https://zh.apex-elite-service.com/wenjian/6.jpg",
+    src: "https://zh.apex-elite-service.com/wenjian/6-1.jpg",
     link: "https://namer-ui.netlify.app/",
   },
   {
@@ -1771,7 +1771,7 @@ const infoSectionData1 = {
             致力于助您主动掌控健康，预见未来
         </>
     ),
-    primaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/8.jpg',
+    primaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/8-1.png',
     secondaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/9.jpg',
 };
 
@@ -1794,7 +1794,7 @@ const infoSectionData2 = {
             将未来的不确定性，转化为尽在掌握的主动权
         </>
     ),
-    primaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/10.jpg',
+    primaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/10-1.jpg',
     secondaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/11.jpg',
 };
 
@@ -1834,7 +1834,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://zh.apex-elite-service.com/wenjian/14.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wenjian/14-1.jpg',
     leftContent: {
       heading: '安心保障',
       description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
@@ -1842,7 +1842,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: 'https://zh.apex-elite-service.com/wenjian/15.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wenjian/15-1.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
