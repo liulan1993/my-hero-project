@@ -18,6 +18,16 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
     const startDate = useMemo(() => new Date(startDateString), [startDateString]);
     const endDate = useMemo(() => new Date(endDateString), [endDateString]);
 
+    // 错误修复: 动态计算扫光动画的速度
+    const animationDuration = useMemo(() => {
+        // 当进度接近100%时，速度加快
+        const maxDuration = 1.5; // 开始时的速度 (秒)
+        const minDuration = 0.3; // 结束时的最快速度 (秒)
+        // 使用一个缓动函数来计算当前进度下的动画时间
+        const duration = maxDuration - (maxDuration - minDuration) * (progress / 100);
+        return Math.max(duration, minDuration); // 确保速度不会低于最快速度
+    }, [progress]);
+
     useEffect(() => {
         const interval = setInterval(() => {
             const now = new Date();
@@ -33,28 +43,44 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
 
     return (
         <div className="w-full h-2 bg-gray-500/20 rounded-full overflow-hidden relative mt-auto">
-            <motion.div
-                className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative overflow-hidden"
-                initial={{ width: '0%' }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 1, ease: "linear" }}
-            >
+            {progress < 100 ? (
+                 <motion.div
+                    className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative overflow-hidden"
+                    initial={{ width: '0%' }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 1, ease: "linear" }}
+                >
+                    <motion.div
+                        className="absolute top-0 left-0 h-full w-10 opacity-80"
+                        style={{
+                            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent)',
+                            filter: 'blur(4px)',
+                        }}
+                        animate={{
+                            x: ['-100%', '1000%']
+                        }}
+                        transition={{
+                            duration: animationDuration,
+                            repeat: Infinity,
+                            ease: "linear"
+                        }}
+                    />
+                </motion.div>
+            ) : (
+                // 错误修复：当进度达到100%时，执行闪烁动画
                 <motion.div
-                    className="absolute top-0 left-0 h-full w-10 opacity-80"
-                    style={{
-                        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent)',
-                        filter: 'blur(4px)',
-                    }}
+                    className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full"
+                    style={{ width: '100%' }}
                     animate={{
-                        x: ['-100%', '1000%']
+                        opacity: [1, 0.6, 1]
                     }}
                     transition={{
-                        duration: 1.5,
+                        duration: 1,
                         repeat: Infinity,
-                        ease: "linear"
+                        ease: "easeInOut"
                     }}
                 />
-            </motion.div>
+            )}
         </div>
     );
 };
@@ -135,7 +161,6 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    // 错误修复: 移除了 w-full 类，让 flexbox 容器来控制其宽度
     <div onClick={() => onExpand(product.id)} className="cursor-pointer">
         <motion.div
             className="relative rounded-[32px] overflow-hidden flex flex-col w-full max-w-[360px] h-[450px] mx-auto"
@@ -182,7 +207,7 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
                 }}
             />
             <motion.div
-                className="absolute bottom-0 left-0 right-0 h-2/3 z-20" // z-index was 21, now 20
+                className="absolute bottom-0 left-0 right-0 h-2/3 z-20" 
                 style={{
                     background: `
                     radial-gradient(circle at bottom center, rgba(161, 58, 229, 0.7) -20%, rgba(79, 70, 229, 0) 60%)
@@ -292,7 +317,6 @@ const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) =>
     { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" },
   ];
   return (
-    // z-index is now controlled by the parent wrapper
     <div ref={parentRef} className={cn("absolute inset-0 w-full h-full overflow-hidden", className)}>
       {beams.map((beam) => (<CollisionMechanism key={beam.initialX + "beam-idx"} beamOptions={beam} containerRef={containerRef} parentRef={parentRef} />))}
       <div ref={containerRef} className="absolute bottom-0 bg-neutral-100 w-full inset-x-0 pointer-events-none" style={{ boxShadow: "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset" }} />
