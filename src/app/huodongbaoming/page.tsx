@@ -33,8 +33,6 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
 
     return (
         <div className="w-full h-2 bg-gray-500/20 rounded-full overflow-hidden relative mt-auto">
-            {/* 错误修复：将扫光动画嵌套在进度条填充部分内部，并添加 overflow-hidden */}
-            {/* 这样扫光动画就会被父元素的宽度（即进度）所裁剪 */}
             <motion.div
                 className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative overflow-hidden"
                 initial={{ width: '0%' }}
@@ -48,7 +46,7 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
                         filter: 'blur(4px)',
                     }}
                     animate={{
-                        x: ['-100%', '1000%'] // 动画范围可以很大，父级会裁剪它
+                        x: ['-100%', '1000%']
                     }}
                     transition={{
                         duration: 1.5,
@@ -137,23 +135,22 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div onClick={() => onExpand(product.id)} className="cursor-pointer">
+    <div onClick={() => onExpand(product.id)} className="cursor-pointer w-full">
+        {/* 响应式优化：移除固定宽高，使用 Tailwind 类 */}
         <motion.div
-            className="relative rounded-[32px] overflow-hidden flex flex-col" // 使用 flex 布局
+            className="relative rounded-[32px] overflow-hidden flex flex-col w-full max-w-[360px] h-[450px] mx-auto"
             style={{
-            width: "360px",
-            height: "450px",
-            backgroundColor: "#0e131f",
-            boxShadow: "0 -10px 100px 10px rgba(78, 99, 255, 0.25), 0 0 10px 0 rgba(0, 0, 0, 0.5)",
+                backgroundColor: "#0e131f",
+                boxShadow: "0 -10px 100px 10px rgba(78, 99, 255, 0.25), 0 0 10px 0 rgba(0, 0, 0, 0.5)",
             }}
             initial={{ y: 0 }}
             animate={{
-            y: isHovered ? -8 : 0, 
+                y: isHovered ? -8 : 0, 
             }}
             transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 20
+                type: "spring",
+                stiffness: 300,
+                damping: 20
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -288,16 +285,16 @@ const CollisionMechanism = ({ parentRef, containerRef, beamOptions = {} }: { con
   );
 };
 
-const BackgroundBeamsWithCollision = ({ children, className }: { children: React.ReactNode; className?: string; }) => {
+// 响应式优化：移除 children prop，此组件现在只作为背景
+const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
   const beams = [
     { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" },
   ];
   return (
-    <div ref={parentRef} className={cn("absolute inset-0 z-10 flex items-center w-full justify-center overflow-hidden", className)}>
+    <div ref={parentRef} className={cn("absolute inset-0 z-10 w-full h-full overflow-hidden", className)}>
       {beams.map((beam) => (<CollisionMechanism key={beam.initialX + "beam-idx"} beamOptions={beam} containerRef={containerRef} parentRef={parentRef} />))}
-      {children}
       <div ref={containerRef} className="absolute bottom-0 bg-neutral-100 w-full inset-x-0 pointer-events-none" style={{ boxShadow: "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset" }} />
     </div>
   );
@@ -333,7 +330,7 @@ const AnimatedBoxes = () => {
 
 const Scene = () => {
     return (
-        <div className="absolute inset-0 w-full h-full z-0">
+        <div className="fixed inset-0 w-full h-full z-0">
             <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
                 <ambientLight intensity={15} />
                 <directionalLight position={[10, 10, 5]} intensity={15} />
@@ -378,10 +375,15 @@ export default function Page() {
   const expandedProduct = products.find(p => p.id === expandedCardId) || null;
 
   return (
-    <div className="relative min-h-screen w-full bg-[#000] text-white flex flex-col items-center justify-center p-8 overflow-hidden" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
+    // 响应式优化：移除 flex 相关类，让其成为一个标准的、可滚动的容器
+    <div className="relative w-full min-h-screen bg-[#000] text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
+      {/* 背景元素保持 fixed/absolute 定位 */}
       <Scene />
-      <BackgroundBeamsWithCollision>
-        <div className="relative z-20 flex flex-col items-center justify-center gap-12">
+      <BackgroundBeamsWithCollision />
+
+      {/* 响应式优化：创建一个可滚动的内容区域 */}
+      <main className="relative z-20 flex flex-col items-center w-full px-4 py-16 sm:py-24">
+        <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 w-full">
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-center text-white font-sans tracking-tight">
                 <div>What&apos;s cooler than Beams?</div>
                 <div className="relative mx-auto w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
@@ -394,13 +396,14 @@ export default function Page() {
                 </div>
             </h2>
 
-            <div className="flex flex-wrap items-center justify-center gap-8">
+            {/* 响应式优化：在手机上卡片将垂直排列，在更大屏幕上水平排列 */}
+            <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-8 md:gap-12 w-full">
                 {products.map(product => (
                     <ProductCard key={product.id} product={product} onExpand={handleExpand} />
                 ))}
             </div>
         </div>
-      </BackgroundBeamsWithCollision>
+      </main>
 
       <AnimatePresence>
         {expandedProduct && <ArticleModal product={expandedProduct} onClose={handleClose} />}
