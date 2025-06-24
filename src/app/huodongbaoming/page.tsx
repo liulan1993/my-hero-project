@@ -240,10 +240,14 @@ const ProductCard = ({ product }: { product: Product; }) => {
 // --- 展开后的卡片组件 ---
 const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: () => void; }) => {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={onCollapse}
+      >
         <motion.div
           className="relative rounded-[32px] overflow-hidden w-full max-w-3xl bg-[#0e131f] max-h-[85vh] flex flex-col"
           layoutId={`card-container-${product.id}`}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="relative flex-shrink-0 p-8 pb-0 z-20">
              <motion.button
@@ -271,7 +275,7 @@ const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: (
             </div>
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     );
 };
 
