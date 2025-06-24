@@ -17,7 +17,8 @@ function cn(...inputs: ClassValue[]) {
 const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
     const lines = content.split('\n').map(line => line.trim());
     return (
-        <div className="text-gray-300">
+        // 错误修复：添加了 text-center 来居中文本
+        <div className="text-gray-300 text-center">
             {lines.map((line, index) => {
                 if (line.startsWith('# ')) {
                     return <h1 key={index} className="text-3xl font-bold my-4 text-white">{line.substring(2)}</h1>;
@@ -84,7 +85,6 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
 
   return (
     <div onClick={() => onExpand(product.id)} className="cursor-pointer">
-        {/* 错误修复：移除了 handleMouseMove, handleMouseLeave, 和 animate prop 中的 rotateX/rotateY 来停止悬停时的3D变形效果。 */}
         <motion.div
             className="relative rounded-[32px] overflow-hidden"
             style={{
@@ -167,7 +167,8 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
                     </div>
                 </motion.div>
 
-                <div className="mb-auto">
+                {/* 错误修复：添加了 text-center 来居中文本 */}
+                <div className="mb-auto text-center">
                     <h3 className="text-2xl font-medium text-white mb-3">
                         {product.title}
                     </h3>
