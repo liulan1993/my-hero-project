@@ -152,60 +152,14 @@ const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
     );
 };
 
-
-// --- 卡片展开后的文章模态窗口 ---
-const ArticleModal = ({ product, onClose }: { product: Product | null; onClose: () => void }) => {
-    if (!product) return null;
-
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
-            onClick={onClose}
-        >
-            <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 50, opacity: 0 }}
-                className="bg-[#121624] rounded-2xl w-full max-w-3xl h-full max-h-[80vh] overflow-y-auto p-8 relative shadow-2xl border border-white/10"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors w-8 h-8 bg-white/10 rounded-full flex items-center justify-center z-50"
-                    aria-label="Close article"
-                >
-                    ✕
-                </button>
-                <SimpleMarkdownRenderer content={product.markdownContent} />
-                <div className="mt-8 pt-8 border-t border-gray-500/30 flex flex-col items-center">
-                    <p className="text-sm text-gray-400 mb-4">扫码报名或了解详情</p>
-                    <img
-                        src={product.qrCodeUrl}
-                        alt="二维码"
-                        className="w-[200px] h-[200px] rounded-lg bg-white p-2"
-                        onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null; 
-                            target.src = "https://placehold.co/200x200/ffffff/000000?text=QR+Code";
-                        }}
-                    />
-                </div>
-            </motion.div>
-        </motion.div>
-    );
-};
-
-// --- 新增：活动已截止的提示弹窗 ---
+// --- 活动已截止的提示弹窗 ---
 const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={onClose}
         >
             <motion.div
@@ -239,36 +193,35 @@ interface Product {
   qrCodeUrl: string;
 }
 
-const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: number) => void }) => {
+const ProductCard = ({ product, isExpanded, onExpand }: { product: Product; isExpanded: boolean; onExpand: (id: number | null) => void }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div onClick={() => onExpand(product.id)} className="cursor-pointer">
-        <motion.div
-            className="relative rounded-[32px] overflow-hidden flex flex-col w-full max-w-[360px] h-[450px] mx-auto"
-            style={{
-                backgroundColor: "#0e131f",
-                boxShadow: "0 -10px 100px 10px rgba(78, 99, 255, 0.25), 0 0 10px 0 rgba(0, 0, 0, 0.5)",
-            }}
-            initial={{ y: 0 }}
-            animate={{
-                y: isHovered ? -8 : 0, 
-            }}
-            transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 20
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            <motion.div
-                className="absolute inset-0 z-30 pointer-events-none"
-                style={{
-                    background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 80%, rgba(255,255,255,0.05) 100%)",
-                    backdropFilter: "blur(2px)",
-                }}
-            />
+    <motion.div 
+        layout 
+        onClick={() => !isExpanded && onExpand(product.id)} 
+        className={cn(
+            "rounded-[32px] overflow-hidden cursor-pointer", 
+            isExpanded ? "w-full max-w-3xl h-auto fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40" : "relative w-full max-w-[360px] h-[450px]"
+        )}
+        style={{
+            backgroundColor: "#0e131f",
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+    >
+        <motion.div className="relative w-full h-full flex flex-col">
+            {/* 卡片背景和辉光效果 */}
+            {!isExpanded && (
+                 <motion.div
+                    className="absolute inset-0 z-30 pointer-events-none"
+                    style={{
+                        background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 80%, rgba(255,255,255,0.05) 100%)",
+                        backdropFilter: "blur(2px)",
+                    }}
+                />
+            )}
             <motion.div
                 className="absolute inset-0 opacity-30 mix-blend-overlay z-10"
                 style={{
@@ -284,66 +237,101 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
                     `,
                     filter: "blur(40px)",
                 }}
-                animate={{
-                    opacity: isHovered ? 0.9 : 0.8,
-                }}
+                animate={{ opacity: isHovered || isExpanded ? 0.9 : 0.8 }}
             />
-            <motion.div
-                className="absolute bottom-0 left-0 right-0 h-2/3 z-20" 
-                style={{
-                    background: `
-                    radial-gradient(circle at bottom center, rgba(161, 58, 229, 0.7) -20%, rgba(79, 70, 229, 0) 60%)
-                    `,
-                    filter: "blur(45px)",
-                }}
-                animate={{
-                    opacity: isHovered ? 0.85 : 0.75,
-                }}
-            />
-            <div className="relative flex flex-col h-full p-8 z-40">
-                <motion.div
-                    className="w-12 h-12 rounded-full flex items-center justify-center mb-6"
-                    style={{
-                    background: "linear-gradient(225deg, #171c2c 0%, #121624 100%)",
-                    }}
-                    animate={{
-                    boxShadow: isHovered
-                        ? "0 8px 16px -2px rgba(0, 0, 0, 0.3), 0 4px 8px -1px rgba(0, 0, 0, 0.2), inset 2px 2px 5px rgba(255, 255, 255, 0.15), inset -2px -2px 5px rgba(0, 0, 0, 0.7)"
-                        : "0 6px 12px -2px rgba(0, 0, 0, 0.25), 0 3px 6px -1px rgba(0, 0, 0, 0.15), inset 1px 1px 3px rgba(255, 255, 255, 0.12), inset -2px -2px 4px rgba(0, 0, 0, 0.5)",
-                    }}
-                >
-                    <div className="flex items-center justify-center w-full h-full relative z-10">
-                    <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                        d="M8 0L9.4 5.4L14.8 5.4L10.6 8.8L12 14.2L8 10.8L4 14.2L5.4 8.8L1.2 5.4L6.6 5.4L8 0Z"
-                        fill="white"
-                        />
-                    </svg>
-                    </div>
-                </motion.div>
 
-                <div className="text-center">
-                    <h3 className="text-2xl font-medium text-white mb-3">
-                        {product.title}
-                    </h3>
-                    <p className="text-sm mb-6 text-gray-300">
-                        {product.description}
-                    </p>
+            {/* 内容区 */}
+            <div className={cn("relative flex flex-col z-40", isExpanded ? "h-auto" : "h-full")}>
+                {/* 展开后的关闭按钮 */}
+                {isExpanded && (
+                    <motion.button
+                        initial={{opacity: 0, scale: 0.5}}
+                        animate={{opacity: 1, scale: 1}}
+                        transition={{delay: 0.3}}
+                        onClick={(e) => {
+                            e.stopPropagation(); // 防止事件冒泡到父级 div
+                            onExpand(null);
+                        }}
+                        className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors w-8 h-8 bg-white/10 rounded-full flex items-center justify-center z-50"
+                        aria-label="Close article"
+                    >
+                        ✕
+                    </motion.button>
+                )}
+
+                {/* 卡片顶部图标和标题 */}
+                <div className="p-8 pb-0">
+                    <motion.div
+                        className="w-12 h-12 rounded-full flex items-center justify-center mb-6"
+                        style={{ background: "linear-gradient(225deg, #171c2c 0%, #121624 100%)" }}
+                        animate={{ boxShadow: isHovered || isExpanded ? "0 8px 16px -2px rgba(0, 0, 0, 0.3), 0 4px 8px -1px rgba(0, 0, 0, 0.2), inset 2px 2px 5px rgba(255, 255, 255, 0.15), inset -2px -2px 5px rgba(0, 0, 0, 0.7)" : "0 6px 12px -2px rgba(0, 0, 0, 0.25), 0 3px 6px -1px rgba(0, 0, 0, 0.15), inset 1px 1px 3px rgba(255, 255, 255, 0.12), inset -2px -2px 4px rgba(0, 0, 0, 0.5)" }}
+                    >
+                        <div className="flex items-center justify-center w-full h-full relative z-10">
+                        <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 0L9.4 5.4L14.8 5.4L10.6 8.8L12 14.2L8 10.8L4 14.2L5.4 8.8L1.2 5.4L6.6 5.4L8 0Z" fill="white" />
+                        </svg>
+                        </div>
+                    </motion.div>
                 </div>
 
-                <div className="mt-auto">
-                    <CountdownDisplay startDateString={product.startDate} endDateString={product.endDate} />
-                    <ProgressBar startDateString={product.startDate} endDateString={product.endDate} />
+                {/* 条件渲染内容 */}
+                <div className="flex-grow flex flex-col">
+                    <AnimatePresence mode="wait">
+                    {isExpanded ? (
+                        <motion.div
+                            key="content"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1, transition: { delay: 0.2 } }}
+                            exit={{ opacity: 0 }}
+                            className="p-8 pt-0 overflow-y-auto"
+                        >
+                            <SimpleMarkdownRenderer content={product.markdownContent} />
+                            <div className="mt-8 pt-8 border-t border-gray-500/30 flex flex-col items-center">
+                                <p className="text-sm text-gray-400 mb-4">扫码报名或了解详情</p>
+                                <img
+                                    src={product.qrCodeUrl}
+                                    alt="二维码"
+                                    className="w-[200px] h-[200px] rounded-lg bg-white p-2"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.onerror = null; 
+                                        target.src = "https://placehold.co/200x200/ffffff/000000?text=QR+Code";
+                                    }}
+                                />
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="summary"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex-grow flex flex-col p-8 pt-0"
+                        >
+                             <div className="text-center">
+                                <h3 className="text-2xl font-medium text-white mb-3">
+                                    {product.title}
+                                </h3>
+                                <p className="text-sm mb-6 text-gray-300">
+                                    {product.description}
+                                </p>
+                            </div>
+                            <div className="mt-auto">
+                                <CountdownDisplay startDateString={product.startDate} endDateString={product.endDate} />
+                                <ProgressBar startDateString={product.startDate} endDateString={product.endDate} />
+                            </div>
+                        </motion.div>
+                    )}
+                    </AnimatePresence>
                 </div>
             </div>
         </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
 
 // --- 光束和碰撞组件 ---
-
 const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   const spans = Array.from({ length: 20 }, (_, index) => ({
     id: index, initialX: 0, initialY: 0,
@@ -412,7 +400,6 @@ const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) =>
 
 
 // --- 您原有的 3D 场景代码 ---
-
 const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
     const shape = new THREE.Shape();
     const angleStep = Math.PI * 0.5;
@@ -431,12 +418,10 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
     );
 };
 
-const AnimatedBoxes = ({ isPaused }: { isPaused: boolean }) => {
+const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null!);
     useFrame((_, delta) => { 
-        if (isPaused || !groupRef.current) {
-            return;
-        }
+        if (!groupRef.current) return;
         groupRef.current.rotation.x += delta * 0.05; 
         groupRef.current.rotation.y += delta * 0.05; 
     });
@@ -444,13 +429,13 @@ const AnimatedBoxes = ({ isPaused }: { isPaused: boolean }) => {
     return (<group ref={groupRef}>{boxes.map((box) => (<Box key={box.id} position={box.position} rotation={box.rotation} />))}</group>);
 };
 
-const Scene = ({ isPaused }: { isPaused: boolean }) => {
+const Scene = () => {
     return (
         <div className="fixed inset-0 w-full h-full z-0">
             <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
                 <ambientLight intensity={15} />
                 <directionalLight position={[10, 10, 5]} intensity={15} />
-                <AnimatedBoxes isPaused={isPaused} />
+                <AnimatedBoxes />
             </Canvas>
         </div>
     );
@@ -460,7 +445,7 @@ const Scene = ({ isPaused }: { isPaused: boolean }) => {
 // --- 最终的、合并后的页面组件 ---
 export default function Page() {
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
-  const [showExpiredModal, setShowExpiredModal] = useState(false); // 新增状态
+  const [showExpiredModal, setShowExpiredModal] = useState(false); 
 
   const products: Product[] = [
     {
@@ -483,8 +468,12 @@ export default function Page() {
     }
   ];
 
-  // 修改 handleExpand 函数以处理过期逻辑
-  const handleExpand = (id: number) => {
+  const handleExpand = (id: number | null) => {
+    if (id === null) {
+      setExpandedCardId(null);
+      return;
+    }
+
     const product = products.find(p => p.id === id);
     if (!product) return;
 
@@ -498,45 +487,55 @@ export default function Page() {
     }
   };
 
-  const handleClose = () => {
-    setExpandedCardId(null);
-  };
-
-  const expandedProduct = products.find(p => p.id === expandedCardId) || null;
-  const isAnimationPaused = expandedCardId !== null || showExpiredModal;
-
   return (
     <div className="relative w-full min-h-screen bg-[#000] text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
-      <Scene isPaused={isAnimationPaused} />
+      <Scene />
+      <div className="fixed inset-0 z-20 pointer-events-none">
+        <BackgroundBeamsWithCollision />
+      </div>
 
-      <main className="relative z-10 flex flex-col items-center w-full px-4 py-16 sm:py-24">
+      <main className="relative z-10 flex flex-col items-center w-full min-h-screen px-4 py-16 sm:py-24">
+        
+        {/* 点击卡片外的背景区域可以关闭卡片 */}
+        <AnimatePresence>
+            {expandedCardId && (
+                <motion.div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setExpandedCardId(null)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                />
+            )}
+        </AnimatePresence>
+        
         <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 w-full">
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-center text-white font-sans tracking-tight">
-                <div>What&apos;s cooler than Beams?</div>
+                <div>很高兴您的加入！</div>
                 <div className="relative mx-auto w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
                     <div className="absolute left-0 top-[1px] bg-clip-text bg-no-repeat text-transparent bg-gradient-to-r py-4 from-purple-500 via-violet-500 to-pink-500 [text-shadow:0_0_rgba(0,0,0,0.1)]">
-                        <span>Exploding beams.</span>
+                        <span>与Apex一起</span>
                     </div>
                     <div className="relative bg-clip-text text-transparent bg-no-repeat bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 py-4">
-                        <span>Exploding beams.</span>
+                        <span>与Apex一起</span>
                     </div>
                 </div>
             </h2>
 
-            <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-8 md:gap-12 w-full">
+            <div className="flex flex-col md:flex-row flex-wrap items-start justify-center gap-8 md:gap-12 w-full">
                 {products.map(product => (
-                    <ProductCard key={product.id} product={product} onExpand={handleExpand} />
+                    <ProductCard 
+                        key={product.id} 
+                        product={product} 
+                        isExpanded={expandedCardId === product.id}
+                        onExpand={handleExpand}
+                    />
                 ))}
             </div>
         </div>
       </main>
 
-      <div className="fixed inset-0 z-20 pointer-events-none">
-        <BackgroundBeamsWithCollision />
-      </div>
-
       <AnimatePresence>
-        {expandedProduct && <ArticleModal product={expandedProduct} onClose={handleClose} />}
         {showExpiredModal && <ExpiredModal onClose={() => setShowExpiredModal(false)} />}
       </AnimatePresence>
     </div>
