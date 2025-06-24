@@ -155,19 +155,18 @@ const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
 // --- 活动已截止的提示弹窗 ---
 const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
     return (
-        // 错误修复：移除 backdrop-blur-sm, 使用半透明背景色
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4"
             onClick={onClose}
         >
             <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-[#121624] rounded-2xl p-8 text-center shadow-2xl border border-white/10"
+                className="bg-[#1a1f32] rounded-2xl p-8 text-center shadow-2xl border border-white/10 max-w-sm w-full"
                 onClick={(e) => e.stopPropagation()}
             >
                 <p className="text-white text-lg">很遗憾我们没有等到您，期待下次相遇。</p>
@@ -183,7 +182,7 @@ const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
 };
 
 
-// --- 新合并的卡片组件 ---
+// --- 卡片组件 ---
 interface Product {
   id: number;
   title: string;
@@ -194,131 +193,92 @@ interface Product {
   qrCodeUrl: string;
 }
 
-const ProductCard = ({ product, isExpanded, onExpand }: { product: Product; isExpanded: boolean; onExpand: (id: number | null) => void }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-    <motion.div 
-        layout="position"
-        onClick={() => !isExpanded && onExpand(product.id)} 
-        className={cn(
-            "rounded-[32px] overflow-hidden cursor-pointer bg-[#0e131f]", 
-            isExpanded ? "w-full max-w-3xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 max-h-[85vh]" : "relative w-full max-w-[360px] h-[450px]"
-        )}
-        transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+const ProductCard = ({ product }: { product: Product; }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    
+    return (
+      <motion.div
+        className="relative rounded-[32px] overflow-hidden w-full max-w-[360px] h-[450px] mx-auto bg-[#0e131f] cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-    >
-        <motion.div className="relative w-full h-full flex flex-col">
-            <motion.div
-                className="absolute inset-0 opacity-30 mix-blend-overlay z-10"
-                style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-                }}
-            />
-            <motion.div
-                className="absolute bottom-0 left-0 right-0 h-2/3 z-20"
-                style={{
-                    background: `
-                    radial-gradient(ellipse at bottom right, rgba(172, 92, 255, 0.7) -10%, rgba(79, 70, 229, 0) 70%),
-                    radial-gradient(ellipse at bottom left, rgba(56, 189, 248, 0.7) -10%, rgba(79, 70, 229, 0) 70%)
-                    `,
-                    filter: "blur(40px)",
-                }}
-                animate={{ opacity: isHovered || isExpanded ? 0.9 : 0.8 }}
-            />
+        initial={{ y: 0 }}
+        animate={{ y: isHovered ? -8 : 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
+        <div className="relative w-full h-full flex flex-col p-8 z-30">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center mb-6 bg-gradient-to-tr from-[#171c2c] to-[#121624]"
+               style={{ boxShadow: "0 6px 12px -2px rgba(0, 0, 0, 0.25), 0 3px 6px -1px rgba(0, 0, 0, 0.15), inset 1px 1px 3px rgba(255, 255, 255, 0.12), inset -2px -2px 4px rgba(0, 0, 0, 0.5)"}}>
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 0L9.4 5.4L14.8 5.4L10.6 8.8L12 14.2L8 10.8L4 14.2L5.4 8.8L1.2 5.4L6.6 5.4L8 0Z" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <h3 className="text-2xl font-medium text-white mb-3">{product.title}</h3>
+            <p className="text-sm mb-6 text-gray-300">{product.description}</p>
+          </div>
+          <div className="mt-auto">
+            <CountdownDisplay startDateString={product.startDate} endDateString={product.endDate} />
+            <ProgressBar startDateString={product.startDate} endDateString={product.endDate} />
+          </div>
+        </div>
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-2/3 z-20"
+          style={{
+            background: `radial-gradient(ellipse at bottom right, rgba(172, 92, 255, 0.7) -10%, rgba(79, 70, 229, 0) 70%), radial-gradient(ellipse at bottom left, rgba(56, 189, 248, 0.7) -10%, rgba(79, 70, 229, 0) 70%)`,
+            filter: "blur(40px)",
+          }}
+          animate={{ opacity: isHovered ? 0.9 : 0.8 }}
+        />
+        <motion.div
+          className="absolute inset-0 opacity-30 mix-blend-overlay z-10"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }}
+        />
+      </motion.div>
+    );
+};
 
-            <div className={cn("relative flex flex-col z-40 h-full")}>
-                {isExpanded && (
-                    <motion.button
-                        initial={{opacity: 0, scale: 0.5}}
-                        animate={{opacity: 1, scale: 1}}
-                        transition={{delay: 0.3}}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onExpand(null);
-                        }}
-                        className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors w-8 h-8 bg-white/10 rounded-full flex items-center justify-center z-50"
-                        aria-label="Close article"
-                    >
-                        ✕
-                    </motion.button>
-                )}
-                
-                <div className="p-8 pb-0">
-                    <motion.div
-                        className="w-12 h-12 rounded-full flex items-center justify-center mb-6"
-                        style={{ background: "linear-gradient(225deg, #171c2c 0%, #121624 100%)" }}
-                        animate={{ boxShadow: isHovered || isExpanded ? "0 8px 16px -2px rgba(0, 0, 0, 0.3), 0 4px 8px -1px rgba(0, 0, 0, 0.2), inset 2px 2px 5px rgba(255, 255, 255, 0.15), inset -2px -2px 5px rgba(0, 0, 0, 0.7)" : "0 6px 12px -2px rgba(0, 0, 0, 0.25), 0 3px 6px -1px rgba(0, 0, 0, 0.15), inset 1px 1px 3px rgba(255, 255, 255, 0.12), inset -2px -2px 4px rgba(0, 0, 0, 0.5)" }}
-                    >
-                        <div className="flex items-center justify-center w-full h-full relative z-10">
-                        <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M8 0L9.4 5.4L14.8 5.4L10.6 8.8L12 14.2L8 10.8L4 14.2L5.4 8.8L1.2 5.4L6.6 5.4L8 0Z" fill="white" />
-                        </svg>
-                        </div>
-                    </motion.div>
-                </div>
-
-                <div className="flex-grow flex flex-col overflow-hidden">
-                    <AnimatePresence mode="wait">
-                    {isExpanded ? (
-                        <motion.div
-                            key="content"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1, transition: { delay: 0.2 } }}
-                            exit={{ opacity: 0 }}
-                            className="p-8 pt-0 overflow-y-auto"
-                        >
-                            <SimpleMarkdownRenderer content={product.markdownContent} />
-                            <div className="mt-8 pt-8 border-t border-gray-500/30 flex flex-col items-center">
-                                <p className="text-sm text-gray-400 mb-4">扫码报名或了解详情</p>
-                                <img
-                                    src={product.qrCodeUrl}
-                                    alt="二维码"
-                                    className="w-[200px] h-[200px] rounded-lg bg-white p-2"
-                                    onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.onerror = null; 
-                                        target.src = "https://placehold.co/200x200/ffffff/000000?text=QR+Code";
-                                    }}
-                                />
-                            </div>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="summary"
-                            className="flex-grow flex flex-col p-8 pt-0"
-                        >
-                             <div className="text-center">
-                                <h3 className="text-2xl font-medium text-white mb-3">
-                                    {product.title}
-                                </h3>
-                                <p className="text-sm mb-6 text-gray-300">
-                                    {product.description}
-                                </p>
-                            </div>
-                            <div className="mt-auto">
-                                <CountdownDisplay startDateString={product.startDate} endDateString={product.endDate} />
-                                <ProgressBar startDateString={product.startDate} endDateString={product.endDate} />
-                            </div>
-                        </motion.div>
-                    )}
-                    </AnimatePresence>
-                </div>
+// --- 展开后的卡片组件 ---
+const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: () => void; }) => {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <motion.div
+          className="relative rounded-[32px] overflow-hidden w-full max-w-3xl bg-[#0e131f] max-h-[85vh] flex flex-col"
+          layoutId={`card-container-${product.id}`}
+        >
+          <div className="relative flex-shrink-0 p-8 pb-0 z-20">
+             <motion.button
+                initial={{opacity: 0, scale: 0.5}}
+                animate={{opacity: 1, scale: 1}}
+                transition={{delay: 0.3}}
+                onClick={onCollapse}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors w-8 h-8 bg-white/10 rounded-full flex items-center justify-center z-50"
+                aria-label="Close article"
+            >
+                ✕
+            </motion.button>
+             <div className="w-12 h-12 rounded-full flex items-center justify-center mb-6 bg-gradient-to-tr from-[#171c2c] to-[#121624]"
+                  style={{ boxShadow: "0 8px 16px -2px rgba(0, 0, 0, 0.3), 0 4px 8px -1px rgba(0, 0, 0, 0.2), inset 2px 2px 5px rgba(255, 255, 255, 0.15), inset -2px -2px 5px rgba(0, 0, 0, 0.7)"}}>
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 0L9.4 5.4L14.8 5.4L10.6 8.8L12 14.2L8 10.8L4 14.2L5.4 8.8L1.2 5.4L6.6 5.4L8 0Z" />
+                </svg>
             </div>
+          </div>
+          <div className="relative flex-grow p-8 pt-0 overflow-y-auto z-20">
+            <SimpleMarkdownRenderer content={product.markdownContent} />
+            <div className="mt-8 pt-8 border-t border-gray-500/30 flex flex-col items-center">
+                <p className="text-sm text-gray-400 mb-4">扫码报名或了解详情</p>
+                <img src={product.qrCodeUrl} alt="二维码" className="w-[200px] h-[200px] rounded-lg bg-white p-2" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src = "https://placehold.co/200x200/ffffff/000000?text=QR+Code"; }} />
+            </div>
+          </div>
         </motion.div>
-    </motion.div>
-  );
+      </div>
+    );
 };
 
 
 // --- 光束和碰撞组件 ---
 const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
-  const spans = Array.from({ length: 20 }, (_, index) => ({
-    id: index, initialX: 0, initialY: 0,
-    directionX: Math.floor(Math.random() * 80 - 40),
-    directionY: Math.floor(Math.random() * -50 - 10),
-  }));
+  const spans = Array.from({ length: 20 }, (_, index) => ({ id: index, initialX: 0, initialY: 0, directionX: Math.floor(Math.random() * 80 - 40), directionY: Math.floor(Math.random() * -50 - 10) }));
   return (
     <div {...props} className={cn("absolute z-50 h-2 w-2", props.className)}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.5, ease: "easeOut" }} className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm" />
@@ -326,40 +286,35 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
     </div>
   );
 };
-
 const CollisionMechanism = ({ parentRef, containerRef, beamOptions = {} }: { containerRef: React.RefObject<HTMLDivElement | null>; parentRef: React.RefObject<HTMLDivElement | null>; beamOptions?: { initialX?: number; translateX?: number; initialY?: number; translateY?: number; rotate?: number; className?: string; duration?: number; delay?: number; repeatDelay?: number; }; }) => {
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{ detected: boolean; coordinates: { x: number; y: number } | null; }>({ detected: false, coordinates: null });
   const [beamKey, setBeamKey] = useState(0);
-  const [cycleCollisionDetected, setCycleCollisionDetected] = useState(false);
   useEffect(() => {
     const checkCollision = () => {
-      if (beamRef.current && containerRef.current && parentRef.current && !cycleCollisionDetected) {
+      if (beamRef.current && containerRef.current && parentRef.current) {
         const beamRect = beamRef.current.getBoundingClientRect();
         const containerRect = containerRef.current.getBoundingClientRect();
-        const parentRect = parentRef.current.getBoundingClientRect();
-        if (beamRect.bottom >= containerRect.top) {
+        if (beamRect.bottom >= containerRect.top && !collision.detected) {
+          const parentRect = parentRef.current.getBoundingClientRect();
           const relativeX = beamRect.left - parentRect.left + beamRect.width / 2;
           const relativeY = beamRect.bottom - parentRect.top;
           setCollision({ detected: true, coordinates: { x: relativeX, y: relativeY } });
-          setCycleCollisionDetected(true);
+          setTimeout(() => {
+            setCollision({ detected: false, coordinates: null });
+            setBeamKey(k => k + 1);
+          }, 2000);
         }
       }
     };
     const animationInterval = setInterval(checkCollision, 50);
     return () => clearInterval(animationInterval);
-  }, [cycleCollisionDetected, containerRef, parentRef]);
-  useEffect(() => {
-    if (collision.detected && collision.coordinates) {
-      setTimeout(() => { setCollision({ detected: false, coordinates: null }); setCycleCollisionDetected(false); }, 2000);
-      setTimeout(() => { setBeamKey((prevKey) => prevKey + 1); }, 2000);
-    }
-  }, [collision]);
+  }, [collision.detected, containerRef, parentRef]);
   return (
     <>
-      <motion.div key={beamKey} ref={beamRef} animate="animate" initial={{ y: beamOptions.initialY || -200, x: beamOptions.initialX || 0, rotate: beamOptions.rotate || 0 }} variants={{ animate: { y: beamOptions.translateY || 1800, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }} transition={{ duration: beamOptions.duration || 8, repeat: Infinity, repeatType: "loop", ease: "linear", delay: beamOptions.delay || 0, repeatDelay: beamOptions.repeatDelay || 0 }} className={cn("absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent", beamOptions.className)} />
+      <motion.div key={beamKey} ref={beamRef} animate="animate" initial={{ y: beamOptions.initialY || -200, x: beamOptions.initialX || 0, rotate: beamOptions.rotate || 0 }} variants={{ animate: { y: 1800, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }} transition={{ duration: beamOptions.duration || 8, repeat: Infinity, repeatType: "loop", ease: "linear", delay: beamOptions.delay || 0, repeatDelay: beamOptions.repeatDelay || 0 }} className={cn("absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent", beamOptions.className)} />
       <AnimatePresence>
-        {collision.detected && collision.coordinates && ( <Explosion key={`${collision.coordinates.x}-${collision.coordinates.y}`} className="" style={{ left: `${collision.coordinates.x}px`, top: `${collision.coordinates.y}px`, transform: "translate(-50%, -50%)" }} /> )}
+        {collision.detected && collision.coordinates && ( <Explosion key={`${collision.coordinates.x}-${collision.coordinates.y}`} style={{ left: `${collision.coordinates.x}px`, top: `${collision.coordinates.y}px`, transform: "translate(-50%, -50%)" }} /> )}
       </AnimatePresence>
     </>
   );
@@ -368,13 +323,10 @@ const CollisionMechanism = ({ parentRef, containerRef, beamOptions = {} }: { con
 const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
-  const beams = [
-    { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" },
-  ];
+  const beams = [ { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" }, ];
   return (
     <div ref={parentRef} className={cn("absolute inset-0 w-full h-full overflow-hidden", className)}>
       {beams.map((beam) => (<CollisionMechanism key={beam.initialX + "beam-idx"} beamOptions={beam} containerRef={containerRef} parentRef={parentRef} />))}
-      <div ref={containerRef} className="absolute bottom-0 bg-neutral-100 w-full inset-x-0 pointer-events-none" style={{ boxShadow: "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset" }} />
     </div>
   );
 };
@@ -398,7 +350,6 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
         </mesh>
     );
 };
-
 const AnimatedBoxes = () => {
     const groupRef = useRef<THREE.Group>(null!);
     useFrame((_, delta) => { 
@@ -409,7 +360,6 @@ const AnimatedBoxes = () => {
     const boxes = Array.from({ length: 50 }, (_, index) => ({ position: [(index - 25) * 0.75, 0, 0] as [number, number, number], rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number], id: index }));
     return (<group ref={groupRef}>{boxes.map((box) => (<Box key={box.id} position={box.position} rotation={box.rotation} />))}</group>);
 };
-
 const Scene = () => {
     return (
         <div className="fixed inset-0 w-full h-full z-0">
@@ -427,6 +377,17 @@ const Scene = () => {
 export default function Page() {
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
   const [showExpiredModal, setShowExpiredModal] = useState(false); 
+
+  useEffect(() => {
+    if (expandedCardId !== null || showExpiredModal) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'auto';
+    }
+    return () => { // 组件卸载时恢复滚动
+        document.body.style.overflow = 'auto';
+    }
+  }, [expandedCardId, showExpiredModal]);
 
   const products: Product[] = [
     {
@@ -449,24 +410,21 @@ export default function Page() {
     }
   ];
 
-  const handleExpand = (id: number | null) => {
-    if (id === null) {
-      setExpandedCardId(null);
-      return;
-    }
-
+  const handleExpand = (id: number) => {
     const product = products.find(p => p.id === id);
     if (!product) return;
-
     const now = new Date();
     const endDate = new Date(product.endDate);
-
     if (now > endDate) {
         setShowExpiredModal(true);
     } else {
         setExpandedCardId(id);
     }
   };
+  
+  const handleCollapse = () => {
+      setExpandedCardId(null);
+  }
 
   return (
     <div className="relative w-full min-h-screen bg-[#000] text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
@@ -476,45 +434,43 @@ export default function Page() {
       </div>
 
       <main className="relative z-10 flex flex-col items-center w-full min-h-screen px-4 py-16 sm:py-24">
-        
-        {/* 点击卡片外的背景区域可以关闭卡片 */}
-        <AnimatePresence>
-            {expandedCardId && (
-                <motion.div
-                    className="fixed inset-0 z-30"
-                    onClick={() => setExpandedCardId(null)}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                />
-            )}
-        </AnimatePresence>
-        
         <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 w-full">
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold text-center text-white font-sans tracking-tight">
-                <div>很高兴您的加入！</div>
+                <div>What&apos;s cooler than Beams?</div>
                 <div className="relative mx-auto w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
                     <div className="absolute left-0 top-[1px] bg-clip-text bg-no-repeat text-transparent bg-gradient-to-r py-4 from-purple-500 via-violet-500 to-pink-500 [text-shadow:0_0_rgba(0,0,0,0.1)]">
-                        <span>与Apex一起</span>
+                        <span>Exploding beams.</span>
                     </div>
                     <div className="relative bg-clip-text text-transparent bg-no-repeat bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 py-4">
-                        <span>与Apex一起</span>
+                        <span>Exploding beams.</span>
                     </div>
                 </div>
             </h2>
 
             <div className="flex flex-col md:flex-row flex-wrap items-start justify-center gap-8 md:gap-12 w-full">
                 {products.map(product => (
-                    <ProductCard 
-                        key={product.id} 
-                        product={product} 
-                        isExpanded={expandedCardId === product.id}
-                        onExpand={handleExpand}
-                    />
+                    <motion.div key={product.id} layoutId={`card-container-${product.id}`} onClick={() => handleExpand(product.id)}>
+                        <ProductCard product={product} />
+                    </motion.div>
                 ))}
             </div>
         </div>
       </main>
+
+      <AnimatePresence>
+          {expandedCardId && (
+              <>
+                <motion.div
+                    className="fixed inset-0 z-40 bg-black/50"
+                    onClick={handleCollapse}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                />
+                <ExpandedCard product={products.find(p => p.id === expandedCardId)!} onCollapse={handleCollapse} />
+              </>
+          )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showExpiredModal && <ExpiredModal onClose={() => setShowExpiredModal(false)} />}
