@@ -13,7 +13,6 @@ function cn(...inputs: ClassValue[]) {
 }
 
 // --- 动态倒计时及百分比显示组件 ---
-// 优化: 使用 React.memo 避免不必要的重渲染
 const CountdownDisplay = React.memo(({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [percentage, setPercentage] = useState(0);
@@ -33,11 +32,11 @@ const CountdownDisplay = React.memo(({ startDateString, endDateString }: { start
                 const seconds = Math.floor((remainingTimeMs % (1000 * 60)) / 1000);
                 setTimeLeft({ days, hours, minutes, seconds });
 
-                const currentPercentage = (remainingTimeMs / totalDuration) * 100;
-                setPercentage(currentPercentage);
+                const currentPercentage = (1 - remainingTimeMs / totalDuration) * 100;
+                setPercentage(100 - (remainingTimeMs / totalDuration) * 100);
             } else {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-                setPercentage(0);
+                setPercentage(100);
                 clearInterval(interval);
             }
         }, 1000);
@@ -59,7 +58,6 @@ CountdownDisplay.displayName = "CountdownDisplay";
 
 
 // --- 动态进度条组件 ---
-// 优化: 使用 React.memo 避免不必要的重渲染
 const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [progress, setProgress] = useState(0);
     const startDate = useMemo(() => new Date(startDateString), [startDateString]);
@@ -137,7 +135,6 @@ const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateS
 ProgressBar.displayName = "ProgressBar";
 
 // --- Markdown 渲染组件 ---
-// 优化: 使用 React.memo 避免不必要的重渲染
 const SimpleMarkdownRenderer = React.memo(({ content }: { content: string }) => {
     const lines = content.split('\n').map(line => line.trim());
     return (
@@ -180,7 +177,6 @@ const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ ease: "easeOut", duration: 0.2 }}
-                // 优化: 添加 will-change 属性，提示浏览器为 opacity 和 transform 动画做准备
                 style={{ willChange: 'opacity, transform' }}
                 className="bg-[#1a1f32] rounded-2xl p-8 text-center shadow-2xl border border-white/10 max-w-sm w-full"
                 onClick={(e) => e.stopPropagation()}
@@ -209,18 +205,18 @@ interface Product {
   qrCodeUrl: string;
 }
 
-// 优化: 使用 React.memo 避免不必要的重渲染
 const ProductCard = React.memo(({ product }: { product: Product; }) => {
     const [isHovered, setIsHovered] = useState(false);
     
     return (
       <motion.div
-        className="relative rounded-[32px] overflow-hidden w-full max-w-[360px] h-[450px] mx-auto bg-[#0e131f] cursor-pointer will-change-transform" // 优化: 添加 will-change-transform 类
+        className="relative rounded-[32px] overflow-hidden w-full max-w-[360px] h-[450px] mx-auto bg-[#0e131f] cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         initial={{ y: 0 }}
         animate={{ y: isHovered ? -8 : 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        style={{ willChange: 'transform' }}
       >
         <div className="relative w-full h-full flex flex-col p-8 z-30">
           <div className="w-12 h-12 rounded-full flex items-center justify-center mb-6 bg-gradient-to-tr from-[#171c2c] to-[#121624]"
@@ -259,18 +255,18 @@ ProductCard.displayName = "ProductCard";
 const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: () => void; }) => {
     return (
       <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
           onClick={onCollapse}
-          initial={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
-          animate={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
-          exit={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
       >
         <motion.div
-          className="relative rounded-[32px] overflow-hidden w-full max-w-3xl bg-[#0e131f] max-h-[85vh] flex flex-col will-change-transform" // 优化: 添加 will-change
+          className="relative rounded-[32px] overflow-hidden w-full max-w-3xl bg-[#0e131f] max-h-[85vh] flex flex-col"
+          style={{ willChange: 'transform' }}
           layoutId={`card-container-${product.id}`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* 优化: 内容部分使用独立的 motion.div 进行动画，并添加延迟，避免与 layout 动画冲突 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -331,7 +327,6 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
   useEffect(() => {
     if (targetY === 0) return;
 
-    let frameId: number;
     const checkCollision = () => {
       if (beamRef.current && parentRef.current) {
         const beamRect = beamRef.current.getBoundingClientRect();
@@ -348,10 +343,10 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
           }, 2000);
         }
       }
-      frameId = requestAnimationFrame(checkCollision);
     };
-    frameId = requestAnimationFrame(checkCollision);
-    return () => cancelAnimationFrame(frameId);
+    // 修复: 恢复使用 setInterval 以确保稳定性
+    const animationInterval = setInterval(checkCollision, 50);
+    return () => clearInterval(animationInterval);
   }, [collision.detected, parentRef, targetY]);
 
   return (
@@ -372,10 +367,12 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
   );
 };
 
-const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) => {
+const BackgroundBeamsWithCollision = ({ className, isPaused }: { className?: string; isPaused?: boolean }) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const beams = [ { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" }, ];
   
+  if (isPaused) return null;
+
   return (
     <div ref={parentRef} className={cn("absolute inset-0 w-full h-full overflow-hidden", className)}>
         {beams.map((beam, index) => (<CollisionMechanism key={beam.initialX + `beam-idx-${index}`} beamOptions={beam} parentRef={parentRef} />))}
@@ -385,8 +382,7 @@ const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) =>
 
 
 // --- 3D 场景代码 ---
-const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
-    // 优化: 几何体和材质可以在组件外部定义一次，避免每次渲染都重新创建
+const Box = React.memo(({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
     const geometry = useMemo(() => {
         const shape = new THREE.Shape();
         const angleStep = Math.PI * 0.5;
@@ -403,12 +399,12 @@ const Box = ({ position, rotation }: { position: [number, number, number], rotat
     const material = useMemo(() => new THREE.MeshPhysicalMaterial({ color: "#232323", metalness: 1, roughness: 0.3, reflectivity: 0.5, ior: 1.5, emissive: "#000000", emissiveIntensity: 0, transparent: false, opacity: 1.0, transmission: 0.0, thickness: 0.5, clearcoat: 0.0, clearcoatRoughness: 0.0, sheen: 0, sheenRoughness: 1.0, sheenColor: "#ffffff", specularIntensity: 1.0, specularColor: "#ffffff", iridescence: 1, iridescenceIOR: 1.3, iridescenceThicknessRange: [100, 400], flatShading: false }), []);
     
     return <mesh geometry={geometry} material={material} position={position} rotation={rotation} />;
-};
+});
+Box.displayName = "Box";
 
 const AnimatedBoxes = ({ isPaused }: { isPaused: boolean }) => {
     const groupRef = useRef<THREE.Group>(null!);
     useFrame((_, delta) => { 
-        // 优化: 当卡片展开或模态框显示时，暂停3D动画以节省资源
         if (isPaused || !groupRef.current) return;
         groupRef.current.rotation.x += delta * 0.05; 
         groupRef.current.rotation.y += delta * 0.05; 
@@ -434,8 +430,13 @@ const Scene = ({ isPaused }: { isPaused: boolean }) => {
 export default function Page() {
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
   const [showExpiredModal, setShowExpiredModal] = useState(false); 
+  // 修复: 创建 isMounted 状态，确保复杂组件只在客户端渲染
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
-  // 优化: 创建一个状态来判断是否有交互（卡片展开或模态框显示）
   const isInteractionActive = expandedCardId !== null || showExpiredModal;
 
   useEffect(() => {
@@ -489,21 +490,17 @@ export default function Page() {
   const expandedProduct = useMemo(() => {
       if (expandedCardId === null) return null;
       return products.find(p => p.id === expandedCardId) || null;
-  }, [expandedCardId]);
+  }, [expandedCardId, products]);
 
 
   return (
     <div className="relative w-full min-h-screen bg-[#000] text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
-      <Scene isPaused={isInteractionActive} />
+      {/* 修复: 仅在客户端挂载后渲染复杂组件 */}
+      {isMounted && <Scene isPaused={isInteractionActive} />}
       
-      {/* 优化: 当交互激活时，淡出背景光束动画以提高性能 */}
-      <motion.div
-        className="fixed inset-0 z-20 pointer-events-none"
-        animate={{ opacity: isInteractionActive ? 0 : 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <BackgroundBeamsWithCollision />
-      </motion.div>
+      <div className="fixed inset-0 z-20 pointer-events-none">
+        {isMounted && <BackgroundBeamsWithCollision isPaused={isInteractionActive} />}
+      </div>
 
       <main className="relative z-10 flex flex-col items-center w-full min-h-screen px-4 py-16 sm:py-24">
         <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 w-full">
