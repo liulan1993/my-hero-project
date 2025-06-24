@@ -152,7 +152,7 @@ const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
     );
 };
 
-// --- 活动已截止的提示弹窗 ---
+// --- 活动已截止的提示弹窗 (已修复) ---
 const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
     return (
         <motion.div
@@ -163,9 +163,10 @@ const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
             onClick={onClose}
         >
             <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                // 移除了 scale 动画来修复UI卡顿和变大问题
                 className="bg-[#1a1f32] rounded-2xl p-8 text-center shadow-2xl border border-white/10 max-w-sm w-full"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -280,7 +281,7 @@ const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: (
 };
 
 
-// --- 光束和碰撞组件 ---
+// --- 光束和碰撞组件 (已修复) ---
 const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   const spans = Array.from({ length: 20 }, (_, index) => ({ id: index, initialX: 0, initialY: 0, directionX: Math.floor(Math.random() * 80 - 40), directionY: Math.floor(Math.random() * -50 - 10) }));
   return (
@@ -290,16 +291,21 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
     </div>
   );
 };
-const CollisionMechanism = ({ parentRef, containerRef, beamOptions = {} }: { containerRef: React.RefObject<HTMLDivElement | null>; parentRef: React.RefObject<HTMLDivElement | null>; beamOptions?: { initialX?: number; translateX?: number; initialY?: number; translateY?: number; rotate?: number; className?: string; duration?: number; delay?: number; repeatDelay?: number; }; }) => {
+
+// 修复了碰撞逻辑，移除了未使用的 containerRef，改为检测浏览器窗口底部
+const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.RefObject<HTMLDivElement | null>; beamOptions?: { initialX?: number; translateX?: number; initialY?: number; translateY?: number; rotate?: number; className?: string; duration?: number; delay?: number; repeatDelay?: number; }; }) => {
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{ detected: boolean; coordinates: { x: number; y: number } | null; }>({ detected: false, coordinates: null });
   const [beamKey, setBeamKey] = useState(0);
+
   useEffect(() => {
     const checkCollision = () => {
-      if (beamRef.current && containerRef.current && parentRef.current) {
+      if (beamRef.current && parentRef.current) {
         const beamRect = beamRef.current.getBoundingClientRect();
-        const containerRect = containerRef.current.getBoundingClientRect();
-        if (beamRect.bottom >= containerRect.top && !collision.detected) {
+        const windowHeight = window.innerHeight; // 获取窗口高度
+
+        // 当光束底部接触或超过窗口底部时，触发碰撞
+        if (beamRect.bottom >= windowHeight && !collision.detected) {
           const parentRect = parentRef.current.getBoundingClientRect();
           const relativeX = beamRect.left - parentRect.left + beamRect.width / 2;
           const relativeY = beamRect.bottom - parentRect.top;
@@ -313,10 +319,11 @@ const CollisionMechanism = ({ parentRef, containerRef, beamOptions = {} }: { con
     };
     const animationInterval = setInterval(checkCollision, 50);
     return () => clearInterval(animationInterval);
-  }, [collision.detected, containerRef, parentRef]);
+  }, [collision.detected, parentRef]); // 移除了 containerRef 依赖
+
   return (
     <>
-      <motion.div key={beamKey} ref={beamRef} animate="animate" initial={{ y: beamOptions.initialY || -200, x: beamOptions.initialX || 0, rotate: beamOptions.rotate || 0 }} variants={{ animate: { y: 1800, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }} transition={{ duration: beamOptions.duration || 8, repeat: Infinity, repeatType: "loop", ease: "linear", delay: beamOptions.delay || 0, repeatDelay: beamOptions.repeatDelay || 0 }} className={cn("absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent", beamOptions.className)} />
+      <motion.div key={beamKey} ref={beamRef} animate="animate" initial={{ y: beamOptions.initialY || -200, x: beamOptions.initialX || 0, rotate: beamOptions.rotate || 0 }} variants={{ animate: { y: window.innerHeight + 200, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }} transition={{ duration: beamOptions.duration || 8, repeat: Infinity, repeatType: "loop", ease: "linear", delay: beamOptions.delay || 0, repeatDelay: beamOptions.repeatDelay || 0 }} className={cn("absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent", beamOptions.className)} />
       <AnimatePresence>
         {collision.detected && collision.coordinates && ( <Explosion key={`${collision.coordinates.x}-${collision.coordinates.y}`} style={{ left: `${collision.coordinates.x}px`, top: `${collision.coordinates.y}px`, transform: "translate(-50%, -50%)" }} /> )}
       </AnimatePresence>
@@ -325,12 +332,13 @@ const CollisionMechanism = ({ parentRef, containerRef, beamOptions = {} }: { con
 };
 
 const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
   const beams = [ { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" }, ];
+  
   return (
     <div ref={parentRef} className={cn("absolute inset-0 w-full h-full overflow-hidden", className)}>
-      {beams.map((beam) => (<CollisionMechanism key={beam.initialX + "beam-idx"} beamOptions={beam} containerRef={containerRef} parentRef={parentRef} />))}
+        {/* 移除了未使用的 containerRef */}
+        {beams.map((beam, index) => (<CollisionMechanism key={beam.initialX + `beam-idx-${index}`} beamOptions={beam} parentRef={parentRef} />))}
     </div>
   );
 };
@@ -462,17 +470,9 @@ export default function Page() {
       </main>
 
       <AnimatePresence>
+          {/* 修复：移除了灰色背景遮罩，现在直接在页面上展开 */}
           {expandedCardId && (
-              <>
-                <motion.div
-                    className="fixed inset-0 z-40 bg-black/50"
-                    onClick={handleCollapse}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                />
-                <ExpandedCard product={products.find(p => p.id === expandedCardId)!} onCollapse={handleCollapse} />
-              </>
+              <ExpandedCard product={products.find(p => p.id === expandedCardId)!} onCollapse={handleCollapse} />
           )}
       </AnimatePresence>
 
