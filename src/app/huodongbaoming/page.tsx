@@ -50,8 +50,6 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   );
 };
 
-// 错误修复：彻底移除多余的 React.forwardRef，因为它没有被使用，并且是导致部署失败的根本原因。
-// 将其改为一个普通的函数组件。
 const CollisionMechanism = ({
   parentRef,
   containerRef,
@@ -177,7 +175,9 @@ const CollisionMechanism = ({
   );
 };
 
-export const BackgroundBeamsWithCollision = ({
+// 错误修复：移除了此组件前的 `export` 关键字。
+// 一个 page.tsx 文件最好只默认导出一个页面组件，以避免与 Next.js 的构建系统冲突。
+const BackgroundBeamsWithCollision = ({
   children,
   className,
 }: {
