@@ -175,8 +175,6 @@ const CollisionMechanism = ({
   );
 };
 
-// 错误修复：移除了此组件前的 `export` 关键字。
-// 一个 page.tsx 文件最好只默认导出一个页面组件，以避免与 Next.js 的构建系统冲突。
 const BackgroundBeamsWithCollision = ({
   children,
   className,
@@ -338,7 +336,8 @@ export default function Page() {
       <BackgroundBeamsWithCollision>
         <h2 className="text-2xl relative z-20 md:text-4xl lg:text-7xl font-bold text-center text-black dark:text-white font-sans tracking-tight">
           {/* 上面一行，不带颜色 */}
-          <div>What's cooler than Beams?</div>
+          {/* 错误修复：将 ' 替换为 &apos; 来修复 react/no-unescaped-entities 错误 */}
+          <div>What&apos;s cooler than Beams?</div>
 
           {/* 下面一行，带颜色 */}
           <div className="relative mx-auto w-max [filter:drop-shadow(0px_1px_3px_rgba(27,_37,_80,_0.14))]">
