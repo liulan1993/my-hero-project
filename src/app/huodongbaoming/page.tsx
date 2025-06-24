@@ -135,7 +135,8 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div onClick={() => onExpand(product.id)} className="cursor-pointer w-full">
+    // 错误修复: 移除了 w-full 类，让 flexbox 容器来控制其宽度
+    <div onClick={() => onExpand(product.id)} className="cursor-pointer">
         <motion.div
             className="relative rounded-[32px] overflow-hidden flex flex-col w-full max-w-[360px] h-[450px] mx-auto"
             style={{
