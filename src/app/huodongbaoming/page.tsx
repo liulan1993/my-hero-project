@@ -80,43 +80,22 @@ interface Product {
 }
 
 const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: number) => void }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      const rotateX = -(y / rect.height) * 5;
-      const rotateY = (x / rect.width) * 5;
-      setRotation({ x: rotateX, y: rotateY });
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setRotation({ x: 0, y: 0 });
-  };
 
   return (
     <div onClick={() => onExpand(product.id)} className="cursor-pointer">
+        {/* 错误修复：移除了 handleMouseMove, handleMouseLeave, 和 animate prop 中的 rotateX/rotateY 来停止悬停时的3D变形效果。 */}
         <motion.div
-            ref={cardRef}
             className="relative rounded-[32px] overflow-hidden"
             style={{
             width: "360px",
             height: "450px",
-            transformStyle: "preserve-3d",
             backgroundColor: "#0e131f",
             boxShadow: "0 -10px 100px 10px rgba(78, 99, 255, 0.25), 0 0 10px 0 rgba(0, 0, 0, 0.5)",
             }}
             initial={{ y: 0 }}
             animate={{
-            y: isHovered ? -5 : 0,
-            rotateX: rotation.x,
-            rotateY: rotation.y,
+            y: isHovered ? -8 : 0, // 只保留轻微的上浮效果
             }}
             transition={{
             type: "spring",
@@ -124,8 +103,7 @@ const ProductCard = ({ product, onExpand }: { product: Product; onExpand: (id: n
             damping: 20
             }}
             onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={handleMouseLeave}
-            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setIsHovered(false)}
         >
             <motion.div
                 className="absolute inset-0 z-35 pointer-events-none"
