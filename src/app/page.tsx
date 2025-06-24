@@ -1220,7 +1220,7 @@ const CtaWithGallerySection = () => {
                                 <div className="w-full md:w-1/3 p-6 border-r border-neutral-800">
                                     <div className="flex flex-col gap-3">
                                     <Image
-                                        src="https://zh.apex-elite-service.com/wangzhantupian/logo.png"
+                                        src="https://zh.apex-elite-service.com/wenjian/logo.png"
                                         alt="Logo"
                                         width={48}
                                         height={48}
@@ -1288,7 +1288,7 @@ const CtaWithGallerySection = () => {
 
                                     <div className="w-full h-60 bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
                                         <Image
-                                        src="https://zh.apex-elite-service.com/1111/12121212.jpg"
+                                        src="https://zh.apex-elite-service.com/wenjian/12.jpg"
                                         alt="Step Visual"
                                         width={200}
                                         height={200}
@@ -1662,7 +1662,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供一站式的公司注册“创始包”，涵盖战略架构、银行开户与主动式秘书服务，为您稳固事业的第一步。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/1111/1111.jpg" 
+              src="https://zh.apex-elite-service.com/wenjian/1.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1679,7 +1679,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">为创始人、高管及家人量身定制整体准证方案（EP、DP等），通过深度评估与战略规划，极大化成功率，提供核心身份保障。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/1111/2222.jpg" 
+              src="https://zh.apex-elite-service.com/wenjian/2.jpg" 
               alt="启动模板" 
               width={500}
               height={300}
@@ -1696,7 +1696,7 @@ const timelineData = [
           <p className="text-neutral-200 font-normal mb-8 text-base md:text-lg">提供专业的年度财税申报、财税合规与规划服务，我们不仅确保您的企业稳健合规，更助力您充分享受新加坡的政策优势。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/1111/3333.jpg" 
+              src="https://zh.apex-elite-service.com/wenjian/3.jpg" 
               alt="英雄区模板" 
               width={500}
               height={300}
@@ -1713,7 +1713,7 @@ const timelineData = [
           <p className="text-neutral-200 mb-4 text-base md:text-lg">提供从核心人才招聘、名义雇主（EOR）到跨境薪酬合规的一站式人力资源解决方案，助您在新加坡高效、合规地组建并管理顶尖团队。</p>
           <div>
             <Image 
-              src="https://zh.apex-elite-service.com/1111/4444.jpg" 
+              src="https://zh.apex-elite-service.com/wenjian/4.jpg" 
               alt="新组件预览" 
               width={500}
               height={300}
@@ -1731,7 +1731,7 @@ const projectShowcaseData = [
     buttonLabel: "教育蓝图", // <-- 新增：按钮上显示的文字
     quote: '我们提供超越择校咨询的长期教育路径规划。通过深度评估家庭理念与孩子特质，为您量身定制从当前到世界名校的清晰成长路线图。',
     designation: "Next.js 项目",
-    src: "https://zh.apex-elite-service.com/1111/5555.jpg",
+    src: "https://zh.apex-elite-service.com/wenjian/5.jpg",
     link: "https://plum-cave.netlify.app/",
   },
   {
@@ -1739,7 +1739,7 @@ const projectShowcaseData = [
     buttonLabel: "名校起航", // <-- 新增：按钮上显示的文字
     quote: "我们提供精准、高效的全流程申请支持，关注的不仅是文书与面试技巧，更是如何将您孩子最独特的闪光点呈现给招生官，赢得理想的录取通知。",
     designation: "Next.js 项目",
-    src: "https://zh.apex-elite-service.com/1111/6666.jpg",
+    src: "https://zh.apex-elite-service.com/wenjian/6.jpg",
     link: "https://namer-ui.netlify.app/",
   },
   {
@@ -1747,7 +1747,7 @@ const projectShowcaseData = [
     buttonLabel: "全程护航", // <-- 新增：按钮上显示的文字
     quote: "我们提供超越申请的长期陪伴服务。作为您与学校间的沟通桥梁，我们协助处理从家长会到升学指导的各项事务，确保孩子无缝融入并持续进步。",
     designation: "Vue 项目",
-    src: "https://zh.apex-elite-service.com/1111/7777.jpg",
+    src: "https://zh.apex-elite-service.com/wenjian/7.jpg",
     link: "https://namer-ui-for-vue.netlify.app/",
   },
 ];
@@ -1771,8 +1771,8 @@ const infoSectionData1 = {
             致力于助您主动掌控健康，预见未来
         </>
     ),
-    primaryImageSrc: 'https://zh.apex-elite-service.com/1111/8888.jpg',
-    secondaryImageSrc: 'https://zh.apex-elite-service.com/1111/9999.jpg',
+    primaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/8.jpg',
+    secondaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/9.jpg',
 };
 
 const infoSectionData2 = {
@@ -1794,8 +1794,8 @@ const infoSectionData2 = {
             将未来的不确定性，转化为尽在掌握的主动权
         </>
     ),
-    primaryImageSrc: 'https://zh.apex-elite-service.com/1111/10101010.jpg',
-    secondaryImageSrc: 'https://zh.apex-elite-service.com/1111/11111111.jpg',
+    primaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/10.jpg',
+    secondaryImageSrc: 'https://zh.apex-elite-service.com/wenjian/11.jpg',
 };
 
 // 新增: FAQ 数据
@@ -1824,7 +1824,7 @@ const faqData = [
 
 const scrollAnimationPages = [
   {
-    leftBgImage: 'https://zh.apex-elite-service.com/1111/13131313.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wenjian/13.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1834,7 +1834,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://zh.apex-elite-service.com/1111/14141414.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wenjian/14.jpg',
     leftContent: {
       heading: '安心保障',
       description: '我们郑重承诺：24小时内回复，紧急事务2小时内响应。所有价格透明，无隐形消费。您将拥有一位专属项目合伙人，全程为您负责。',
@@ -1842,7 +1842,7 @@ const scrollAnimationPages = [
     rightContent: null,
   },
   {
-    leftBgImage: 'https://zh.apex-elite-service.com/1111/15151515.jpg',
+    leftBgImage: 'https://zh.apex-elite-service.com/wenjian/15.jpg',
     rightBgImage: null,
     leftContent: null,
     rightContent: {
@@ -1852,7 +1852,7 @@ const scrollAnimationPages = [
   },
   {
     leftBgImage: null,
-    rightBgImage: 'https://zh.apex-elite-service.com/1111/16161616.jpg',
+    rightBgImage: 'https://zh.apex-elite-service.com/wenjian/16.jpg',
     leftContent: {
       heading: '即刻启程',
       description: '纸上得来终觉浅，绝知此事要躬行。立即联系我们，开启一次专属的战略性探讨，让我们为您在新加坡的成功保驾护航。',
@@ -2268,10 +2268,10 @@ const CustomFooter = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const socialIcons = [
-      { name: '小红书', icon: <XiaohongshuIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2' },
-      { name: '知乎', icon: <ZhihuIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
-      { name: '抖音', icon: <DouyinIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/wenjing.png', url: 'https://www.douyin.com' },
-      { name: '哔哩哔哩', icon: <BilibiliIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wangzhantupian/mengchen.png', url: 'https://www.bilibili.com' },
+      { name: '小红书', icon: <XiaohongshuIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wenjian/xiaohongshu.png', url: 'https://www.xiaohongshu.com/user/profile/6624755f00000000030303c2' },
+      { name: '知乎', icon: <ZhihuIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wenjian/sara.png', url: 'https://www.zhihu.com/org/apex-elite-service' },
+      { name: '抖音', icon: <DouyinIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wenjian/wenjing.png', url: 'https://www.douyin.com' },
+      { name: '哔哩哔哩', icon: <BilibiliIcon className="h-5 w-5" />, qrcode: 'https://zh.apex-elite-service.com/wenjian/mengchen.png', url: 'https://www.bilibili.com' },
     ];
 
     const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -2298,7 +2298,7 @@ const CustomFooter = () => {
             <h2 className="text-2xl font-bold tracking-tight mb-4">官方公众号</h2>
             <div className="mb-8 w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-gray-800/20 border border-slate-700 rounded-lg flex items-center justify-center p-2">
               <Image
-                src="https://zh.apex-elite-service.com/wangzhantupian/gongzhonghao.png"
+                src="https://zh.apex-elite-service.com/wenjian/weixingongzhonghao.png"
                 alt="官方公众号二维码"
                 width={280}
                 height={280}
