@@ -2533,7 +2533,7 @@ export default function HomePage() {
           
           setTimeout(() => {
               setAnimationState('finished'); // 4. 穿梭结束，动画完成
-          }, 1500 + 3000); // 穿梭动画总时长 (1.5s + 5s)
+          }, 1500 + 2000); // 穿梭动画总时长 (1.5s + 5s)
       }
   };
 
@@ -2592,7 +2592,7 @@ export default function HomePage() {
         key="main-content"
         initial={{ opacity: 0 }}
         animate={{ opacity: mainContentVisible ? 1 : 0 }}
-        transition={{ duration: 3, ease: "easeOut" }}
+        transition={{ duration: 2, ease: "easeOut" }}
         className={cn(animationState !== 'finished' && "pointer-events-none")}
       >
         <AppNavigationBar 
