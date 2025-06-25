@@ -124,12 +124,23 @@ const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateS
                     />
                 </motion.div>
             ) : (
-                // “已截止”的闪烁效果
+                // “已截止”的闪烁效果 (已修复)
                 <motion.div
                     className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full"
                     style={{ width: '100%' }}
-                    animate={{ opacity: [1, 0.6, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    animate={{ 
+                        // 修复: 使用 box-shadow 创建一个更明显、颜色匹配的脉冲辉光效果
+                        boxShadow: [
+                            "0 0 0px 0px rgba(168, 85, 247, 0.2)",
+                            "0 0 12px 3px rgba(168, 85, 247, 0.6)",
+                            "0 0 0px 0px rgba(168, 85, 247, 0.2)",
+                        ],
+                    }}
+                    transition={{ 
+                        duration: 1.8, // 减慢一点动画，使其更柔和
+                        repeat: Infinity, 
+                        ease: "easeInOut" 
+                    }}
                 />
             )}
         </div>
