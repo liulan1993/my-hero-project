@@ -104,10 +104,11 @@ const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateS
     }, [startDate, endDate]); // 依赖项应保持不变，无需加入 progress
 
     return (
-        <div className="w-full h-2 bg-gray-500/20 rounded-full overflow-hidden relative mt-auto">
+        // 修复: 移除了 overflow-hidden，以防止辉光效果被裁剪
+        <div className="w-full h-2 bg-gray-500/20 rounded-full relative mt-auto">
             {progress < 100 ? (
                  <motion.div
-                    className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative overflow-hidden"
+                    className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative"
                     initial={{ width: `${progress}%` }} // 从计算出的初始值开始
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1, ease: "linear" }}
@@ -541,7 +542,7 @@ export default function Page() {
                 </div>
             </h2>
 
-            <div className="flex flex-col md:flex-row flex-wrap items-start justify-center gap-8 md:gap-12 w-full">
+            <div className="flex flex-col md:flex-row flex-wrap items-center justify-center gap-8 md:gap-12 w-full">
                 {products.map(product => (
                     <motion.div key={product.id} layoutId={`card-container-${product.id}`} onClick={() => handleExpand(product.id)}>
                         <ProductCard product={product} />
