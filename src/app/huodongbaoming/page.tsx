@@ -58,12 +58,25 @@ const CountdownDisplay = React.memo(({ startDateString, endDateString }: { start
 CountdownDisplay.displayName = 'CountdownDisplay'; // 方便调试
 
 
-// --- 动态进度条组件 (已优化) ---
+// --- 动态进度条组件 (已修复) ---
 const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
-    const [progress, setProgress] = useState(0);
-    // 优化: 使用 useMemo 缓存日期对象
     const startDate = useMemo(() => new Date(startDateString), [startDateString]);
     const endDate = useMemo(() => new Date(endDateString), [endDateString]);
+
+    // 修复: 封装一个独立的进度计算函数
+    const calculateProgress = () => {
+        const now = new Date();
+        const totalDuration = endDate.getTime() - startDate.getTime();
+        // 处理 totalDuration 为0或负数的情况，避免NaN
+        if (totalDuration <= 0) return 100;
+
+        const elapsedTime = now.getTime() - startDate.getTime();
+        const currentProgress = (elapsedTime / totalDuration) * 100;
+        return Math.min(Math.max(currentProgress, 0), 100);
+    };
+
+    // 修复: 同步计算初始进度，避免在截止后初次渲染时进度条仍从0开始
+    const [progress, setProgress] = useState(calculateProgress);
 
     const animationDuration = useMemo(() => {
         const maxDuration = 1.5;
@@ -73,32 +86,33 @@ const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateS
     }, [progress]);
 
     useEffect(() => {
+        // 修复: 如果初始进度已经是100%，则无需启动定时器
+        if (progress >= 100) {
+            return;
+        }
+
         const interval = setInterval(() => {
-            const now = new Date();
-            const totalDuration = endDate.getTime() - startDate.getTime();
-            const elapsedTime = now.getTime() - startDate.getTime();
-            const currentProgress = (elapsedTime / totalDuration) * 100;
-            const newProgress = Math.min(Math.max(currentProgress, 0), 100);
-            
+            const newProgress = calculateProgress();
             setProgress(newProgress);
             
             if (newProgress >= 100) {
-                clearInterval(interval); // 优化: 进度条满了之后清除定时器
+                clearInterval(interval);
             }
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [startDate, endDate]);
+    }, [startDate, endDate]); // 依赖项应保持不变，无需加入 progress
 
     return (
         <div className="w-full h-2 bg-gray-500/20 rounded-full overflow-hidden relative mt-auto">
             {progress < 100 ? (
                  <motion.div
                     className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative overflow-hidden"
-                    initial={{ width: '0%' }}
+                    initial={{ width: `${progress}%` }} // 从计算出的初始值开始
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1, ease: "linear" }}
                 >
+                    {/* “加载中”的扫光效果 */}
                     <motion.div
                         className="absolute top-0 left-0 h-full w-10 opacity-80"
                         style={{
@@ -110,11 +124,12 @@ const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateS
                     />
                 </motion.div>
             ) : (
+                // “已截止”的闪烁效果
                 <motion.div
                     className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full"
                     style={{ width: '100%' }}
                     animate={{ opacity: [1, 0.6, 1] }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 />
             )}
         </div>
