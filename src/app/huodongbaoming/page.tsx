@@ -108,7 +108,8 @@ const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateS
         <div className="w-full h-2 bg-gray-500/20 rounded-full relative mt-auto">
             {progress < 100 ? (
                  <motion.div
-                    className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative"
+                    // 修复: 添加 overflow-hidden 以将扫光效果限制在进度条内部
+                    className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full relative overflow-hidden"
                     initial={{ width: `${progress}%` }} // 从计算出的初始值开始
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1, ease: "linear" }}
@@ -130,15 +131,16 @@ const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateS
                     className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full"
                     style={{ width: '100%' }}
                     animate={{ 
-                        // 修复: 使用 box-shadow 创建一个更明显、颜色匹配的脉冲辉光效果
+                        // 修复: 大幅增强辉光效果，使其更醒目
                         boxShadow: [
-                            "0 0 0px 0px rgba(168, 85, 247, 0.2)",
-                            "0 0 12px 3px rgba(168, 85, 247, 0.6)",
-                            "0 0 0px 0px rgba(168, 85, 247, 0.2)",
+                            "0 0 2px 0px rgba(168, 85, 247, 0.2)",
+                            "0 0 25px 8px rgba(168, 85, 247, 0.8)",
+                            "0 0 2px 0px rgba(168, 85, 247, 0.2)",
                         ],
                     }}
                     transition={{ 
-                        duration: 1.8, // 减慢一点动画，使其更柔和
+                        // 修复: 加快动画频率，实现“救护车”式爆闪
+                        duration: 0.7, 
                         repeat: Infinity, 
                         ease: "easeInOut" 
                     }}
