@@ -12,10 +12,11 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- 动态倒计时及百分比显示组件 ---
-const CountdownDisplay = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
+// --- 动态倒计时及百分比显示组件 (已优化) ---
+const CountdownDisplay = React.memo(({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [percentage, setPercentage] = useState(0);
+    // 优化: 使用 useMemo 缓存日期对象，避免在每次渲染时重新创建
     const startDate = useMemo(() => new Date(startDateString), [startDateString]);
     const endDate = useMemo(() => new Date(endDateString), [endDateString]);
 
@@ -37,6 +38,7 @@ const CountdownDisplay = ({ startDateString, endDateString }: { startDateString:
             } else {
                 setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
                 setPercentage(0);
+                clearInterval(interval); // 优化: 倒计时结束后清除定时器
             }
         }, 1000);
 
@@ -52,12 +54,14 @@ const CountdownDisplay = ({ startDateString, endDateString }: { startDateString:
             </div>
         </div>
     );
-};
+});
+CountdownDisplay.displayName = 'CountdownDisplay'; // 方便调试
 
 
-// --- 动态进度条组件 ---
-const ProgressBar = ({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
+// --- 动态进度条组件 (已优化) ---
+const ProgressBar = React.memo(({ startDateString, endDateString }: { startDateString: string; endDateString: string; }) => {
     const [progress, setProgress] = useState(0);
+    // 优化: 使用 useMemo 缓存日期对象
     const startDate = useMemo(() => new Date(startDateString), [startDateString]);
     const endDate = useMemo(() => new Date(endDateString), [endDateString]);
 
@@ -74,8 +78,13 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
             const totalDuration = endDate.getTime() - startDate.getTime();
             const elapsedTime = now.getTime() - startDate.getTime();
             const currentProgress = (elapsedTime / totalDuration) * 100;
-
-            setProgress(Math.min(Math.max(currentProgress, 0), 100));
+            const newProgress = Math.min(Math.max(currentProgress, 0), 100);
+            
+            setProgress(newProgress);
+            
+            if (newProgress >= 100) {
+                clearInterval(interval); // 优化: 进度条满了之后清除定时器
+            }
         }, 1000);
 
         return () => clearInterval(interval);
@@ -96,38 +105,28 @@ const ProgressBar = ({ startDateString, endDateString }: { startDateString: stri
                             background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent)',
                             filter: 'blur(4px)',
                         }}
-                        animate={{
-                            x: ['-100%', '1000%']
-                        }}
-                        transition={{
-                            duration: animationDuration,
-                            repeat: Infinity,
-                            ease: "linear"
-                        }}
+                        animate={{ x: ['-100%', '1000%'] }}
+                        transition={{ duration: animationDuration, repeat: Infinity, ease: "linear" }}
                     />
                 </motion.div>
             ) : (
                 <motion.div
                     className="h-full bg-gradient-to-r from-purple-500 to-sky-400 rounded-full"
                     style={{ width: '100%' }}
-                    animate={{
-                        opacity: [1, 0.6, 1]
-                    }}
-                    transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
+                    animate={{ opacity: [1, 0.6, 1] }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
                 />
             )}
         </div>
     );
-};
+});
+ProgressBar.displayName = 'ProgressBar';
 
 
-// --- Markdown 渲染组件 ---
-const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
-    const lines = content.split('\n').map(line => line.trim());
+// --- Markdown 渲染组件 (已优化) ---
+const SimpleMarkdownRenderer = React.memo(({ content }: { content: string }) => {
+    // 优化: 使用 useMemo 避免在每次渲染时重新分割字符串
+    const lines = useMemo(() => content.split('\n').map(line => line.trim()), [content]);
     return (
         <div className="text-gray-300 text-center">
             {lines.map((line, index) => {
@@ -150,10 +149,11 @@ const SimpleMarkdownRenderer = ({ content }: { content: string }) => {
             })}
         </div>
     );
-};
+});
+SimpleMarkdownRenderer.displayName = 'SimpleMarkdownRenderer';
 
-// --- 活动已截止的提示弹窗 (已修复) ---
-const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
+// --- 活动已截止的提示弹窗 (已优化) ---
+const ExpiredModal = React.memo(({ onClose }: { onClose: () => void }) => {
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -163,10 +163,10 @@ const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
             onClick={onClose}
         >
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                // 移除了 scale 动画来修复UI卡顿和变大问题
+                initial={{ opacity: 0, scale: 0.95 }} // 优化: 使用更轻微的 scale 动画
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="bg-[#1a1f32] rounded-2xl p-8 text-center shadow-2xl border border-white/10 max-w-sm w-full"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -180,10 +180,10 @@ const ExpiredModal = ({ onClose }: { onClose: () => void }) => {
             </motion.div>
         </motion.div>
     );
-};
+});
+ExpiredModal.displayName = 'ExpiredModal';
 
-
-// --- 卡片组件 ---
+// --- 卡片组件 (已优化) ---
 interface Product {
   id: number;
   title: string;
@@ -194,7 +194,7 @@ interface Product {
   qrCodeUrl: string;
 }
 
-const ProductCard = ({ product }: { product: Product; }) => {
+const ProductCard = React.memo(({ product }: { product: Product; }) => {
     const [isHovered, setIsHovered] = useState(false);
     
     return (
@@ -236,14 +236,19 @@ const ProductCard = ({ product }: { product: Product; }) => {
         />
       </motion.div>
     );
-};
+});
+ProductCard.displayName = 'ProductCard';
 
-// --- 展开后的卡片组件 ---
-const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: () => void; }) => {
+
+// --- 展开后的卡片组件 (已优化) ---
+const ExpandedCard = React.memo(({ product, onCollapse }: { product: Product; onCollapse: () => void; }) => {
     return (
       <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" // 优化: 添加一个半透明的背景遮罩，使弹出层更清晰
           onClick={onCollapse}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
       >
         <motion.div
           className="relative rounded-[32px] overflow-hidden w-full max-w-3xl bg-[#0e131f] max-h-[85vh] flex flex-col"
@@ -278,12 +283,13 @@ const ExpandedCard = ({ product, onCollapse }: { product: Product; onCollapse: (
         </motion.div>
       </motion.div>
     );
-};
+});
+ExpandedCard.displayName = 'ExpandedCard';
 
 
-// --- 光束和碰撞组件 (已修复) ---
+// --- 光束和碰撞组件 (已优化) ---
 const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
-  const spans = Array.from({ length: 20 }, (_, index) => ({ id: index, initialX: 0, initialY: 0, directionX: Math.floor(Math.random() * 80 - 40), directionY: Math.floor(Math.random() * -50 - 10) }));
+  const spans = useMemo(() => Array.from({ length: 20 }, (_, index) => ({ id: index, initialX: 0, initialY: 0, directionX: Math.floor(Math.random() * 80 - 40), directionY: Math.floor(Math.random() * -50 - 10) })), []);
   return (
     <div {...props} className={cn("absolute z-50 h-2 w-2", props.className)}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.5, ease: "easeOut" }} className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm" />
@@ -292,26 +298,25 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   );
 };
 
-// 修复：通过 useEffect 在客户端安全地获取 window.innerHeight，避免了服务端渲染错误
-const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.RefObject<HTMLDivElement | null>; beamOptions?: { initialX?: number; translateX?: number; initialY?: number; translateY?: number; rotate?: number; className?: string; duration?: number; delay?: number; repeatDelay?: number; }; }) => {
+const CollisionMechanism = ({ parentRef, beamOptions = {}, isPaused }: { parentRef: React.RefObject<HTMLDivElement | null>; beamOptions?: { initialX?: number; translateX?: number; initialY?: number; translateY?: number; rotate?: number; className?: string; duration?: number; delay?: number; repeatDelay?: number; }; isPaused: boolean; }) => {
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{ detected: boolean; coordinates: { x: number; y: number } | null; }>({ detected: false, coordinates: null });
   const [beamKey, setBeamKey] = useState(0);
-  const [targetY, setTargetY] = useState(0); // 为动画目标Y坐标创建 state
+  const [targetY, setTargetY] = useState(0);
 
-  // 该 effect 仅在客户端运行以获取窗口高度
   useEffect(() => {
     setTargetY(window.innerHeight + 200);
-  }, []); // 空依赖数组确保该 effect 仅在挂载时运行一次（客户端）
+  }, []);
 
-  // 该 effect 处理碰撞检测逻辑
   useEffect(() => {
-    if (targetY === 0) return; // 在设置窗口高度前不运行碰撞检测
+    // 优化: 当交互发生时(isPaused=true)，暂停碰撞检测，释放资源
+    if (isPaused || targetY === 0) return;
 
+    let frameId: number;
     const checkCollision = () => {
       if (beamRef.current && parentRef.current) {
         const beamRect = beamRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight; 
+        const windowHeight = window.innerHeight;
 
         if (beamRect.bottom >= windowHeight && !collision.detected) {
           const parentRect = parentRef.current.getBoundingClientRect();
@@ -325,9 +330,18 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
         }
       }
     };
-    const animationInterval = setInterval(checkCollision, 50);
-    return () => clearInterval(animationInterval);
-  }, [collision.detected, parentRef, targetY]); // 将 targetY 添加到依赖项
+
+    // 优化: 使用 requestAnimationFrame 替代 setInterval，使检测与浏览器渲染同步
+    const animationLoop = () => {
+        if (!collision.detected) { // 碰撞后停止检测，直到重置
+            checkCollision();
+            frameId = requestAnimationFrame(animationLoop);
+        }
+    };
+    frameId = requestAnimationFrame(animationLoop);
+
+    return () => cancelAnimationFrame(frameId);
+  }, [collision.detected, parentRef, targetY, isPaused]); // 添加 isPaused 作为依赖
 
   return (
     <>
@@ -336,7 +350,7 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
         ref={beamRef} 
         animate="animate" 
         initial={{ y: beamOptions.initialY || -200, x: beamOptions.initialX || 0, rotate: beamOptions.rotate || 0 }} 
-        variants={{ animate: { y: targetY, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }} // 使用 state 替代直接访问 window
+        variants={{ animate: { y: targetY, x: beamOptions.translateX || 0, rotate: beamOptions.rotate || 0 } }}
         transition={{ duration: beamOptions.duration || 8, repeat: Infinity, repeatType: "loop", ease: "linear", delay: beamOptions.delay || 0, repeatDelay: beamOptions.repeatDelay || 0 }} 
         className={cn("absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent", beamOptions.className)} 
       />
@@ -347,79 +361,97 @@ const CollisionMechanism = ({ parentRef, beamOptions = {} }: { parentRef: React.
   );
 };
 
-const BackgroundBeamsWithCollision = ({ className }: { className?: string; }) => {
+const BackgroundBeamsWithCollision = React.memo(({ className, isPaused }: { className?: string; isPaused: boolean; }) => {
   const parentRef = useRef<HTMLDivElement>(null);
-  const beams = [ { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" }, ];
+  // 优化: 使用 useMemo 缓存 beams 数组
+  const beams = useMemo(() => [ { initialX: 10, translateX: 10, duration: 7, repeatDelay: 3, delay: 2 }, { initialX: 600, translateX: 600, duration: 3, repeatDelay: 3, delay: 4 }, { initialX: 100, translateX: 100, duration: 7, repeatDelay: 7, className: "h-6" }, { initialX: 400, translateX: 400, duration: 5, repeatDelay: 14, delay: 4 }, { initialX: 800, translateX: 800, duration: 11, repeatDelay: 2, className: "h-20" }, { initialX: 1000, translateX: 1000, duration: 4, repeatDelay: 2, className: "h-12" }, { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: "h-6" }, ], []);
   
   return (
     <div ref={parentRef} className={cn("absolute inset-0 w-full h-full overflow-hidden", className)}>
-        {beams.map((beam, index) => (<CollisionMechanism key={beam.initialX + `beam-idx-${index}`} beamOptions={beam} parentRef={parentRef} />))}
+        {beams.map((beam, index) => (<CollisionMechanism key={beam.initialX + `beam-idx-${index}`} beamOptions={beam} parentRef={parentRef} isPaused={isPaused} />))}
     </div>
   );
-};
+});
+BackgroundBeamsWithCollision.displayName = 'BackgroundBeamsWithCollision';
 
 
-// --- 您原有的 3D 场景代码 ---
-const Box = ({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
-    const shape = new THREE.Shape();
-    const angleStep = Math.PI * 0.5;
-    const radius = 1;
-    shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
-    shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
-    shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
-    shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
-    const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 };
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    geometry.center();
+// --- 3D 场景代码 (已优化) ---
+const Box = React.memo(({ position, rotation }: { position: [number, number, number], rotation: [number, number, number] }) => {
+    // 优化: 使用 useMemo 缓存几何体，避免重复计算
+    const geometry = useMemo(() => {
+        const shape = new THREE.Shape();
+        const angleStep = Math.PI * 0.5;
+        const radius = 1;
+        shape.absarc(2, 2, radius, angleStep * 0, angleStep * 1, false);
+        shape.absarc(-2, 2, radius, angleStep * 1, angleStep * 2, false);
+        shape.absarc(-2, -2, radius, angleStep * 2, angleStep * 3, false);
+        shape.absarc(2, -2, radius, angleStep * 3, angleStep * 4, false);
+        const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 20, curveSegments: 20 };
+        const geom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        geom.center();
+        return geom;
+    }, []);
     return (
         <mesh geometry={geometry} position={position} rotation={rotation}>
             <meshPhysicalMaterial color="#232323" metalness={1} roughness={0.3} reflectivity={0.5} ior={1.5} emissive="#000000" emissiveIntensity={0} transparent={false} opacity={1.0} transmission={0.0} thickness={0.5} clearcoat={0.0} clearcoatRoughness={0.0} sheen={0} sheenRoughness={1.0} sheenColor="#ffffff" specularIntensity={1.0} specularColor="#ffffff" iridescence={1} iridescenceIOR={1.3} iridescenceThicknessRange={[100, 400]} flatShading={false} />
         </mesh>
     );
-};
-const AnimatedBoxes = () => {
+});
+Box.displayName = 'Box';
+
+const AnimatedBoxes = React.memo(({ isPaused }: { isPaused: boolean }) => {
     const groupRef = useRef<THREE.Group>(null!);
+    
+    // 优化: 当交互发生时(isPaused=true)，暂停 useFrame 里的动画计算，释放 GPU/CPU
     useFrame((_, delta) => { 
-        if (!groupRef.current) return;
+        if (isPaused || !groupRef.current) return;
         groupRef.current.rotation.x += delta * 0.05; 
         groupRef.current.rotation.y += delta * 0.05; 
     });
-    const boxes = Array.from({ length: 50 }, (_, index) => ({ position: [(index - 25) * 0.75, 0, 0] as [number, number, number], rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number], id: index }));
+    
+    // 优化: 使用 useMemo 缓存 box 数组，避免重复创建
+    const boxes = useMemo(() => Array.from({ length: 50 }, (_, index) => ({ position: [(index - 25) * 0.75, 0, 0] as [number, number, number], rotation: [ (index - 10) * 0.1, Math.PI / 2, 0 ] as [number, number, number], id: index })), []);
+    
     return (<group ref={groupRef}>{boxes.map((box) => (<Box key={box.id} position={box.position} rotation={box.rotation} />))}</group>);
-};
-const Scene = () => {
+});
+AnimatedBoxes.displayName = 'AnimatedBoxes';
+
+const Scene = React.memo(({ isPaused }: { isPaused: boolean }) => {
     return (
         <div className="fixed inset-0 w-full h-full z-0">
             <Canvas camera={{ position: [0, 0, 15], fov: 40 }}>
                 <ambientLight intensity={15} />
                 <directionalLight position={[10, 10, 5]} intensity={15} />
-                <AnimatedBoxes />
+                <AnimatedBoxes isPaused={isPaused} />
             </Canvas>
         </div>
     );
-};
+});
+Scene.displayName = 'Scene';
 
-
-// --- 最终的、合并后的页面组件 ---
+// --- 最终的、合并后的页面组件 (已优化) ---
 export default function Page() {
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
   const [showExpiredModal, setShowExpiredModal] = useState(false); 
+  
+  // 优化: 创建一个统一的状态来判断当前是否有交互，从而决定是否暂停背景动画
+  const isInteractive = expandedCardId !== null || showExpiredModal;
 
   useEffect(() => {
-    // 修复：添加客户端检查，以安全地操作 document 对象
     if (typeof window !== 'undefined' && document.body) {
-        if (expandedCardId !== null || showExpiredModal) {
+        if (isInteractive) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
         }
-        return () => { // 组件卸载时恢复滚动
+        return () => {
             document.body.style.overflow = 'auto';
         }
     }
-  }, [expandedCardId, showExpiredModal]);
+  }, [isInteractive]);
 
-  const products: Product[] = [
+  // 优化: 使用 useMemo 缓存产品数据，仅在需要时更新
+  const products: Product[] = useMemo(() => [
     {
       id: 1,
       title: "音乐节的号角吹响啦！",
@@ -438,7 +470,7 @@ export default function Page() {
       qrCodeUrl: "https://zh.apex-elite-service.com/wenjian/sara.png",
       markdownContent: `# 一场关于莫名其妙的巡演即将开启\n\n### 一起进入黄龄的Live异世界！\n一月一城，跟随「莫名其妙」度过有趣的2025！\n\n### 【北京站】\n演出时间：7月19日（周六）20:00\n演出地点：东三 LIVE\n- 票价 -\n\n预售票 360 | 正价票 420 | VIP票 560\n\n- VIP权益 -\n\n提前30min入场+精美礼包+演出后小组合影（10人/组）\n\n报名截止：2025-07-18T23:59:59`
     }
-  ];
+  ], []);
 
   const handleExpand = (id: number) => {
     const product = products.find(p => p.id === id);
@@ -456,11 +488,17 @@ export default function Page() {
       setExpandedCardId(null);
   }
 
+  const expandedProduct = useMemo(() => {
+      return expandedCardId ? products.find(p => p.id === expandedCardId) : null;
+  }, [expandedCardId, products]);
+
   return (
     <div className="relative w-full min-h-screen bg-[#000] text-white" style={{background: 'linear-gradient(to bottom right, #000, #1A2428)'}}>
-      <Scene />
+      {/* 优化: 传入 isPaused 状态来控制动画 */}
+      <Scene isPaused={isInteractive} />
       <div className="fixed inset-0 z-20 pointer-events-none">
-        <BackgroundBeamsWithCollision />
+        {/* 优化: 传入 isPaused 状态来控制动画 */}
+        <BackgroundBeamsWithCollision isPaused={isInteractive} />
       </div>
 
       <main className="relative z-10 flex flex-col items-center w-full min-h-screen px-4 py-16 sm:py-24">
@@ -488,9 +526,8 @@ export default function Page() {
       </main>
 
       <AnimatePresence>
-          {/* 修复：移除了灰色背景遮罩，现在直接在页面上展开 */}
-          {expandedCardId && (
-              <ExpandedCard product={products.find(p => p.id === expandedCardId)!} onCollapse={handleCollapse} />
+          {expandedCardId && expandedProduct && (
+              <ExpandedCard product={expandedProduct} onCollapse={handleCollapse} />
           )}
       </AnimatePresence>
 
