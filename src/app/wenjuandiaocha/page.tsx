@@ -220,6 +220,10 @@ function SurveyForm() {
     const [formData, setFormData] = useState<FormData>({});
     const [status, setStatus] = useState('idle'); // idle, submitting, success, error
 
+    // --- 在下方增加这一行 ---
+    const [validationError, setValidationError] = useState<string | null>(null);
+    // ----------------------
+
     const handleChange = (qId: string, value: string | string[]) => {
         setFormData(prev => ({ ...prev, [qId]: value }));
     };
@@ -234,6 +238,33 @@ function SurveyForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setValidationError(null); // 每次提交前，先清除旧的提示信息
+
+        // --- 新增的校验逻辑开始 ---
+        const totalQuestions = surveyQuestions.length;
+        const requiredCount = Math.ceil(totalQuestions * 0.5); // 计算需要回答的题目数量（50%）
+
+        // 精确计算用户回答了多少个不同的问题
+        const answeredQuestionIds = new Set();
+        Object.entries(formData).forEach(([key, value]) => {
+            const hasValue = Array.isArray(value) ? value.length > 0 : (typeof value === 'string' && value.trim() !== '');
+            if (hasValue) {
+                const baseQId = key.replace('_details', ''); // 将 q22 和 q22_details 视为同一个问题
+                answeredQuestionIds.add(baseQId);
+            }
+        });
+        const answeredCount = answeredQuestionIds.size;
+
+        // 判断是否满足条件
+        if (answeredCount < requiredCount) {
+            setValidationError(
+                `问卷共 ${totalQuestions} 题，您已回答 ${answeredCount} 题。请至少回答 ${requiredCount} 题后再提交。`
+            );
+            return; // 不满足条件，直接返回，不执行后续提交操作
+        }
+        // --- 新增的校验逻辑结束 ---
+
+        // 如果校验通过，才继续执行下面的提交操作
         setStatus('submitting');
 
         // !! 修改处：构建包含问题和答案的详细数据结构
@@ -356,6 +387,10 @@ function SurveyForm() {
                     <Link href="/">返回主页</Link>
                 </Button>
               </div>
+
+              {/* --- 在这里增加下面的代码块 --- */}
+              {validationError && <p className="text-yellow-400 mt-4 font-semibold">{validationError}</p>}
+              {/* ---------------------- */}
               {status === 'success' && <p className="text-green-400 mt-4">感谢您的参与，问卷已成功提交！</p>}
               {status === 'error' && <p className="text-red-500 mt-4">抱歉，提交失败，请稍后重试。</p>}
             </div>
