@@ -684,7 +684,8 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
             // 创建一个包含时间戳的新对象
             const dataWithTimestamp = {
                 ...formData,
-                submissionTime: new Date().toISOString(),
+                // 修改后的代码 (生成北京时间)
+                submissionTime: new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Shanghai' }),
             };
             const result = await saveContactToRedis(dataWithTimestamp);
             if (result.success) {
