@@ -681,7 +681,12 @@ const SubmissionCard = ({ onSuccess }: { onSuccess: () => void }) => {
         const isValid = Object.keys(formData).every(key => validateField(key, formData[key as keyof typeof formData], formData.countryKey));
 
         if (isValid) {
-            const result = await saveContactToRedis(formData);
+            // 创建一个包含时间戳的新对象
+            const dataWithTimestamp = {
+                ...formData,
+                submissionTime: new Date().toISOString(),
+            };
+            const result = await saveContactToRedis(dataWithTimestamp);
             if (result.success) {
                 alert('资料提交成功！');
                 onSuccess();
