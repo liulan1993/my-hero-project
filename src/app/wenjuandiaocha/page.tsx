@@ -258,7 +258,7 @@ function SurveyForm() {
         // 判断是否满足条件
         if (answeredCount < requiredCount) {
             setValidationError(
-                `问卷共 ${totalQuestions} 题，您已回答 ${answeredCount} 题。请至少回答 ${requiredCount} 题后再提交。`
+                `辛苦您了！为了确保问卷的有效性，我们需要您请继续完成问卷。`
             );
             return; // 不满足条件，直接返回，不执行后续提交操作
         }
