@@ -2642,7 +2642,7 @@ export default function HomePage() {
                     {features.map((feature, idx) => (
                     <div
                         key={idx}
-                        className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-start items-start space-y-2 md:space-y-3"
+                        className="backdrop-blur-sm bg-white/5 border border-white/10 rounded-xl p-4 md:p-6 h-40 md:h-48 flex flex-col justify-center items-center space-y-2 md:space-y-3"
                     >
                         <feature.icon size={18} className="text-white/80 md:w-5 md:h-5" />
                         <h3 className="text-base font-bold text-white">{feature.title}</h3>
